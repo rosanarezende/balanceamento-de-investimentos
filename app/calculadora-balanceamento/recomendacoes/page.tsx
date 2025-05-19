@@ -39,10 +39,13 @@ export default function RecomendacoesBTG() {
   const [stocks, setStocks] = useState<StockWithPrice[]>([])
   const [loading, setLoading] = useState(true)
   const [investmentValue, setInvestmentValue] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchStockData = async () => {
       setLoading(true)
+      setError(null)
+
       const investmentParam = searchParams.get("valor")
 
       if (!investmentParam) {
@@ -54,20 +57,31 @@ export default function RecomendacoesBTG() {
 
       try {
         // Buscar preços para todas as ações
-        const stocksWithPrices = await Promise.all(
-          initialStocks.map(async (stock) => {
+        const stocksWithPrices: StockWithPrice[] = []
+
+        for (const stock of initialStocks) {
+          try {
             const currentPrice = await fetchStockPrice(stock.ticker)
-            return {
+            stocksWithPrices.push({
               ...stock,
               currentPrice,
               recommendation: "COMPRAR", // Valor padrão
-            }
-          }),
-        )
+            })
+          } catch (err) {
+            console.error(`Erro ao processar ação ${stock.ticker}:`, err)
+            // Continuar com as outras ações mesmo se uma falhar
+            stocksWithPrices.push({
+              ...stock,
+              currentPrice: 0, // Valor temporário
+              recommendation: "COMPRAR",
+            })
+          }
+        }
 
         setStocks(stocksWithPrices)
       } catch (error) {
         console.error("Erro ao buscar dados das ações:", error)
+        setError("Não foi possível carregar os dados das ações. Por favor, tente novamente.")
       } finally {
         setLoading(false)
       }
@@ -99,6 +113,16 @@ export default function RecomendacoesBTG() {
     router.push(`/calculadora-balanceamento/resultado?valor=${investmentValue}`)
   }
 
+  const handleRetry = () => {
+    // Tentar buscar os dados novamente
+    setStocks([])
+    setLoading(true)
+    setError(null)
+
+    // Recarregar a página
+    window.location.reload()
+  }
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="max-w-md mx-auto bg-white min-h-screen">
@@ -127,6 +151,16 @@ export default function RecomendacoesBTG() {
             <div className="py-8 text-center">
               <p className="text-gray-500">Carregando dados das ações...</p>
             </div>
+          ) : error ? (
+            <div className="py-8 text-center">
+              <p className="text-red-500 mb-4">{error}</p>
+              <div className="flex justify-center space-x-4">
+                <Button variant="outline" onClick={handleRetry}>
+                  Tentar Novamente
+                </Button>
+                <Button onClick={handleSkip}>Continuar Mesmo Assim</Button>
+              </div>
+            </div>
           ) : (
             <div className="space-y-4 mb-6">
               {stocks.map((stock) => (
@@ -136,7 +170,9 @@ export default function RecomendacoesBTG() {
                       <h3 className="font-bold">{stock.ticker}</h3>
                       <p className="text-xs text-gray-500">
                         Preço atual:{" "}
-                        {stock.currentPrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                        {stock.currentPrice > 0
+                          ? stock.currentPrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+                          : "Preço indisponível"}
                       </p>
                     </div>
                   </div>
@@ -176,7 +212,11 @@ export default function RecomendacoesBTG() {
             <Button variant="outline" className="flex-1 border-blue-600 text-blue-600" onClick={handleSkip}>
               Pular
             </Button>
-            <Button className="flex-1 bg-blue-600" onClick={handleContinue}>
+            <Button
+              className="flex-1 bg-blue-600"
+              onClick={handleContinue}
+              disabled={loading || (stocks.length === 0 && !error)}
+            >
               Continuar
             </Button>
           </div>
