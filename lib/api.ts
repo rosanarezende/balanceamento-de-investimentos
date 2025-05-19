@@ -21,7 +21,14 @@ export async function fetchStockPrice(ticker: string): Promise<number> {
 }
 
 // Tipos de recomendação disponíveis
-export const RECOMMENDATION_TYPES = ["Comprar", "Manter", "Evitar Aporte"]
+export const RECOMMENDATION_TYPES = ["Comprar", "Vender", "Aguardar"]
+
+// Descrições das recomendações
+export const RECOMMENDATION_DESCRIPTIONS = {
+  Comprar: "Recomendado para aportes. O ativo está subvalorizado ou tem boas perspectivas de crescimento.",
+  Vender: "Não recomendado para aportes. Considere vender posições existentes se necessário.",
+  Aguardar: "Mantenha as posições existentes, mas aguarde antes de fazer novos aportes.",
+}
 
 export async function saveManualRecommendation(ticker: string, recommendation: string): Promise<void> {
   // This is a placeholder function. In a real application, this function would

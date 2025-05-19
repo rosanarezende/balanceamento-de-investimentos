@@ -1,46 +1,48 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Eye } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
+import { getSimulations, type Simulation } from "@/lib/firestore"
+import { useAuth } from "@/contexts/auth-context"
 import AuthGuard from "@/components/auth-guard"
-
-// Simulação de dados históricos
-const historicalSimulations = [
-  {
-    id: 1,
-    date: new Date(2023, 4, 15),
-    investmentAmount: 5000,
-    portfolioValueBefore: 18500,
-    portfolioValueAfter: 23500,
-  },
-  {
-    id: 2,
-    date: new Date(2023, 5, 20),
-    investmentAmount: 3000,
-    portfolioValueBefore: 23500,
-    portfolioValueAfter: 26500,
-  },
-  {
-    id: 3,
-    date: new Date(2023, 6, 10),
-    investmentAmount: 2000,
-    portfolioValueBefore: 26500,
-    portfolioValueAfter: 28500,
-  },
-]
 
 export default function Historico() {
   const router = useRouter()
+  const { user } = useAuth()
+  const [simulations, setSimulations] = useState<Simulation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadSimulations() {
+      if (!user) return
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const userSimulations = await getSimulations(user.uid)
+        setSimulations(userSimulations)
+      } catch (error) {
+        console.error("Erro ao carregar simulações:", error)
+        setError("Não foi possível carregar o histórico de simulações. Por favor, tente novamente.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSimulations()
+  }, [user])
 
   const handleBack = () => {
     router.back()
   }
 
-  const handleViewDetails = (id: number) => {
-    // Aqui seria implementada a navegação para os detalhes da simulação
+  const handleViewDetails = (id: string) => {
     router.push(`/historico/${id}`)
   }
 
@@ -50,6 +52,8 @@ export default function Historico() {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     })
   }
 
@@ -62,24 +66,35 @@ export default function Historico() {
 
         <h1 className="text-2xl font-bold mb-6">Histórico de Simulações</h1>
 
-        {historicalSimulations.length > 0 ? (
+        {loading ? (
+          <div className="py-8 text-center">
+            <p className="text-muted-foreground">Carregando simulações...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
+            <p className="text-yellow-700 dark:text-yellow-300 text-sm">{error}</p>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => window.location.reload()}>
+              Tentar Novamente
+            </Button>
+          </div>
+        ) : simulations.length > 0 ? (
           <div className="space-y-4">
-            {historicalSimulations.map((simulation) => (
+            {simulations.map((simulation) => (
               <Card key={simulation.id}>
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Simulação #{simulation.id}</h3>
-                    <span className="text-sm text-gray-500">{formatDate(simulation.date)}</span>
+                    <h3 className="font-medium">Simulação</h3>
+                    <span className="text-sm text-muted-foreground">{formatDate(simulation.date)}</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                    <div className="text-gray-600">Valor do aporte:</div>
+                    <div className="text-muted-foreground">Valor do aporte:</div>
                     <div className="font-medium text-right">{formatCurrency(simulation.investmentAmount)}</div>
 
-                    <div className="text-gray-600">Valor anterior:</div>
+                    <div className="text-muted-foreground">Valor anterior:</div>
                     <div className="font-medium text-right">{formatCurrency(simulation.portfolioValueBefore)}</div>
 
-                    <div className="text-gray-600">Valor após aporte:</div>
+                    <div className="text-muted-foreground">Valor após aporte:</div>
                     <div className="font-medium text-right">{formatCurrency(simulation.portfolioValueAfter)}</div>
                   </div>
 
@@ -87,7 +102,7 @@ export default function Historico() {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    onClick={() => handleViewDetails(simulation.id)}
+                    onClick={() => simulation.id && handleViewDetails(simulation.id)}
                   >
                     <Eye className="mr-2 h-4 w-4" />
                     Ver Detalhes
@@ -98,7 +113,10 @@ export default function Historico() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-500">Nenhuma simulação encontrada.</p>
+            <p className="text-muted-foreground">Nenhuma simulação encontrada.</p>
+            <Button className="mt-4" onClick={() => router.push("/calculadora-balanceamento")}>
+              Criar Nova Simulação
+            </Button>
           </div>
         )}
       </div>
