@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { stockPriceCache } from "@/lib/cache"
 
 // Chave de API da Alpha Vantage (agora usando uma variável de ambiente do servidor)
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo"
@@ -41,9 +42,16 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Verificar se o preço está em cache
+    if (stockPriceCache.has(ticker)) {
+      const cachedPrice = stockPriceCache.get(ticker)
+      return NextResponse.json({ price: cachedPrice, cached: true })
+    }
+
     // Em ambiente de preview ou desenvolvimento, usar diretamente os preços simulados
     if (process.env.NODE_ENV !== "production") {
       const price = getSimulatedStockPrice(ticker)
+      stockPriceCache.set(ticker, price, 300) // Cache por 5 minutos
       return NextResponse.json({ price })
     }
 
@@ -62,31 +70,54 @@ export async function GET(request: Request) {
       headers: {
         Accept: "application/json",
       },
+      next: { revalidate: 300 }, // Revalidar a cada 5 minutos
     })
     clearTimeout(timeoutId)
 
     if (!response.ok) {
       console.warn(`API respondeu com status ${response.status} para ${ticker}`)
       const price = getSimulatedStockPrice(ticker)
-      return NextResponse.json({ price })
+      stockPriceCache.set(ticker, price, 300) // Cache por 5 minutos
+      return NextResponse.json({ price, simulated: true })
     }
 
     const data = await response.json()
 
-    // Verifica se a resposta contém os dados esperados
+    // Verificar se a resposta contém os dados esperados
     if (data["Global Quote"] && data["Global Quote"]["05. price"]) {
       const price = Number.parseFloat(data["Global Quote"]["05. price"])
+      stockPriceCache.set(ticker, price, 300) // Cache por 5 minutos
       return NextResponse.json({ price })
     }
 
     // Fallback para preços simulados em caso de erro ou limite de API excedido
     console.warn(`Dados inválidos recebidos da API para ${ticker}`)
     const price = getSimulatedStockPrice(ticker)
-    return NextResponse.json({ price })
+    stockPriceCache.set(ticker, price, 300) // Cache por 5 minutos
+    return NextResponse.json({ price, simulated: true })
   } catch (error) {
     // Captura e loga o erro, mas não deixa a aplicação quebrar
-    console.warn(`Erro ao buscar preço para ${ticker}, usando preço simulado:`, error)
+    console.error(`Erro ao buscar preço para ${ticker}:`, error)
+
+    // Tratamento específico para diferentes tipos de erro
+    let errorMessage = "Erro desconhecido"
+    if (error instanceof Error) {
+      errorMessage = error.message
+
+      // Tratamento específico para timeout
+      if (error.name === "AbortError") {
+        errorMessage = "Timeout ao buscar preço da ação"
+      }
+    }
+
+    // Usar preço simulado como fallback
     const price = getSimulatedStockPrice(ticker)
-    return NextResponse.json({ price })
+    stockPriceCache.set(ticker, price, 300) // Cache por 5 minutos, mesmo para preços simulados
+
+    return NextResponse.json({
+      price,
+      simulated: true,
+      error: errorMessage,
+    })
   }
 }

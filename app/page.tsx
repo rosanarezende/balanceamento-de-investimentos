@@ -8,6 +8,7 @@ import { StockCard } from "@/components/stock-card"
 import { AddStockForm } from "@/components/add-stock-form"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import { useAuth } from "@/contexts/auth-context"
+import { ThemeToggle } from "@/components/theme-toggle"
 import AuthGuard from "@/components/auth-guard"
 
 export default function Home() {
@@ -53,29 +54,32 @@ export default function Home() {
 
   return (
     <AuthGuard>
-      <div className="bg-gray-100 min-h-screen">
-        <div className="max-w-md mx-auto bg-white pb-4">
-          <div className="flex items-center justify-between p-4 border-b">
+      <div className="bg-background min-h-screen">
+        <div className="max-w-md mx-auto bg-card pb-4">
+          <div className="flex items-center justify-between p-4 border-b border-border">
             <div>
-              <h1 className="font-medium">EquilibraInvest</h1>
-              <p className="text-xs text-gray-500">Olá, {user?.displayName?.split(" ")[0] || "Usuário"}</p>
+              <h1 className="font-medium text-card-foreground">EquilibraInvest</h1>
+              <p className="text-xs text-muted-foreground">Olá, {user?.displayName?.split(" ")[0] || "Usuário"}</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Sair">
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Sair">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Meus Ativos</h2>
-              <button className="text-blue-600">
+              <h2 className="text-xl font-bold text-card-foreground">Meus Ativos</h2>
+              <button className="text-primary">
                 <Info size={20} />
               </button>
             </div>
 
             {error && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
-                <p className="text-yellow-700 text-sm">{error}</p>
+              <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 mb-4">
+                <p className="text-yellow-700 dark:text-yellow-300 text-sm">{error}</p>
                 <Button variant="outline" size="sm" className="mt-2" onClick={handleRetry}>
                   Tentar Novamente
                 </Button>
@@ -84,11 +88,11 @@ export default function Home() {
 
             {loading ? (
               <div className="py-8 text-center">
-                <p className="text-gray-500">Carregando dados das ações...</p>
+                <p className="text-muted-foreground">Carregando dados das ações...</p>
               </div>
             ) : stocksWithDetails.length === 0 ? (
               <div className="py-8 text-center">
-                <p className="text-gray-500">Você ainda não possui ações na sua carteira.</p>
+                <p className="text-muted-foreground">Você ainda não possui ações na sua carteira.</p>
                 <Button className="mt-4" onClick={() => setShowAddForm(true)}>
                   Adicionar Ações
                 </Button>
@@ -130,13 +134,24 @@ export default function Home() {
           </div>
 
           <div className="px-4 space-y-3 mt-4">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleCalculatorClick}>
+            <Button
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={handleCalculatorClick}
+            >
               CALCULADORA DE BALANCEAMENTO
             </Button>
 
             <Button
               variant="outline"
-              className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+              className="w-full border-primary text-primary hover:bg-primary/10"
+              onClick={() => router.push("/dashboard")}
+            >
+              DASHBOARD E GRÁFICOS
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full border-primary text-primary hover:bg-primary/10"
               onClick={handleEditClick}
             >
               {showAddForm ? "OCULTAR FORMULÁRIO" : "ADICIONAR ATIVOS"}
@@ -144,13 +159,17 @@ export default function Home() {
 
             <Button
               variant="outline"
-              className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+              className="w-full border-primary text-primary hover:bg-primary/10"
               onClick={handleHistoryClick}
             >
               HISTÓRICO DE SIMULAÇÕES
             </Button>
 
-            <Button variant="destructive" className="w-full bg-red-600 hover:bg-red-700" onClick={handleResetClick}>
+            <Button
+              variant="destructive"
+              className="w-full bg-destructive hover:bg-destructive/90"
+              onClick={handleResetClick}
+            >
               RESETAR TODOS OS ATIVOS
             </Button>
           </div>
