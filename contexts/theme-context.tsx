@@ -11,6 +11,7 @@ interface ThemeContextType {
   toggleTheme: () => void
 }
 
+// Criamos o contexto com um valor padrão para evitar erros durante a renderização no servidor
 const ThemeContext = createContext<ThemeContextType>({
   theme: "dark",
   toggleTheme: () => {},
@@ -23,19 +24,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Carregar tema do localStorage ou Firestore ao montar o componente
   useEffect(() => {
-    setMounted(true)
+    // Verificar se estamos no navegador
+    if (typeof window === "undefined") return
 
     const loadTheme = async () => {
-      // Primeiro, verificar se há um tema salvo no localStorage
-      const savedTheme = localStorage.getItem("theme") as Theme | null
+      try {
+        // Primeiro, verificar se há um tema salvo no localStorage
+        const savedTheme = localStorage.getItem("theme") as Theme | null
 
-      if (savedTheme) {
-        setTheme(savedTheme)
-        applyTheme(savedTheme)
-      } else if (user) {
-        // Se não houver tema no localStorage, mas o usuário estiver logado,
-        // tentar buscar do Firestore
-        try {
+        if (savedTheme) {
+          setTheme(savedTheme)
+          applyTheme(savedTheme)
+        } else if (user) {
+          // Se não houver tema no localStorage, mas o usuário estiver logado,
+          // tentar buscar do Firestore
           const userPreferences = await getUserPreferences(user.uid)
           if (userPreferences && userPreferences.theme) {
             setTheme(userPreferences.theme)
@@ -47,32 +49,32 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             setTheme("dark")
             applyTheme("dark")
           }
-        } catch (error) {
-          console.error("Erro ao carregar preferências de tema:", error)
-          // Em caso de erro, usar o tema escuro como padrão
+        } else {
+          // Se não houver usuário logado, usar o tema escuro como padrão
           setTheme("dark")
           applyTheme("dark")
         }
-      } else {
-        // Se não houver usuário logado, usar o tema escuro como padrão
+      } catch (error) {
+        console.error("Erro ao carregar preferências de tema:", error)
+        // Em caso de erro, usar o tema escuro como padrão
         setTheme("dark")
         applyTheme("dark")
+      } finally {
+        setMounted(true)
       }
     }
 
-    // Só executamos no cliente
-    if (typeof window !== "undefined") {
-      loadTheme()
-    }
+    loadTheme()
   }, [user])
 
   const applyTheme = (newTheme: Theme) => {
-    if (typeof document !== "undefined") {
-      if (newTheme === "dark") {
-        document.documentElement.classList.add("dark")
-      } else {
-        document.documentElement.classList.remove("dark")
-      }
+    // Verificar se estamos no navegador
+    if (typeof document === "undefined") return
+
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark")
+    } else {
+      document.documentElement.classList.remove("dark")
     }
   }
 
@@ -100,19 +102,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Fornecemos um valor padrão durante a renderização no servidor
-  const contextValue = {
-    theme,
-    toggleTheme,
-  }
-
-  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        toggleTheme,
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  )
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext)
-  if (context === undefined) {
-    throw new Error("useTheme deve ser usado dentro de um ThemeProvider")
-  }
-  return context
+  return useContext(ThemeContext)
 }

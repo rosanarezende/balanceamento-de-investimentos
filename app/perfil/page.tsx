@@ -14,26 +14,28 @@ import { useTheme } from "@/contexts/theme-context"
 import { Logo } from "@/components/ui/logo"
 import AuthGuard from "@/components/auth-guard"
 
+// Configuração para evitar pré-renderização estática
+export const dynamic = "force-dynamic"
+
 export default function ProfilePage() {
   const { user, signOut } = useAuth()
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // Só acessamos o hook useTheme após a montagem do componente no cliente
-  const { theme: currentTheme, toggleTheme } = useTheme()
-  const [theme, setTheme] = useState<"light" | "dark">(currentTheme || "dark")
-  const [toggleThemeFunc, setToggleThemeFunc] = useState<(() => void) | null>(() => toggleTheme)
+  // Inicializamos com valores padrão para evitar erros durante a renderização inicial
+  const [theme, setTheme] = useState<"light" | "dark">("dark")
+  const [toggleThemeFunc, setToggleThemeFunc] = useState<() => void>(() => {})
 
+  // Só acessamos o hook useTheme após a montagem do componente no cliente
   useEffect(() => {
-    setMounted(true)
-    // try {
-    //   // Só importamos o hook useTheme no lado do cliente
-    //   const { theme: currentTheme, toggleTheme } = useTheme()
-    //   setTheme(currentTheme)
-    //   setToggleThemeFunc(() => toggleTheme)
-    // } catch (error) {
-    //   console.error("Erro ao acessar o tema:", error)
-    // }
+    try {
+      const { theme: currentTheme, toggleTheme } = useTheme()
+      setTheme(currentTheme)
+      setToggleThemeFunc(() => toggleTheme)
+      setMounted(true)
+    } catch (error) {
+      console.error("Erro ao acessar o tema:", error)
+    }
   }, [])
 
   const handleSignOut = async () => {
@@ -44,7 +46,7 @@ export default function ProfilePage() {
 
   // Não renderizamos nada durante a pré-renderização no servidor
   if (!mounted) {
-    return null
+    return <div className="min-h-screen bg-background"></div>
   }
 
   return (
@@ -97,7 +99,7 @@ export default function ProfilePage() {
                     </Label>
                     <p className="text-text-tertiary text-sm">Ativar ou desativar o tema escuro</p>
                   </div>
-                  <Switch id="darkMode" checked={theme === "dark"} onCheckedChange={toggleThemeFunc || (() => {})} />
+                  <Switch id="darkMode" checked={theme === "dark"} onCheckedChange={toggleThemeFunc} />
                 </div>
 
                 {/* Outras configurações podem ser adicionadas aqui */}

@@ -1,5 +1,8 @@
 "use client"
 
+// Adicionar a configuração dinâmica
+export const dynamic = "force-dynamic"
+
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"

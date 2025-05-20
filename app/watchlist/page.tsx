@@ -1,5 +1,8 @@
 "use client"
 
+// Adicionar a configuração dinâmica
+export const dynamic = "force-dynamic"
+
 import { useState, useEffect } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import { SectionTitle } from "@/components/ui/section-title"

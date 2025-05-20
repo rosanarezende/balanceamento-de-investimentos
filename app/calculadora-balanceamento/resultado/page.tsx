@@ -1,5 +1,8 @@
 "use client"
 
+// Adicionar a configuração dinâmica
+export const dynamic = "force-dynamic"
+
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
