@@ -1,19 +1,24 @@
+import { useTheme } from "@/contexts/theme-context"
 import Image from "next/image"
 import Link from "next/link"
 
 interface LogoProps {
-  variant?: "default" | "white" | "dark"
+  icon?: boolean
   size?: "sm" | "md" | "lg" | "xl" | "2xl"
   withText?: boolean
 }
 
-export function Logo({ variant = "dark", size = "md", withText = false }: LogoProps) {
-  const logoSrc =
-    variant === "dark"
-      ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2_20250519_205643_0001-jwHSizUNUv3PlioAZMQzjeHDb0b1Xl.png"
-      : variant === "white"
-        ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_20250519_205643_0000-hdgTdkfc35ThdiejMWPueDZdR80Mdw.png"
-        : "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_20250519_205705_0000-Ou6XpU3g4F4xUQlewPwQxzImrOAZzB.png"
+const LOGO_DARK_URL = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2_20250519_205643_0001-jwHSizUNUv3PlioAZMQzjeHDb0b1Xl.png"
+const LOGO_LIGHT_URL = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_20250519_205643_0000-hdgTdkfc35ThdiejMWPueDZdR80Mdw.png"
+const ICON_DARK_URL = "https://github.com/user-attachments/assets/4f79da24-732c-464f-8a8e-78f4f941083f"
+const ICON_LIGHT_URL = "https://github.com/user-attachments/assets/49dfa6fe-4b44-43c7-966f-6ed335ebc837"
+
+export function Logo({ icon, size = "md", withText = false }: LogoProps) {
+  const { theme } = useTheme()
+
+  const logoSrc = theme === "dark" ? LOGO_DARK_URL : LOGO_LIGHT_URL
+  const iconSrc = theme === "dark" ? ICON_DARK_URL : ICON_LIGHT_URL
+  const src = icon ? iconSrc : logoSrc
 
   const sizeClasses = {
     sm: { img: 32, text: "text-lg", div: "w-8 h-8" },
@@ -29,7 +34,7 @@ export function Logo({ variant = "dark", size = "md", withText = false }: LogoPr
     <Link href="/" className="flex items-center gap-2">
       <div className={`relative ${sizes.div}`}>
         <Image
-          src={logoSrc || "/placeholder.svg"}
+          src={src || "/placeholder.svg"}
           alt="EquilibreInvest Logo"
           fill
           className="object-contain"

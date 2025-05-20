@@ -58,7 +58,7 @@ export function AppShell({ children }: AppShellProps) {
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <Logo size="sm" />
+            <Logo icon withText size="sm" />
           </div>
 
           <div className="flex items-center gap-2">
