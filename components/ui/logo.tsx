@@ -3,7 +3,7 @@ import Link from "next/link"
 
 interface LogoProps {
   variant?: "default" | "white" | "dark"
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg" | "xl"
   withText?: boolean
 }
 
@@ -16,27 +16,27 @@ export function Logo({ variant = "dark", size = "md", withText = false }: LogoPr
         : "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_20250519_205705_0000-Ou6XpU3g4F4xUQlewPwQxzImrOAZzB.png"
 
   const sizeClasses = {
-    sm: { img: 32, text: "text-lg" },
-    md: { img: 48, text: "text-xl" },
-    lg: { img: 64, text: "text-2xl" },
-    xl : { img: 80, text: "text-3xl" },
+    sm: { img: 32, text: "text-lg", div: "w-8 h-8" },
+    md: { img: 48, text: "text-xl", div: "w-12 h-12" },
+    lg: { img: 64, text: "text-2xl", div: "w-16 h-16" },
+    xl: { img: 80, text: "text-3xl", div: "w-20 h-20" },
   }
 
-  console.log('sizeClasses[size].img', sizeClasses[size].img)
+  const sizes = sizeClasses[size] || sizeClasses["md"]
 
   return (
     <Link href="/" className="flex items-center gap-2">
-      <div className="relative">
+      <div className={`relative ${sizes.div}`}>
         <Image
           src={logoSrc || "/placeholder.svg"}
           alt="EquilibreInvest Logo"
-          width={sizeClasses[size].img}
-          height={sizeClasses[size].img}
+          fill
           className="object-contain"
+          sizes={`${sizes.img}px`}
         />
       </div>
       {withText && (
-        <span className={`font-bold ${sizeClasses[size].text} tracking-tight text-white`}>EquilibreInvest</span>
+        <span className={`font-bold ${sizes.text} tracking-tight text-white`}>EquilibreInvest</span>
       )}
     </Link>
   )
