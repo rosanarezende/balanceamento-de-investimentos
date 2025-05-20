@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import { CardGlass } from "@/components/ui/card-glass"
 import { SectionTitle } from "@/components/ui/section-title"
@@ -16,13 +16,35 @@ import AuthGuard from "@/components/auth-guard"
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth()
-  const { theme, toggleTheme } = useTheme()
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Só acessamos o hook useTheme após a montagem do componente no cliente
+  const { theme: currentTheme, toggleTheme } = useTheme()
+  const [theme, setTheme] = useState<"light" | "dark">(currentTheme || "dark")
+  const [toggleThemeFunc, setToggleThemeFunc] = useState<(() => void) | null>(() => toggleTheme)
+
+  useEffect(() => {
+    setMounted(true)
+    // try {
+    //   // Só importamos o hook useTheme no lado do cliente
+    //   const { theme: currentTheme, toggleTheme } = useTheme()
+    //   setTheme(currentTheme)
+    //   setToggleThemeFunc(() => toggleTheme)
+    // } catch (error) {
+    //   console.error("Erro ao acessar o tema:", error)
+    // }
+  }, [])
 
   const handleSignOut = async () => {
     setLoading(true)
     await signOut()
     setLoading(false)
+  }
+
+  // Não renderizamos nada durante a pré-renderização no servidor
+  if (!mounted) {
+    return null
   }
 
   return (
@@ -75,7 +97,7 @@ export default function ProfilePage() {
                     </Label>
                     <p className="text-text-tertiary text-sm">Ativar ou desativar o tema escuro</p>
                   </div>
-                  <Switch id="darkMode" checked={theme === "dark"} onCheckedChange={toggleTheme} />
+                  <Switch id="darkMode" checked={theme === "dark"} onCheckedChange={toggleThemeFunc || (() => {})} />
                 </div>
 
                 {/* Outras configurações podem ser adicionadas aqui */}

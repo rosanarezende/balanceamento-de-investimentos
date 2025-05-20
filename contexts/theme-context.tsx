@@ -11,7 +11,10 @@ interface ThemeContextType {
   toggleTheme: () => void
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+const ThemeContext = createContext<ThemeContextType>({
+  theme: "dark",
+  toggleTheme: () => {},
+})
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark")
@@ -57,14 +60,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    loadTheme()
+    // Só executamos no cliente
+    if (typeof window !== "undefined") {
+      loadTheme()
+    }
   }, [user])
 
   const applyTheme = (newTheme: Theme) => {
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark")
-    } else {
-      document.documentElement.classList.remove("dark")
+    if (typeof document !== "undefined") {
+      if (newTheme === "dark") {
+        document.documentElement.classList.add("dark")
+      } else {
+        document.documentElement.classList.remove("dark")
+      }
     }
   }
 
@@ -78,7 +86,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyTheme(newTheme)
 
     // Salvar no localStorage
-    localStorage.setItem("theme", newTheme)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("theme", newTheme)
+    }
 
     // Se o usuário estiver logado, salvar no Firestore
     if (user) {
@@ -90,12 +100,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Evitar renderização no servidor para prevenir erros de hidratação
-  if (!mounted) {
-    return <>{children}</>
+  // Fornecemos um valor padrão durante a renderização no servidor
+  const contextValue = {
+    theme,
+    toggleTheme,
   }
 
-  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {
