@@ -45,10 +45,10 @@ export default function Login() {
       >
         <div className="glassmorphism rounded-2xl p-8 border border-gray-700">
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-6">
-              <Logo size="xl" />
+            <div className="flex justify-center mb-2">
+              <Logo size="2xl" />
             </div>
-            <p className="text-gray-300">Gerencie e equilibre sua carteira de investimentos de forma inteligente</p>
+            <p className="text-2xl font-bold text-gradient">Gerencie e equilibre sua carteira de investimentos de forma inteligente</p>
           </div>
 
           {error && (
