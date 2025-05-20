@@ -7,11 +7,11 @@ interface LogoProps {
   withText?: boolean
 }
 
-export function Logo({ variant = "default", size = "md", withText = true }: LogoProps) {
+export function Logo({ variant = "dark", size = "md", withText = true }: LogoProps) {
   const logoSrc =
-    variant === "white"
+    variant === "dark"
       ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2_20250519_205643_0001-jwHSizUNUv3PlioAZMQzjeHDb0b1Xl.png"
-      : variant === "dark"
+      : variant === "white"
         ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_20250519_205643_0000-hdgTdkfc35ThdiejMWPueDZdR80Mdw.png"
         : "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_20250519_205705_0000-Ou6XpU3g4F4xUQlewPwQxzImrOAZzB.png"
 
