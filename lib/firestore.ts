@@ -1,4 +1,15 @@
-import { doc, getDoc, updateDoc, deleteField, collection, addDoc, getDocs, query, orderBy } from "firebase/firestore"
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  deleteField,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  setDoc,
+} from "firebase/firestore"
 import { db } from "./firebase"
 
 export interface Stock {
@@ -36,6 +47,12 @@ export interface Simulation {
   portfolioValueBefore: number
   portfolioValueAfter: number
   allocations: SimulationAllocation[]
+}
+
+export interface WatchlistItem {
+  ticker: string
+  targetPrice: number | null
+  notes: string
 }
 
 // Obter a carteira do usuário
@@ -173,6 +190,138 @@ export async function getSimulation(userId: string, simulationId: string): Promi
     return null
   } catch (error) {
     console.error(`Erro ao obter simulação ${simulationId}:`, error)
+    throw error
+  }
+}
+
+// Obter a watchlist do usuário
+export async function getUserWatchlist(userId: string): Promise<WatchlistItem[]> {
+  try {
+    const userRef = doc(db, "users", userId)
+    const userDoc = await getDoc(userRef)
+
+    if (userDoc.exists() && userDoc.data().watchlist) {
+      return Object.entries(userDoc.data().watchlist).map(([ticker, data]) => ({
+        ticker,
+        ...(data as { targetPrice: number | null; notes: string }),
+      }))
+    }
+
+    return []
+  } catch (error) {
+    console.error("Erro ao obter watchlist do usuário:", error)
+    throw error
+  }
+}
+
+// Adicionar item à watchlist
+export async function addToWatchlist(
+  userId: string,
+  item: {
+    ticker: string
+    targetPrice: number | null
+    notes: string
+  },
+): Promise<void> {
+  try {
+    const userRef = doc(db, "users", userId)
+
+    await updateDoc(userRef, {
+      [`watchlist.${item.ticker}`]: {
+        targetPrice: item.targetPrice,
+        notes: item.notes,
+      },
+    })
+  } catch (error) {
+    console.error(`Erro ao adicionar ${item.ticker} à watchlist:`, error)
+    throw error
+  }
+}
+
+// Atualizar item da watchlist
+export async function updateWatchlistItem(
+  userId: string,
+  ticker: string,
+  data: {
+    targetPrice: number | null
+    notes: string
+  },
+): Promise<void> {
+  try {
+    const userRef = doc(db, "users", userId)
+
+    await updateDoc(userRef, {
+      [`watchlist.${ticker}`]: {
+        targetPrice: data.targetPrice,
+        notes: data.notes,
+      },
+    })
+  } catch (error) {
+    console.error(`Erro ao atualizar ${ticker} na watchlist:`, error)
+    throw error
+  }
+}
+
+// Remover item da watchlist
+export async function removeFromWatchlist(userId: string, ticker: string): Promise<void> {
+  try {
+    const userRef = doc(db, "users", userId)
+
+    await updateDoc(userRef, {
+      [`watchlist.${ticker}`]: deleteField(),
+    })
+  } catch (error) {
+    console.error(`Erro ao remover ${ticker} da watchlist:`, error)
+    throw error
+  }
+}
+
+// Salvar preferências do usuário
+export async function saveUserPreferences(
+  userId: string,
+  preferences: {
+    theme: "light" | "dark"
+    // Outras preferências podem ser adicionadas aqui
+  },
+): Promise<void> {
+  try {
+    const userRef = doc(db, "users", userId)
+
+    // Verificar se o documento do usuário existe
+    const userDoc = await getDoc(userRef)
+
+    if (userDoc.exists()) {
+      // Atualizar o documento existente
+      await updateDoc(userRef, {
+        preferences,
+      })
+    } else {
+      // Criar um novo documento
+      await setDoc(userRef, {
+        preferences,
+        portfolio: {},
+        watchlist: {},
+      })
+    }
+  } catch (error) {
+    console.error("Erro ao salvar preferências do usuário:", error)
+    throw error
+  }
+}
+
+// Obter preferências do usuário
+export async function getUserPreferences(userId: string): Promise<{ theme: "light" | "dark" } | null> {
+  try {
+    const userRef = doc(db, "users", userId)
+    const userDoc = await getDoc(userRef)
+
+    if (userDoc.exists() && userDoc.data().preferences) {
+      return userDoc.data().preferences
+    }
+
+    return null
+  } catch (error) {
+    console.error("Erro ao obter preferências do usuário:", error)
     throw error
   }
 }
