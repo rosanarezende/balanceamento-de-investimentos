@@ -22,20 +22,10 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // Inicializamos com valores padrão para evitar erros durante a renderização inicial
-  const [theme, setTheme] = useState<"light" | "dark">("dark")
-  const [toggleThemeFunc, setToggleThemeFunc] = useState<() => void>(() => {})
+  const { theme, toggleTheme } = useTheme()
 
-  // Só acessamos o hook useTheme após a montagem do componente no cliente
   useEffect(() => {
-    try {
-      const { theme: currentTheme, toggleTheme } = useTheme()
-      setTheme(currentTheme)
-      setToggleThemeFunc(() => toggleTheme)
-      setMounted(true)
-    } catch (error) {
-      console.error("Erro ao acessar o tema:", error)
-    }
+    setMounted(true)
   }, [])
 
   const handleSignOut = async () => {

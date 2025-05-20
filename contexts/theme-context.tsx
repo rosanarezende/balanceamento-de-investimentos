@@ -109,7 +109,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         toggleTheme,
       }}
     >
-      {children}
+      {mounted ? children : null}
     </ThemeContext.Provider>
   )
 }

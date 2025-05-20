@@ -31,13 +31,17 @@ export function StockList() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [selectedStock, setSelectedStock] = useState<StockWithDetails | null>(null)
   const [isNewStock, setIsNewStock] = useState(false)
+  const [stocksWithDailyChange, setStocksWithDailyChange] = useState<StockWithDetails[]>([])
 
-  // Adicionar dados simulados de variação diária
-  const stocksWithDailyChange = stocksWithDetails.map((stock) => ({
-    ...stock,
-    dailyChange: (Math.random() * 2 - 1) * stock.currentValue * 0.05, // -5% a +5%
-    dailyChangePercentage: Math.random() * 10 - 5, // -5% a +5%
-  }))
+  // Gere os valores aleatórios apenas uma vez, quando stocksWithDetails mudar
+  useEffect(() => {
+    const generated = stocksWithDetails.map((stock) => ({
+      ...stock,
+      dailyChange: (Math.random() * 2 - 1) * stock.currentValue * 0.05, // -5% a +5%
+      dailyChangePercentage: Math.random() * 10 - 5, // -5% a +5%
+    }))
+    setStocksWithDailyChange(generated)
+  }, [stocksWithDetails])
 
   // Ordenar os ativos quando a opção de ordenação ou os dados mudam
   useEffect(() => {
