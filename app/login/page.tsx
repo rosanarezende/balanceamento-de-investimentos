@@ -10,8 +10,11 @@ export default function Login() {
   const { user, loading, error, signInWithGoogle, clearError } = useAuth()
   const router = useRouter()
   const [animateIn, setAnimateIn] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+
     if (user) {
       router.push("/")
     }
@@ -21,6 +24,17 @@ export default function Login() {
       setAnimateIn(true)
     }, 100)
   }, [user, router])
+
+  const handleLogin = async () => {
+    clearError()
+    await signInWithGoogle()
+    // Não redirecionamos aqui, deixamos o useEffect fazer isso quando o user for definido
+  }
+
+  // Evitar renderização no servidor para prevenir erros de hidratação
+  if (!mounted) {
+    return null
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
@@ -51,10 +65,7 @@ export default function Login() {
             </p>
 
             <button
-              onClick={() => {
-                clearError()
-                signInWithGoogle()
-              }}
+              onClick={handleLogin}
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 p-3 rounded-lg font-medium transition-colors disabled:opacity-50"
             >

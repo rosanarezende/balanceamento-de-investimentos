@@ -15,10 +15,13 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark")
+  const [mounted, setMounted] = useState(false)
   const { user } = useAuth()
 
   // Carregar tema do localStorage ou Firestore ao montar o componente
   useEffect(() => {
+    setMounted(true)
+
     const loadTheme = async () => {
       // Primeiro, verificar se há um tema salvo no localStorage
       const savedTheme = localStorage.getItem("theme") as Theme | null
@@ -85,6 +88,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao salvar preferências de tema:", error)
       }
     }
+  }
+
+  // Evitar renderização no servidor para prevenir erros de hidratação
+  if (!mounted) {
+    return <>{children}</>
   }
 
   return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>

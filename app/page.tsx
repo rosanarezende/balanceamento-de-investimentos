@@ -9,13 +9,19 @@ import { usePortfolio } from "@/hooks/use-portfolio"
 import AuthGuard from "@/components/auth-guard"
 
 export default function HomePage() {
-  const { stocksWithDetails, totalPortfolioValue } = usePortfolio()
+  const { stocksWithDetails, totalPortfolioValue, loading } = usePortfolio()
   const [dailyChange, setDailyChange] = useState(0)
   const [dailyChangePercentage, setDailyChangePercentage] = useState(0)
+  const [mounted, setMounted] = useState(false)
+
+  // Evitar problemas de hidratação
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Simular variação diária
   useEffect(() => {
-    if (totalPortfolioValue > 0) {
+    if (totalPortfolioValue > 0 && !loading) {
       // Simular uma variação entre -3% e +3%
       const changePercentage = Math.random() * 6 - 3
       const change = totalPortfolioValue * (changePercentage / 100)
@@ -23,10 +29,12 @@ export default function HomePage() {
       setDailyChange(change)
       setDailyChangePercentage(changePercentage)
     }
-  }, [totalPortfolioValue])
+  }, [totalPortfolioValue, loading])
 
   // Gerar insights com base nos dados da carteira
   const generateInsights = () => {
+    if (stocksWithDetails.length === 0) return []
+
     const insights = []
 
     // Verificar se há ativos acima da meta
@@ -80,6 +88,11 @@ export default function HomePage() {
     }
 
     return insights
+  }
+
+  // Evitar renderização no servidor para prevenir erros de hidratação
+  if (!mounted) {
+    return null
   }
 
   return (

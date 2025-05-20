@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { getUserPortfolio, updateStock, removeStock, updateUserRecommendation, type Portfolio } from "@/lib/firestore"
 import { fetchStockPrice } from "@/lib/api"
@@ -27,37 +27,64 @@ export function usePortfolio() {
 
   // Carregar a carteira do usuário
   useEffect(() => {
-    async function loadPortfolio() {
-      if (!user) return
+    let isMounted = true
 
-      setLoading(true)
-      setError(null)
+    async function loadPortfolio() {
+      if (!user) {
+        if (isMounted) {
+          setLoading(false)
+          setPortfolio({})
+        }
+        return
+      }
+
+      if (isMounted) {
+        setLoading(true)
+        setError(null)
+      }
 
       try {
         const userPortfolio = await getUserPortfolio(user.uid)
-        setPortfolio(userPortfolio)
+        if (isMounted) {
+          setPortfolio(userPortfolio || {})
+        }
       } catch (error) {
         console.error("Erro ao carregar carteira:", error)
-        setError("Não foi possível carregar sua carteira. Por favor, tente novamente.")
+        if (isMounted) {
+          setError("Não foi possível carregar sua carteira. Por favor, tente novamente.")
+        }
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
     loadPortfolio()
+
+    return () => {
+      isMounted = false
+    }
   }, [user])
 
   // Calcular detalhes da carteira quando o portfolio mudar
   useEffect(() => {
+    let isMounted = true
+
     async function calculatePortfolioDetails() {
       if (!user || Object.keys(portfolio).length === 0) {
-        setStocksWithDetails([])
-        setTotalPortfolioValue(0)
+        if (isMounted) {
+          setStocksWithDetails([])
+          setTotalPortfolioValue(0)
+          setLoading(false)
+        }
         return
       }
 
-      setLoading(true)
-      setError(null)
+      if (isMounted) {
+        setLoading(true)
+        setError(null)
+      }
 
       try {
         // Buscar preços atuais para todas as ações
@@ -86,8 +113,6 @@ export function usePortfolio() {
           return total + stock.quantity * price
         }, 0)
 
-        setTotalPortfolioValue(totalValue)
-
         // Calcular informações detalhadas para cada ação
         const detailedStocks = Object.entries(portfolio).map(([ticker, stock]) => {
           const currentPrice = stockPrices[ticker] || 0
@@ -110,88 +135,103 @@ export function usePortfolio() {
           }
         })
 
-        setStocksWithDetails(detailedStocks)
+        if (isMounted) {
+          setTotalPortfolioValue(totalValue)
+          setStocksWithDetails(detailedStocks)
+        }
       } catch (error) {
         console.error("Erro ao calcular detalhes da carteira:", error)
-        setError("Não foi possível calcular os detalhes da sua carteira. Por favor, tente novamente.")
+        if (isMounted) {
+          setError("Não foi possível calcular os detalhes da sua carteira. Por favor, tente novamente.")
+        }
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
     calculatePortfolioDetails()
+
+    return () => {
+      isMounted = false
+    }
   }, [portfolio, user])
 
   // Adicionar ou atualizar uma ação
-  const addOrUpdateStock = async (
-    ticker: string,
-    quantity: number,
-    targetPercentage: number,
-    userRecommendation = "Comprar",
-  ) => {
-    if (!user) return
+  const addOrUpdateStock = useCallback(
+    async (ticker: string, quantity: number, targetPercentage: number, userRecommendation = "Comprar") => {
+      if (!user) return
 
-    try {
-      await updateStock(user.uid, ticker, {
-        quantity,
-        targetPercentage,
-        userRecommendation,
-      })
-
-      // Atualizar o estado local
-      setPortfolio((prev) => ({
-        ...prev,
-        [ticker]: {
+      try {
+        await updateStock(user.uid, ticker, {
           quantity,
           targetPercentage,
           userRecommendation,
-        },
-      }))
-    } catch (error) {
-      console.error(`Erro ao adicionar/atualizar ação ${ticker}:`, error)
-      throw error
-    }
-  }
+        })
+
+        // Atualizar o estado local
+        setPortfolio((prev) => ({
+          ...prev,
+          [ticker]: {
+            quantity,
+            targetPercentage,
+            userRecommendation,
+          },
+        }))
+      } catch (error) {
+        console.error(`Erro ao adicionar/atualizar ação ${ticker}:`, error)
+        throw error
+      }
+    },
+    [user],
+  )
 
   // Remover uma ação
-  const removeStockFromPortfolio = async (ticker: string) => {
-    if (!user) return
+  const removeStockFromPortfolio = useCallback(
+    async (ticker: string) => {
+      if (!user) return
 
-    try {
-      await removeStock(user.uid, ticker)
+      try {
+        await removeStock(user.uid, ticker)
 
-      // Atualizar o estado local
-      setPortfolio((prev) => {
-        const newPortfolio = { ...prev }
-        delete newPortfolio[ticker]
-        return newPortfolio
-      })
-    } catch (error) {
-      console.error(`Erro ao remover ação ${ticker}:`, error)
-      throw error
-    }
-  }
+        // Atualizar o estado local
+        setPortfolio((prev) => {
+          const newPortfolio = { ...prev }
+          delete newPortfolio[ticker]
+          return newPortfolio
+        })
+      } catch (error) {
+        console.error(`Erro ao remover ação ${ticker}:`, error)
+        throw error
+      }
+    },
+    [user],
+  )
 
   // Atualizar a recomendação do usuário
-  const updateRecommendation = async (ticker: string, recommendation: string) => {
-    if (!user) return
+  const updateRecommendation = useCallback(
+    async (ticker: string, recommendation: string) => {
+      if (!user) return
 
-    try {
-      await updateUserRecommendation(user.uid, ticker, recommendation)
+      try {
+        await updateUserRecommendation(user.uid, ticker, recommendation)
 
-      // Atualizar o estado local
-      setPortfolio((prev) => ({
-        ...prev,
-        [ticker]: {
-          ...prev[ticker],
-          userRecommendation: recommendation,
-        },
-      }))
-    } catch (error) {
-      console.error(`Erro ao atualizar recomendação para ${ticker}:`, error)
-      throw error
-    }
-  }
+        // Atualizar o estado local
+        setPortfolio((prev) => ({
+          ...prev,
+          [ticker]: {
+            ...prev[ticker],
+            userRecommendation: recommendation,
+          },
+        }))
+      } catch (error) {
+        console.error(`Erro ao atualizar recomendação para ${ticker}:`, error)
+        throw error
+      }
+    },
+    [user],
+  )
 
   return {
     portfolio,

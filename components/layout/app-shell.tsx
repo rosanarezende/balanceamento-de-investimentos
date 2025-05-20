@@ -1,7 +1,7 @@
 "use client"
 
-import { type ReactNode, useState } from "react"
-import { usePathname } from "next/navigation"
+import { type ReactNode, useState, useEffect } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { Logo } from "@/components/ui/logo"
 import { LayoutDashboard, BarChart3, Calculator, Clock, Eye, Settings, LogOut, Menu, X } from "lucide-react"
 import Link from "next/link"
@@ -15,7 +15,14 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const { signOut, user } = useAuth()
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Evitar problemas de hidratação
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -27,6 +34,16 @@ export function AppShell({ children }: AppShellProps) {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen)
+  }
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/login")
+  }
+
+  // Evitar renderização no servidor para prevenir erros de hidratação
+  if (!mounted) {
+    return null
   }
 
   return (
@@ -58,7 +75,7 @@ export function AppShell({ children }: AppShellProps) {
             </Link>
 
             <button
-              onClick={signOut}
+              onClick={handleSignOut}
               className="p-2 rounded-md text-text-secondary hover:bg-background-tertiary"
               aria-label="Sair"
             >

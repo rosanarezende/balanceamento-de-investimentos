@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { type User, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from "firebase/auth"
 import { doc, getDoc, setDoc } from "firebase/firestore"
 import { auth, db, googleProvider } from "@/lib/firebase"
-import { useRouter } from "next/navigation"
 
 interface AuthContextType {
   user: User | null
@@ -21,32 +20,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user)
+    // Usar uma variável para controlar se o componente ainda está montado
+    let isMounted = true
 
-        // Verificar se o usuário já existe no Firestore
-        const userRef = doc(db, "users", user.uid)
-        const userSnap = await getDoc(userRef)
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      try {
+        if (!isMounted) return
 
-        // Se não existir, criar um novo documento para o usuário
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            email: user.email,
-            displayName: user.displayName,
-            portfolio: {},
-          })
+        if (currentUser) {
+          setUser(currentUser)
+
+          // Verificar se o usuário já existe no Firestore
+          const userRef = doc(db, "users", currentUser.uid)
+          const userSnap = await getDoc(userRef)
+
+          // Se não existir, criar um novo documento para o usuário
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              email: currentUser.email,
+              displayName: currentUser.displayName,
+              portfolio: {},
+              watchlist: {},
+              preferences: {
+                theme: "dark",
+              },
+            })
+          }
+        } else {
+          setUser(null)
         }
-      } else {
-        setUser(null)
+      } catch (err) {
+        console.error("Erro ao verificar autenticação:", err)
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
       }
-      setLoading(false)
     })
 
-    return () => unsubscribe()
+    // Cleanup function
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
   }, [])
 
   const clearError = () => {
@@ -58,7 +76,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true)
       setError(null)
       await signInWithPopup(auth, googleProvider)
-      router.push("/")
     } catch (error: any) {
       console.error("Erro ao fazer login com Google:", error)
       setError(`Erro ao fazer login: ${error.message}`)
@@ -70,7 +87,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       await firebaseSignOut(auth)
-      router.push("/login")
     } catch (error) {
       console.error("Erro ao fazer logout:", error)
     }
