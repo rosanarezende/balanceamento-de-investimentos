@@ -89,7 +89,7 @@ export default function ProfilePage() {
                     </Label>
                     <p className="text-text-tertiary text-sm">Ativar ou desativar o tema escuro</p>
                   </div>
-                  <Switch id="darkMode" checked={theme === "dark"} onCheckedChange={toggleThemeFunc} />
+                  <Switch id="darkMode" checked={theme === "dark"} onCheckedChange={toggleTheme} />
                 </div>
 
                 {/* Outras configurações podem ser adicionadas aqui */}
