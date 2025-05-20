@@ -4,7 +4,7 @@ import Link from "next/link"
 
 interface LogoProps {
   icon?: boolean
-  size?: "sm" | "md" | "lg" | "xl" | "2xl"
+  size?: "sm" | "md" | "lg" | "xl"
   withText?: boolean
 }
 
@@ -20,10 +20,9 @@ export function Logo({ icon, size = "md", withText = false }: LogoProps) {
 
   const sizeClasses = {
     sm: { img: 32, text: "text-lg", div: "w-8 h-8" },
-    md: { img: 48, text: "text-xl", div: "w-12 h-12" },
-    lg: { img: 64, text: "text-2xl", div: "w-16 h-16" },
-    xl: { img: 192, text: "text-5xl", div: "w-48 h-48" },
-    "2xl": { img: 320, text: "text-7xl", div: "w-80 h-80" },
+    md: { img: 64, text: "text-2xl", div: "w-16 h-16" },
+    lg: { img: 192, text: "text-5xl", div: "w-48 h-48" },
+    xl: { img: 320, text: "text-7xl", div: "w-80 h-80" },
   }
 
   const sizes = sizeClasses[size] || sizeClasses["md"]
