@@ -46,9 +46,8 @@ export default function Login() {
         <div className="glassmorphism rounded-2xl p-8 border border-gray-700">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
-              <Logo size="lg" />
+              <Logo size="xl" />
             </div>
-            <h1 className="text-3xl font-bold text-gradient mb-2">Equilibre. Invista. Cresça.</h1>
             <p className="text-gray-300">Gerencie e equilibre sua carteira de investimentos de forma inteligente</p>
           </div>
 

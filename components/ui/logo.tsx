@@ -7,7 +7,7 @@ interface LogoProps {
   withText?: boolean
 }
 
-export function Logo({ variant = "dark", size = "md", withText = true }: LogoProps) {
+export function Logo({ variant = "dark", size = "md", withText = false }: LogoProps) {
   const logoSrc =
     variant === "dark"
       ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2_20250519_205643_0001-jwHSizUNUv3PlioAZMQzjeHDb0b1Xl.png"
@@ -19,7 +19,10 @@ export function Logo({ variant = "dark", size = "md", withText = true }: LogoPro
     sm: { img: 32, text: "text-lg" },
     md: { img: 48, text: "text-xl" },
     lg: { img: 64, text: "text-2xl" },
+    xl : { img: 80, text: "text-3xl" },
   }
+
+  console.log('sizeClasses[size].img', sizeClasses[size].img)
 
   return (
     <Link href="/" className="flex items-center gap-2">
