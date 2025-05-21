@@ -6,16 +6,89 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { saveManualRecommendation, RECOMMENDATION_TYPES } from "@/lib/api"
-import { useStocksWithPrices } from "@/hooks/use-stocksWithPrices"
-import Loading from "@/components/ui/loading"
+import { fetchStockPrice, saveManualRecommendation, RECOMMENDATION_TYPES } from "@/lib/api"
+
+// Tipo para representar uma ação na carteira
+interface Stock {
+  ticker: string
+  quantity: number
+  targetPercentage: number
+}
+
+// Dados iniciais da carteira
+const initialStocks: Stock[] = [
+  { ticker: "RANI3", quantity: 26, targetPercentage: 11.0 },
+  { ticker: "TIMS3", quantity: 11, targetPercentage: 11.0 },
+  { ticker: "AZZA3", quantity: 4, targetPercentage: 11.0 },
+  { ticker: "PRIO3", quantity: 6, targetPercentage: 11.0 },
+  { ticker: "CXSE3", quantity: 14, targetPercentage: 11.0 },
+  { ticker: "ALUP11", quantity: 7, targetPercentage: 11.0 },
+  { ticker: "ABCB4", quantity: 10, targetPercentage: 11.0 },
+  { ticker: "NEOE3", quantity: 7, targetPercentage: 11.0 },
+  { ticker: "AGRO3", quantity: 9, targetPercentage: 11.0 },
+]
+
+interface StockWithPrice extends Stock {
+  currentPrice: number
+  recommendation: string
+}
 
 export default function RecomendacoesBTG() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [stocks, setStocks] = useState<StockWithPrice[]>([])
+  const [loading, setLoading] = useState(true)
+  const [investmentValue, setInvestmentValue] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const investmentParam = searchParams.get("valor")
-  const { loading, error, setStocks, stocks, investmentValue } = useStocksWithPrices(investmentParam)
+  useEffect(() => {
+    const fetchStockData = async () => {
+      setLoading(true)
+      setError(null)
+
+      const investmentParam = searchParams.get("valor")
+
+      if (!investmentParam) {
+        router.push("/calculadora-balanceamento")
+        return
+      }
+
+      setInvestmentValue(investmentParam)
+
+      try {
+        // Buscar preços para todas as ações
+        const stocksWithPrices: StockWithPrice[] = []
+
+        for (const stock of initialStocks) {
+          try {
+            const currentPrice = await fetchStockPrice(stock.ticker)
+            stocksWithPrices.push({
+              ...stock,
+              currentPrice,
+              recommendation: "COMPRAR", // Valor padrão
+            })
+          } catch (err) {
+            console.error(`Erro ao processar ação ${stock.ticker}:`, err)
+            // Continuar com as outras ações mesmo se uma falhar
+            stocksWithPrices.push({
+              ...stock,
+              currentPrice: 0, // Valor temporário
+              recommendation: "COMPRAR",
+            })
+          }
+        }
+
+        setStocks(stocksWithPrices)
+      } catch (error) {
+        console.error("Erro ao buscar dados das ações:", error)
+        setError("Não foi possível carregar os dados das ações. Por favor, tente novamente.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStockData()
+  }, [searchParams, router])
 
   const handleBack = () => {
     router.back()
@@ -33,7 +106,7 @@ export default function RecomendacoesBTG() {
   const handleContinue = () => {
     // Salvar todas as recomendações
     stocks.forEach((stock) => {
-      saveManualRecommendation(stock.ticker, stock.userRecommendation)
+      saveManualRecommendation(stock.ticker, stock.recommendation)
     })
 
     // Navegar para o resultado
@@ -41,8 +114,13 @@ export default function RecomendacoesBTG() {
   }
 
   const handleRetry = () => {
-    // Tentar novamente a busca de preços
+    // Tentar buscar os dados novamente
     setStocks([])
+    setLoading(true)
+    setError(null)
+
+    // Recarregar a página
+    window.location.reload()
   }
 
   return (
@@ -70,7 +148,9 @@ export default function RecomendacoesBTG() {
           </p>
 
           {loading ? (
-            <Loading text="Carregando dados das ações..."/>
+            <div className="py-8 text-center">
+              <p className="text-gray-500">Carregando dados das ações...</p>
+            </div>
           ) : error ? (
             <div className="py-8 text-center">
               <p className="text-red-500 mb-4">{error}</p>
@@ -100,7 +180,7 @@ export default function RecomendacoesBTG() {
                   <div>
                     <p className="text-sm font-medium mb-2">Recomendação BTG:</p>
                     <RadioGroup
-                      value={stock.userRecommendation}
+                      value={stock.recommendation}
                       onValueChange={(value) => handleRecommendationChange(stock.ticker, value)}
                       className="flex space-x-4"
                     >

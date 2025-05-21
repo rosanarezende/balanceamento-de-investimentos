@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Briefcase, Plus, ArrowUpDown } from "lucide-react"
 import { usePortfolio } from "@/hooks/use-portfolio"
+import { LoadingState } from "@/components/ui/loading-state"
 import type { StockWithDetails } from "@/hooks/use-portfolio"
 
 type SortOption =
@@ -158,9 +159,7 @@ export function StockList() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-primary"></div>
-        </div>
+        <LoadingState message="Carregando seus ativos..." />
       ) : error ? (
         <div className="p-4 rounded-lg bg-state-error/10 border border-state-error/20 text-state-error">
           <p>{error}</p>

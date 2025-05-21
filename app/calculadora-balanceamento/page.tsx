@@ -1,11 +1,12 @@
 "use client"
 
-// Adicionar a configuração dinâmica
-export const dynamic = "force-dynamic"
-
 import type React from "react"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowLeft } from "lucide-react"
 import AuthGuard from "@/components/auth-guard"
 
 export default function CalculadoraBalanceamento() {
@@ -23,7 +24,7 @@ export default function CalculadoraBalanceamento() {
       return
     }
 
-    // Navegar diretamente para o resultado (removemos a tela de recomendações BTG)
+    // Navegar diretamente para o resultado
     router.push(`/calculadora-balanceamento/resultado?valor=${value}`)
   }
 
@@ -51,52 +52,44 @@ export default function CalculadoraBalanceamento() {
 
   return (
     <AuthGuard>
-      <div className="bg-gray-100 min-h-screen">
-        <div className="max-w-md mx-auto bg-white min-h-screen flex flex-col">
-          <div className="p-4 flex items-center">
-            <button onClick={handleBack} className="mr-4">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 12H5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path
-                  d="M12 19L5 12L12 5"
-                  stroke="black"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+      <div className="container mx-auto max-w-md">
+        <Card className="border-none shadow-none bg-card">
+          <div className="p-4 flex items-center border-b border-border">
+            <button onClick={handleBack} className="mr-4 text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft size={24} />
             </button>
-            <div className="flex-1 text-right">
-              <h1 className="text-xl font-medium">Calculadora De Balanceamento</h1>
-              <p className="text-sm text-gray-500">Calcule como reorganizar seus investimentos</p>
+            <div>
+              <h1 className="font-medium text-foreground">Calculadora De Balanceamento</h1>
+              <p className="text-xs text-muted-foreground">Calcule como reorganizar seus investimentos</p>
             </div>
           </div>
 
-          <div className="flex-1 px-4 py-8 flex flex-col">
-            <h2 className="text-4xl font-bold text-center mb-8">2º Passo</h2>
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center justify-center gap-6">
+              <h2 className="text-3xl font-bold text-center text-foreground">2º Passo</h2>
 
-            <p className="text-xl text-gray-500 mb-12 text-center">
-              Para iniciar a projeção de balanceamento você deve informar abaixo o valor que deseja investir no campo
-              abaixo
-            </p>
+              <p className="text-lg text-muted-foreground text-center">
+                Para iniciar a projeção de balanceamento você deve informar abaixo o valor que deseja investir
+              </p>
 
-            <div className="mb-12">
-              <div className="bg-white border rounded-lg p-4 flex items-center">
-                <span className="text-gray-500 text-2xl mr-2">R$</span>
-                <input
-                  type="text"
-                  className="flex-1 text-2xl outline-none"
-                  value={investmentValue}
-                  onChange={handleInputChange}
-                />
+              <div className="w-full">
+                <div className="bg-background border border-input rounded-lg p-4 flex items-center">
+                  <span className="text-muted-foreground text-2xl mr-2">R$</span>
+                  <input
+                    type="text"
+                    className="flex-1 text-2xl outline-none bg-transparent text-foreground"
+                    value={investmentValue}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
-            </div>
 
-            <button className="bg-blue-600 text-white py-4 rounded-lg text-xl font-medium" onClick={handleCalculate}>
-              Calcular
-            </button>
-          </div>
-        </div>
+              <Button className="w-full py-6 text-xl" size="lg" onClick={handleCalculate}>
+                Calcular
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AuthGuard>
   )

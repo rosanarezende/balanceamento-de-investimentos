@@ -91,16 +91,25 @@ export function usePortfolio() {
         const stockPrices: Record<string, number> = {}
         const failedStocks: string[] = []
 
-        for (const ticker of Object.keys(portfolio)) {
+        // Buscar preços em paralelo para melhorar performance
+        const pricePromises = Object.keys(portfolio).map(async (ticker) => {
           try {
-            stockPrices[ticker] = await fetchStockPrice(ticker)
+            const price = await fetchStockPrice(ticker)
+            return { ticker, price }
           } catch (err) {
             console.error(`Erro ao buscar preço para ${ticker}:`, err)
             failedStocks.push(ticker)
-            // Usar um preço simulado mesmo em caso de erro
-            stockPrices[ticker] = 0
+            return { ticker, price: 0 }
           }
-        }
+        })
+
+        // Aguardar todas as requisições de preço
+        const priceResults = await Promise.all(pricePromises)
+
+        // Preencher o objeto de preços
+        priceResults.forEach(({ ticker, price }) => {
+          stockPrices[ticker] = price
+        })
 
         // Se alguma ação falhou, mostrar aviso mas continuar
         if (failedStocks.length > 0) {
@@ -233,6 +242,24 @@ export function usePortfolio() {
     [user],
   )
 
+  // Função para forçar a atualização dos dados da carteira
+  const refreshPortfolio = useCallback(async () => {
+    if (!user) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const userPortfolio = await getUserPortfolio(user.uid)
+      setPortfolio(userPortfolio || {})
+    } catch (error) {
+      console.error("Erro ao atualizar carteira:", error)
+      setError("Não foi possível atualizar sua carteira. Por favor, tente novamente.")
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
+
   return {
     portfolio,
     stocksWithDetails,
@@ -242,5 +269,6 @@ export function usePortfolio() {
     addOrUpdateStock,
     removeStockFromPortfolio,
     updateRecommendation,
+    refreshPortfolio,
   }
 }

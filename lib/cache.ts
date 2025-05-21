@@ -2,67 +2,73 @@
 interface CacheItem<T> {
   value: T
   timestamp: number
-  expiresAt: number
 }
 
-class Cache<T> {
-  private cache: Map<string, CacheItem<T>> = new Map()
-  private defaultTTL: number
+// Cache para preços de ações
+const STOCK_PRICE_CACHE_PREFIX = "stock_price_"
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutos em milissegundos
 
-  constructor(defaultTTLInSeconds = 300) {
-    // 5 minutos por padrão
-    this.defaultTTL = defaultTTLInSeconds * 1000
-  }
+/**
+ * Obtém um preço de ação do cache
+ * @param ticker Código da ação
+ * @returns Preço da ação ou null se não estiver em cache ou expirado
+ */
+export async function getCachedStockPrice(ticker: string): Promise<number | null> {
+  try {
+    const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
+    const cachedData = localStorage.getItem(cacheKey)
 
-  set(key: string, value: T, ttlInSeconds?: number): void {
-    const now = Date.now()
-    const ttl = (ttlInSeconds !== undefined ? ttlInSeconds : this.defaultTTL) * 1000
-
-    this.cache.set(key, {
-      value,
-      timestamp: now,
-      expiresAt: now + ttl,
-    })
-  }
-
-  get(key: string): T | null {
-    const item = this.cache.get(key)
-
-    if (!item) {
+    if (!cachedData) {
       return null
     }
 
-    // Verificar se o item expirou
-    if (Date.now() > item.expiresAt) {
-      this.cache.delete(key)
+    const { price, timestamp } = JSON.parse(cachedData) as CacheItem<number>
+    const now = Date.now()
+
+    // Verificar se o cache expirou
+    if (now - timestamp > CACHE_TTL) {
+      // Cache expirado
+      localStorage.removeItem(cacheKey)
       return null
     }
 
-    return item.value
-  }
-
-  has(key: string): boolean {
-    return this.get(key) !== null
-  }
-
-  delete(key: string): void {
-    this.cache.delete(key)
-  }
-
-  clear(): void {
-    this.cache.clear()
-  }
-
-  // Limpar itens expirados
-  purgeExpired(): void {
-    const now = Date.now()
-    for (const [key, item] of this.cache.entries()) {
-      if (now > item.expiresAt) {
-        this.cache.delete(key)
-      }
-    }
+    return price
+  } catch (error) {
+    console.error(`Erro ao obter preço em cache para ${ticker}:`, error)
+    return null
   }
 }
 
-// Exportar uma instância do cache para preços de ações
-export const stockPriceCache = new Cache<number>(300) // Cache de 5 minutos para preços
+/**
+ * Armazena um preço de ação no cache
+ * @param ticker Código da ação
+ * @param price Preço da ação
+ */
+export async function setCachedStockPrice(ticker: string, price: number): Promise<void> {
+  try {
+    const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
+    const cacheData: CacheItem<number> = {
+      value: price,
+      timestamp: Date.now(),
+    }
+
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData))
+  } catch (error) {
+    console.error(`Erro ao armazenar preço em cache para ${ticker}:`, error)
+    // Falha silenciosa - não queremos que erros de cache afetem a funcionalidade principal
+  }
+}
+
+/**
+ * Remove um preço de ação do cache
+ * @param ticker Código da ação
+ */
+export async function clearStockPriceCache(ticker: string): Promise<void> {
+  try {
+    const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
+    localStorage.removeItem(cacheKey)
+  } catch (error) {
+    console.error(`Erro ao limpar cache para ${ticker}:`, error)
+    // Falha silenciosa
+  }
+}
