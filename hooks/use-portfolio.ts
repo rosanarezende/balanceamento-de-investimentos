@@ -260,6 +260,16 @@ export function usePortfolio() {
     }
   }, [user])
 
+  // Adicionar método para verificar ativos elegíveis
+  const getEligibleStocks = (recommendation = "Comprar") => {
+    return stocksWithDetails.filter(stock => stock.userRecommendation === recommendation)
+  }
+
+  // Adicionar método para verificar se há ativos abaixo do peso
+  const getUnderweightStocks = () => {
+    return stocksWithDetails.filter(stock => stock.currentPercentage < stock.targetPercentage)
+  }
+
   return {
     portfolio,
     stocksWithDetails,
@@ -270,5 +280,9 @@ export function usePortfolio() {
     removeStockFromPortfolio,
     updateRecommendation,
     refreshPortfolio,
+    getEligibleStocks,
+    getUnderweightStocks,
+    hasStocks: stocksWithDetails.length > 0,
+    hasEligibleStocks: stocksWithDetails.some(stock => stock.userRecommendation === "Comprar"),
   }
 }

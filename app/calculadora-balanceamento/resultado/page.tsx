@@ -53,6 +53,21 @@ export default function ResultadoCalculadora() {
         return
       }
 
+      // Verificar se há ativos na carteira
+      if (stocksWithDetails.length === 0) {
+        setError("Você precisa adicionar ativos à sua carteira antes de usar a calculadora.")
+        setLoading(false)
+        return
+      }
+
+      // Verificar se há ativos elegíveis para investimento
+      const eligibleStocks = stocksWithDetails.filter(stock => stock.userRecommendation === "Comprar")
+      if (eligibleStocks.length === 0) {
+        setError("Não há ativos marcados como 'Comprar' na sua carteira. Adicione recomendações aos seus ativos.")
+        setLoading(false)
+        return
+      }
+
       const investmentValue = Number.parseFloat(investmentParam)
       setTotalInvestment(investmentValue)
 
@@ -196,6 +211,9 @@ export default function ResultadoCalculadora() {
 
     if (stocksWithDetails.length > 0) {
       calculateAllocations()
+    } else {
+      setError("Você precisa adicionar ativos à sua carteira antes de usar a calculadora.")
+      setLoading(false)
     }
   }, [stocksWithDetails, searchParams, router])
 
