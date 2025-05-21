@@ -25,6 +25,14 @@ export function usePortfolio() {
   const [error, setError] = useState<string | null>(null)
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0)
 
+  // Adicionar persistência local como backup
+  useEffect(() => {
+    // Quando o portfolio for carregado do Firestore, salvar no localStorage
+    if (Object.keys(portfolio).length > 0) {
+      localStorage.setItem('userPortfolio', JSON.stringify(portfolio))
+    }
+  }, [portfolio])
+
   // Carregar a carteira do usuário
   useEffect(() => {
     let isMounted = true
@@ -44,9 +52,18 @@ export function usePortfolio() {
       }
 
       try {
+        // Tentar carregar do localStorage primeiro para feedback imediato
+        const cachedPortfolio = localStorage.getItem('userPortfolio')
+        if (cachedPortfolio && isMounted) {
+          setPortfolio(JSON.parse(cachedPortfolio))
+        }
+
+        // Então carregar do Firestore (dados mais atualizados)
         const userPortfolio = await getUserPortfolio(user.uid)
         if (isMounted) {
           setPortfolio(userPortfolio || {})
+          // Atualizar o cache
+          localStorage.setItem('userPortfolio', JSON.stringify(userPortfolio))
         }
       } catch (error) {
         console.error("Erro ao carregar carteira:", error)
@@ -173,6 +190,7 @@ export function usePortfolio() {
       if (!user) return
 
       try {
+        // Atualizar no Firestore
         await updateStock(user.uid, ticker, {
           quantity,
           targetPercentage,
@@ -188,6 +206,11 @@ export function usePortfolio() {
             userRecommendation,
           },
         }))
+        
+        // Aguardar o próximo ciclo de renderização
+        await new Promise(resolve => setTimeout(resolve, 50))
+        
+        return true
       } catch (error) {
         console.error(`Erro ao adicionar/atualizar ação ${ticker}:`, error)
         throw error
@@ -252,6 +275,11 @@ export function usePortfolio() {
     try {
       const userPortfolio = await getUserPortfolio(user.uid)
       setPortfolio(userPortfolio || {})
+
+      // Aguardar o próximo ciclo de renderização para garantir que o estado foi atualizado
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      return userPortfolio
     } catch (error) {
       console.error("Erro ao atualizar carteira:", error)
       setError("Não foi possível atualizar sua carteira. Por favor, tente novamente.")

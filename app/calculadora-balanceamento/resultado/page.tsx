@@ -55,9 +55,19 @@ export default function ResultadoCalculadora() {
 
       // Verificar se há ativos na carteira
       if (stocksWithDetails.length === 0) {
-        setError("Você precisa adicionar ativos à sua carteira antes de usar a calculadora.")
-        setLoading(false)
-        return
+        try {
+          await refreshPortfolio()
+
+          setError("Você precisa adicionar ativos à sua carteira antes de usar a calculadora.")
+          setLoading(false)
+          return
+        } 
+        catch (error) {
+          console.error("Erro ao atualizar carteira:", error)
+          setError("Não foi possível carregar sua carteira. Por favor, tente novamente.")
+          setLoading(false)
+          return
+        }
       }
 
       // Verificar se há ativos elegíveis para investimento
@@ -209,13 +219,19 @@ export default function ResultadoCalculadora() {
       }
     }
 
-    if (stocksWithDetails.length > 0) {
+    // Só calcular se houver ativos ou se estiver carregando
+    if (stocksWithDetails.length > 0 || portfolioLoading) {
       calculateAllocations()
     } else {
-      setError("Você precisa adicionar ativos à sua carteira antes de usar a calculadora.")
-      setLoading(false)
+      // Tentar atualizar a carteira uma vez
+      refreshPortfolio().then(() => {
+        if (stocksWithDetails.length === 0) {
+          setError("Você precisa adicionar ativos à sua carteira antes de usar a calculadora.")
+          setLoading(false)
+        }
+      })
     }
-  }, [stocksWithDetails, searchParams, router])
+  }, [stocksWithDetails, searchParams, router, portfolioLoading, refreshPortfolio])
 
   // Função para gerar recomendação de IA
   const generateAiRecommendation = async (

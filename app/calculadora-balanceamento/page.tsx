@@ -2,11 +2,11 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, AlertTriangle } from "lucide-react"
+import { ArrowLeft, AlertTriangle, RefreshCw } from "lucide-react"
 import AuthGuard from "@/components/auth-guard"
 import { usePortfolio } from "@/hooks/use-portfolio"
 
@@ -16,8 +16,27 @@ export default function CalculadoraBalanceamento() {
 
   // Adicionar uso do hook para verificar se há ativos
   const { stocksWithDetails, loading: portfolioLoading } = usePortfolio()
-  // Estado para controlar mensagens de erro
   const [error, setError] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Função para forçar a atualização da carteira
+  const handleRefreshPortfolio = async () => {
+    setIsRefreshing(true)
+    try {
+      await refreshPortfolio()
+    } catch (error) {
+      console.error("Erro ao atualizar carteira:", error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  // Verificar se há ativos na carteira ao carregar a página
+  useEffect(() => {
+    // Forçar uma atualização da carteira ao montar o componente
+    handleRefreshPortfolio()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleBack = () => {
     router.back()
@@ -129,6 +148,24 @@ export default function CalculadoraBalanceamento() {
                             onClick={() => router.push('/')}
                           >
                             Ir para Dashboard
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRefreshPortfolio}
+                            disabled={isRefreshing}
+                          >
+                            {isRefreshing ? (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                                Atualizando...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Atualizar Carteira
+                              </>
+                            )}
                           </Button>
                         </div>
                       </div>
