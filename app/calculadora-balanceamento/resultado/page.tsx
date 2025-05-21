@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import { saveSimulation } from "@/lib/firestore"
 import AuthGuard from "@/components/auth-guard"
+import Loading from "@/components/ui/loading"
 
 interface StockAllocation {
   ticker: string
@@ -224,9 +225,7 @@ export default function ResultadoCalculadora() {
             )}
 
             {loading ? (
-              <div className="py-8 text-center">
-                <p className="text-muted-foreground">Calculando recomendações de investimento...</p>
-              </div>
+              <Loading text="Calculando recomendações de investimento..." />
             ) : !hasEligibleStocks ? (
               <div className="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg mb-6">
                 <h3 className="font-bold text-center mb-2 text-card-foreground">Nenhum ativo elegível para aporte</h3>
