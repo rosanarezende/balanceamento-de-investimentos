@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, AlertTriangle } from "lucide-react"
 import AuthGuard from "@/components/auth-guard"
 import { usePortfolio } from "@/hooks/use-portfolio"
 
