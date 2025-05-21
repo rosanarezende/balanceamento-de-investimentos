@@ -76,4 +76,18 @@ const Alert = React.forwardRef<
 })
 Alert.displayName = "Alert"
 
-export { Alert, alertVariants }
+// Adicionar o componente AlertDescription
+const AlertDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+AlertDescription.displayName = "AlertDescription"
+
+// Exportar também o AlertDescription
+export { Alert, AlertDescription, alertVariants }
