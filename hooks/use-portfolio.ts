@@ -24,6 +24,7 @@ export function usePortfolio() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false)  // Novo estado para controlar atualizações
 
   // Adicionar persistência local como backup
   useEffect(() => {
@@ -267,8 +268,9 @@ export function usePortfolio() {
 
   // Função para forçar a atualização dos dados da carteira
   const refreshPortfolio = useCallback(async () => {
-    if (!user) return
+    if (!user || isRefreshing) return
 
+    setIsRefreshing(true)
     setLoading(true)
     setError(null)
 
@@ -285,8 +287,9 @@ export function usePortfolio() {
       setError("Não foi possível atualizar sua carteira. Por favor, tente novamente.")
     } finally {
       setLoading(false)
+      setIsRefreshing(false)
     }
-  }, [user])
+  }, [user, isRefreshing])
 
   // Adicionar método para verificar ativos elegíveis
   const getEligibleStocks = (recommendation = "Comprar") => {
