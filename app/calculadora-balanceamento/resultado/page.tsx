@@ -30,7 +30,7 @@ export default function ResultadoCalculadora() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
-  const { stocksWithDetails, loading: portfolioLoading } = usePortfolio()
+  const { stocksWithDetails, loading: portfolioLoading, refreshPortfolio } = usePortfolio()
   const [allocations, setAllocations] = useState<StockAllocation[]>([])
   const [totalInvestment, setTotalInvestment] = useState(0)
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0)
