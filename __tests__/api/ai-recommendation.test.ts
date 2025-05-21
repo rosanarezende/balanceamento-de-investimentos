@@ -1,9 +1,9 @@
 import { POST } from "@/app/api/ai-recommendation/route"
-import { generateText } from "ai"
+import { generateText } from "@/lib/ai"
 import { jest } from "@jest/globals"
 
 // Mock do AI SDK
-jest.mock("ai", () => ({
+jest.mock("@/lib/ai", () => ({
   generateText: jest.fn(),
 }))
 
@@ -52,7 +52,10 @@ describe("API de Recomendação de IA", () => {
     expect(data.recommendation).toBe(mockRecommendation)
     expect(generateText).toHaveBeenCalledWith(
       expect.objectContaining({
+        model: expect.any(Object),
         prompt: "Analisar esta carteira de investimentos",
+        maxTokens: 150,
+        temperature: 0.7,
       }),
     )
   })

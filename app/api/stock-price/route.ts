@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getCachedStockPrice, setCachedStockPrice } from "@/lib/cache"
+import { getCachedStockPrice, setCachedStockPrice } from "@/lib/api"
 
 // Chave de API da Alpha Vantage (agora usando uma variável de ambiente do servidor)
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo"

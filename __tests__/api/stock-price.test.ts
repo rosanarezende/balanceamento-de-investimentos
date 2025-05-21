@@ -1,13 +1,13 @@
 import { GET } from "@/app/api/stock-price/route"
 import { NextRequest } from "next/server"
-import { getCachedStockPrice, setCachedStockPrice } from "@/lib/cache"
+import { getCachedStockPrice, setCachedStockPrice } from "@/lib/api"
 import { jest } from "@jest/globals"
 
 // Mock do fetch
 global.fetch = jest.fn()
 
 // Mock do cache
-jest.mock("@/lib/cache", () => ({
+jest.mock("@/lib/api", () => ({
   getCachedStockPrice: jest.fn(),
   setCachedStockPrice: jest.fn(),
 }))
@@ -59,7 +59,7 @@ describe("Stock Price API", () => {
 
     expect(response.status).toBe(200)
     expect(data).toHaveProperty("price")
-    expect(data.price).toBe(42.5)
+    expect(data.price).toBe 42.5)
     expect(data.source).toBe("cache")
 
     // Verificar se getCachedStockPrice foi chamado com o ticker correto

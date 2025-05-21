@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { generateText } from "ai"
+import { generateText } from "@/lib/ai"
 import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: Request) {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     // Usar o AI SDK da Vercel para gerar texto
     const { text } = await generateText({
       model: openai("gpt-3.5-turbo"),
-      prompt: prompt,
+      prompt,
       maxTokens: 150,
       temperature: 0.7,
     })
