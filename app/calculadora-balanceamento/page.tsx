@@ -15,7 +15,7 @@ export default function CalculadoraBalanceamento() {
   const router = useRouter()
 
   // Adicionar uso do hook para verificar se há ativos
-  const { stocksWithDetails, loading: portfolioLoading } = usePortfolio()
+  const { stocksWithDetails, loading: portfolioLoading, refreshPortfolio } = usePortfolio()
   const [error, setError] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
