@@ -105,120 +105,93 @@ export default function CalculadoraBalanceamento() {
                 Para iniciar a projeção de balanceamento você deve informar abaixo o valor que deseja investir
               </p>
 
-              <div className="w-full">
-                <div className="bg-background border border-input rounded-lg p-4 flex items-center">
-                  <span className="text-muted-foreground text-2xl mr-2">R$</span>
-                  <input
-                    type="text"
-                    className="flex-1 text-2xl outline-none bg-transparent text-foreground"
-                    value={investmentValue}
-                    onChange={handleInputChange}
-                    placeholder="0,00"
-                  />
+              {/* Adicionar indicador de carregamento */}
+              {portfolioLoading ? (
+                <div className="w-full flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* Adicionar mensagem de erro quando não há ativos */}
+                  {stocksWithDetails.length === 0 && (
+                    <div className="w-full bg-yellow-500/10 p-4 rounded-lg">
+                      <div className="flex items-start">
+                        <AlertTriangle className="text-yellow-500 mr-2 h-5 w-5 mt-0.5" />
+                        <div>
+                          <h3 className="font-medium text-foreground">Carteira vazia</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Você precisa adicionar ativos à sua carteira antes de usar a calculadora.
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => router.push('/')}
+                          >
+                            Ir para Dashboard
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-              <Button className="w-full py-6 text-xl" size="lg" onClick={handleCalculate}>
-                Calcular
-              </Button>
+                  {/* Mostrar mensagem se não há ativos elegíveis */}
+                  {stocksWithDetails.length > 0 && 
+                  !stocksWithDetails.some(stock => stock.userRecommendation === "Comprar") && (
+                    <div className="w-full bg-yellow-500/10 p-4 rounded-lg">
+                      <div className="flex items-start">
+                        <AlertTriangle className="text-yellow-500 mr-2 h-5 w-5 mt-0.5" />
+                        <div>
+                          <h3 className="font-medium text-foreground">Sem ativos para compra</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Não há ativos marcados como "Comprar" na sua carteira. Adicione recomendações aos seus ativos.
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => router.push('/')}
+                          >
+                            Gerenciar Ativos
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Exibir mensagem de erro */}
+                  {error && (
+                    <div className="w-full bg-destructive/10 p-4 rounded-lg">
+                      <p className="text-destructive text-sm">{error}</p>
+                    </div>
+                  )}
+
+                  <div className="w-full">
+                    <div className="bg-background border border-input rounded-lg p-4 flex items-center">
+                      <span className="text-muted-foreground text-2xl mr-2">R$</span>
+                      <input
+                        type="text"
+                        className="flex-1 text-2xl outline-none bg-transparent text-foreground"
+                        value={investmentValue}
+                        onChange={handleInputChange}
+                        placeholder="0,00"
+                      />
+                    </div>
+                  </div>
+
+                  <Button 
+                    className="w-full py-6 text-xl" 
+                    size="lg" 
+                    onClick={handleCalculate}
+                    disabled={stocksWithDetails.length === 0 || 
+                            !stocksWithDetails.some(stock => stock.userRecommendation === "Comprar")}
+                  >
+                    Calcular
+                  </Button>
+                </>
+              )}
             </div>
           </CardContent>
-
-          <CardContent className="p-6">
-          <div className="flex flex-col items-center justify-center gap-6">
-            <h2 className="text-3xl font-bold text-center text-foreground">2º Passo</h2>
-
-            <p className="text-lg text-muted-foreground text-center">
-              Para iniciar a projeção de balanceamento você deve informar abaixo o valor que deseja investir
-            </p>
-
-            {/* Adicionar indicador de carregamento */}
-            {portfolioLoading ? (
-              <div className="w-full flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <>
-                {/* Adicionar mensagem de erro quando não há ativos */}
-                {stocksWithDetails.length === 0 && (
-                  <div className="w-full bg-yellow-500/10 p-4 rounded-lg">
-                    <div className="flex items-start">
-                      <AlertTriangle className="text-yellow-500 mr-2 h-5 w-5 mt-0.5" />
-                      <div>
-                        <h3 className="font-medium text-foreground">Carteira vazia</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Você precisa adicionar ativos à sua carteira antes de usar a calculadora.
-                        </p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2"
-                          onClick={() => router.push('/')}
-                        >
-                          Ir para Dashboard
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Mostrar mensagem se não há ativos elegíveis */}
-                {stocksWithDetails.length > 0 && 
-                 !stocksWithDetails.some(stock => stock.userRecommendation === "Comprar") && (
-                  <div className="w-full bg-yellow-500/10 p-4 rounded-lg">
-                    <div className="flex items-start">
-                      <AlertTriangle className="text-yellow-500 mr-2 h-5 w-5 mt-0.5" />
-                      <div>
-                        <h3 className="font-medium text-foreground">Sem ativos para compra</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Não há ativos marcados como "Comprar" na sua carteira. Adicione recomendações aos seus ativos.
-                        </p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2"
-                          onClick={() => router.push('/')}
-                        >
-                          Gerenciar Ativos
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Exibir mensagem de erro */}
-                {error && (
-                  <div className="w-full bg-destructive/10 p-4 rounded-lg">
-                    <p className="text-destructive text-sm">{error}</p>
-                  </div>
-                )}
-
-                <div className="w-full">
-                  <div className="bg-background border border-input rounded-lg p-4 flex items-center">
-                    <span className="text-muted-foreground text-2xl mr-2">R$</span>
-                    <input
-                      type="text"
-                      className="flex-1 text-2xl outline-none bg-transparent text-foreground"
-                      value={investmentValue}
-                      onChange={handleInputChange}
-                      placeholder="0,00"
-                    />
-                  </div>
-                </div>
-
-                <Button 
-                  className="w-full py-6 text-xl" 
-                  size="lg" 
-                  onClick={handleCalculate}
-                  disabled={stocksWithDetails.length === 0 || 
-                           !stocksWithDetails.some(stock => stock.userRecommendation === "Comprar")}
-                >
-                  Calcular
-                </Button>
-              </>
-            )}
-          </div>
-        </CardContent>
         </Card>
       </div>
     </AuthGuard>
