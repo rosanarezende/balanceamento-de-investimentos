@@ -16,8 +16,8 @@ export default function LoginPage() {
   // Verificar se estamos em um ambiente de preview
   useEffect(() => {
     const hostname = window.location.hostname
-    const isPreview = hostname.includes("vercel.app") || hostname.includes("localhost") || hostname.includes("v0.dev")
-    setIsPreviewEnvironment(true) // Sempre mostrar opção de preview para facilitar testes
+    const isPreview = hostname.includes("github.dev") || hostname.includes("localhost") || hostname.includes("v0.dev")
+    setIsPreviewEnvironment(isPreview) 
   }, [])
 
   const handleGoogleLogin = async () => {
@@ -34,15 +34,19 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold text-center mb-6">EquilibreInvest</h1>
 
-        <Tabs defaultValue="preview" className="w-full">
+        <Tabs defaultValue={isPreviewEnvironment ? "preview" : "google"} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="preview">Login Preview</TabsTrigger>
+            {isPreviewEnvironment && (
+              <TabsTrigger value="preview">Login Preview</TabsTrigger>
+            )}
             <TabsTrigger value="google">Login Google</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="preview">
-            <PreviewLoginForm />
-          </TabsContent>
+          {isPreviewEnvironment && (
+            <TabsContent value="preview">
+              <PreviewLoginForm />
+            </TabsContent>
+          )}
 
           <TabsContent value="google">
             <Card className="p-6 flex flex-col items-center">
