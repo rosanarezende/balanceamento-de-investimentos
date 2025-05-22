@@ -36,7 +36,15 @@ export default function HomePage() {
 
   // Gerar insights com base nos dados da carteira
   const generateInsights = () => {
-    if (stocksWithDetails.length === 0) return []
+    if (stocksWithDetails.length === 0) {
+      return [
+        {
+          id: "no-stocks",
+          message: "Você não possui ações na sua carteira. Adicione ativos para começar.",
+          type: "info" as const,
+        },
+      ]
+    }
 
     const insights = []
 
