@@ -134,6 +134,8 @@ export function StockList() {
     }
   }
 
+  console.log({ sortedStocks })
+
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">

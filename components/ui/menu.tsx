@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-const Menu = () => {
+export const Menu = () => {
   const router = useRouter();
 
   return (
@@ -24,5 +24,3 @@ const Menu = () => {
     </nav>
   );
 };
-
-export default Menu;

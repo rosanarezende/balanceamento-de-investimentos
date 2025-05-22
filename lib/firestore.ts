@@ -83,6 +83,7 @@ export async function updateStock(
   },
 ): Promise<void> {
   try {
+    console.log(`Atualizando ação ${ticker} para o usuário ${userId}`, data)
     const userRef = doc(db, "users", userId)
 
     await updateDoc(userRef, {

@@ -29,7 +29,7 @@ export function PortfolioSummary({
   dailyChangePercentage,
   stocksData,
 }: PortfolioSummaryProps) {
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(false)
   const [chartType, setChartType] = useState<"pie" | "comparison">("pie")
 
   const toggleExpanded = () => {
