@@ -1,19 +1,4 @@
-import { getCachedStockPrice, setCachedStockPrice } from "@/lib/cache"
-
-/**
- * Busca o preço atual de uma ação na B3 usando a API do servidor
- * @param ticker Código da ação (ex: ITUB4)
- * @returns Preço atual da ação ou preço simulado em caso de falha
- */
 export async function fetchStockPrice(ticker: string): Promise<number> {
-  try {
-    // Verificar primeiro no cache
-    const cachedPrice = await getCachedStockPrice(ticker)
-    if (cachedPrice !== null) {
-      return cachedPrice
-    }
-
-    // Chamar a API Route do servidor em vez de acessar diretamente a API externa
     const response = await fetch(`/api/stock-price?ticker=${ticker}`)
 
     if (!response.ok) {
@@ -21,17 +6,11 @@ export async function fetchStockPrice(ticker: string): Promise<number> {
     }
 
     const data = await response.json()
-
-    // Armazenar o preço no cache
-    if (data.price) {
-      await setCachedStockPrice(ticker, data.price)
+    if (!data || !data.price) {
+      throw new Error("Dados inválidos recebidos da API")
     }
 
     return data.price
-  } catch (error) {
-    console.error(`Erro ao buscar preço para ${ticker}:`, error)
-    throw error
-  }
 }
 
 // Tipos de recomendação disponíveis
