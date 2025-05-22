@@ -83,6 +83,8 @@ describe("Portfolio Flow Integration", () => {
     removeStockFromPortfolio: jest.fn(),
     updateRecommendation: jest.fn(),
     refreshPortfolio: jest.fn(),
+    getEligibleStocks: jest.fn(() => mockStocksWithDetails.filter(stock => stock.userRecommendation === "Comprar")),
+    getUnderweightStocks: jest.fn(() => mockStocksWithDetails.filter(stock => stock.currentPercentage < stock.targetPercentage)),
   }
 
   beforeEach(() => {
@@ -216,5 +218,47 @@ describe("Portfolio Flow Integration", () => {
 
     // Verificar se o botão de tentar novamente é exibido
     expect(screen.getByText("Tentar Novamente")).toBeInTheDocument()
+  })
+
+  it("should refresh portfolio data", async () => {
+    render(
+      <AuthProvider>
+        <ThemeProvider>
+          <StockList />
+        </ThemeProvider>
+      </AuthProvider>,
+    )
+
+    // Verificar se o botão de atualizar carteira é exibido
+    const refreshButton = screen.getByTitle("Atualizar carteira")
+    expect(refreshButton).toBeInTheDocument()
+
+    // Clicar no botão de atualizar carteira
+    fireEvent.click(refreshButton)
+
+    // Verificar se a função refreshPortfolio foi chamada
+    expect(mockPortfolioHook.refreshPortfolio).toHaveBeenCalled()
+  })
+
+  it("should show message if no eligible stocks for investment", async () => {
+    // Configurar usePortfolio para retornar portfólio sem ações elegíveis
+    ;(usePortfolio as jest.Mock).mockReturnValue({
+      ...mockPortfolioHook,
+      stocksWithDetails: mockStocksWithDetails.map(stock => ({
+        ...stock,
+        userRecommendation: "Aguardar",
+      })),
+    })
+
+    render(
+      <AuthProvider>
+        <ThemeProvider>
+          <StockList />
+        </ThemeProvider>
+      </AuthProvider>,
+    )
+
+    // Verificar se a mensagem de "sem ativos para compra" é exibida
+    expect(screen.getByText("Não há ativos marcados como 'Comprar' na sua carteira. Adicione recomendações aos seus ativos.")).toBeInTheDocument()
   })
 })

@@ -122,6 +122,20 @@ export async function updateUserRecommendation(userId: string, ticker: string, r
   }
 }
 
+// Salvar uma recomendação manual
+export async function saveManualRecommendation(userId: string, ticker: string, recommendation: string): Promise<void> {
+  try {
+    const userRef = doc(db, "users", userId)
+
+    await updateDoc(userRef, {
+      [`portfolio.${ticker}.manualRecommendation`]: recommendation,
+    })
+  } catch (error) {
+    console.error(`Erro ao salvar recomendação manual para ${ticker}:`, error)
+    throw error
+  }
+}
+
 // Salvar uma simulação no histórico
 export async function saveSimulation(userId: string, simulation: Simulation): Promise<string> {
   try {

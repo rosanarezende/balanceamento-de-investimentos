@@ -29,3 +29,21 @@ export async function saveManualRecommendation(ticker: string, recommendation: s
   console.log(`Salvando recomendação manual para ${ticker}: ${recommendation}`)
   return Promise.resolve()
 }
+
+export async function getDailyChange(ticker: string): Promise<{ change: number; changePercentage: number }> {
+  const response = await fetch(`/api/stock-daily-change?ticker=${ticker}`)
+
+  if (!response.ok) {
+    throw new Error(`Erro ao buscar variação diária: ${response.status}`)
+  }
+
+  const data = await response.json()
+  if (!data || typeof data.change !== "number" || typeof data.changePercentage !== "number") {
+    throw new Error("Dados inválidos recebidos da API")
+  }
+
+  return {
+    change: data.change,
+    changePercentage: data.changePercentage,
+  }
+}

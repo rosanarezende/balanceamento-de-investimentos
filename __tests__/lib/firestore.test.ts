@@ -1,4 +1,4 @@
-import { getUserPortfolio, updateStock, removeStock, updateUserRecommendation, saveSimulation } from "@/lib/firestore"
+import { getUserPortfolio, updateStock, removeStock, updateUserRecommendation, saveSimulation, saveManualRecommendation } from "@/lib/firestore"
 import { doc, getDoc, updateDoc, deleteField, collection, addDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
@@ -229,6 +229,40 @@ describe("Firestore", () => {
     })
   })
 
-  // Testes adicionais para as outras funções do Firestore...
-  // Por brevidade, não incluí todos os testes, mas seguiriam o mesmo padrão
+  describe("saveManualRecommendation", () => {
+    it("should save manual recommendation correctly", async () => {
+      // Configurar o mock
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+
+      const recommendationData = {
+        ticker: "PETR4",
+        recommendation: "Comprar",
+      }
+
+      await saveManualRecommendation("user123", recommendationData)
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123")
+
+      // Verificar se updateDoc foi chamado com os parâmetros corretos
+      expect(updateDoc).toHaveBeenCalledWith("userRef", {
+        "manualRecommendations.PETR4": recommendationData,
+      })
+    })
+
+    it("should throw error when updateDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      const recommendationData = {
+        ticker: "PETR4",
+        recommendation: "Comprar",
+      }
+
+      // Verificar se a função lança um erro
+      await expect(saveManualRecommendation("user123", recommendationData)).rejects.toThrow("Firestore error")
+    })
+  })
 })

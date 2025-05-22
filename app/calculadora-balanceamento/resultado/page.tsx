@@ -4,13 +4,14 @@ import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Info, AlertTriangle } from "lucide-react"
+import { ArrowLeft, Info, AlertTriangle, RefreshCw } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { useAuth } from "@/contexts/auth-context"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import { saveSimulation } from "@/lib/firestore"
 import AuthGuard from "@/components/auth-guard"
 import { LoadingState } from "@/components/ui/loading-state"
+import { Menu } from "@/components/ui/menu"
 
 interface StockAllocation {
   ticker: string
@@ -41,6 +42,7 @@ export default function ResultadoCalculadora() {
   const [savingSimulation, setSavingSimulation] = useState(false)
   const [aiRecommendation, setAiRecommendation] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {
     const calculateAllocations = async () => {
@@ -338,6 +340,18 @@ export default function ResultadoCalculadora() {
     (allocation) => allocation.isEligibleForInvestment && allocation.investmentAmount > 0,
   )
 
+  // Função para forçar a atualização da carteira
+  const handleRefreshPortfolio = async () => {
+    setIsRefreshing(true)
+    try {
+      await refreshPortfolio()
+    } catch (error) {
+      console.error("Erro ao atualizar carteira:", error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
   return (
     <AuthGuard>
       <div className="container mx-auto max-w-md">
@@ -375,6 +389,24 @@ export default function ResultadoCalculadora() {
                   Não há ativos marcados como "Comprar" que estejam abaixo do peso na sua carteira. Considere alterar
                   suas recomendações ou ajustar os percentuais META.
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshPortfolio}
+                  disabled={isRefreshing}
+                >
+                  {isRefreshing ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                      Atualizando...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-1" />
+                      Atualizar Carteira
+                    </>
+                  )}
+                </Button>
               </div>
             ) : (
               <>
@@ -568,6 +600,7 @@ export default function ResultadoCalculadora() {
           </div>
         )}
       </div>
+      <Menu />
     </AuthGuard>
   )
 }

@@ -20,8 +20,8 @@ export function RecommendationEditor({ ticker, currentRecommendation, onUpdate }
     currentRecommendation || RECOMMENDATION_TYPES[0],
   )
 
-  const handleSave = () => {
-    saveManualRecommendation(ticker, selectedRecommendation)
+  const handleSave = async () => {
+    await saveManualRecommendation(ticker, selectedRecommendation)
     onUpdate(selectedRecommendation)
     setOpen(false)
   }

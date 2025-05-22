@@ -21,6 +21,7 @@ interface StockCardProps {
   userRecommendation: string
   onEdit: () => void
   onDelete: () => void
+  onUpdateRecommendation: (ticker: string, recommendation: string) => void
 }
 
 export function StockCard({
@@ -37,6 +38,7 @@ export function StockCard({
   userRecommendation,
   onEdit,
   onDelete,
+  onUpdateRecommendation,
 }: StockCardProps) {
   // Determinar o status com base na recomendação
   const getRecommendationStatus = (recommendation: string) => {
@@ -58,6 +60,10 @@ export function StockCard({
 
   // Determinar a opacidade com base na recomendação
   const isRecommendedToBuy = userRecommendation === "Comprar"
+
+  const handleRecommendationUpdate = (newRecommendation: string) => {
+    onUpdateRecommendation(ticker, newRecommendation)
+  }
 
   return (
     <CardGlass
