@@ -65,6 +65,13 @@ export default function CalculadoraBalanceamento() {
       return
     }
 
+    // Priorizar ações mais distantes da meta
+    eligibleStocks.sort((a, b) => {
+      const diffA = a.targetPercentage - a.currentPercentage
+      const diffB = b.targetPercentage - b.currentPercentage
+      return diffB - diffA
+    })
+
     // Navegar para o resultado apenas se todas as validações passarem
     router.push(`/calculadora-balanceamento/resultado?valor=${value}`)
   }

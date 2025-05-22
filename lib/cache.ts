@@ -1,18 +1,11 @@
-// Sistema de cache simples para armazenar preços de ações
 interface CacheItem<T> {
   value: T
   timestamp: number
 }
 
-// Cache para preços de ações
 const STOCK_PRICE_CACHE_PREFIX = "stock_price_"
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutos em milissegundos
 
-/**
- * Obtém um preço de ação do cache
- * @param ticker Código da ação
- * @returns Preço da ação ou null se não estiver em cache ou expirado
- */
 export async function getCachedStockPrice(ticker: string): Promise<number | null> {
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
@@ -22,12 +15,10 @@ export async function getCachedStockPrice(ticker: string): Promise<number | null
       return null
     }
 
-    const { price, timestamp } = JSON.parse(cachedData) as CacheItem<number>
+    const { value: price, timestamp } = JSON.parse(cachedData) as CacheItem<number>
     const now = Date.now()
 
-    // Verificar se o cache expirou
     if (now - timestamp > CACHE_TTL) {
-      // Cache expirado
       localStorage.removeItem(cacheKey)
       return null
     }
@@ -39,11 +30,6 @@ export async function getCachedStockPrice(ticker: string): Promise<number | null
   }
 }
 
-/**
- * Armazena um preço de ação no cache
- * @param ticker Código da ação
- * @param price Preço da ação
- */
 export async function setCachedStockPrice(ticker: string, price: number): Promise<void> {
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
@@ -55,20 +41,14 @@ export async function setCachedStockPrice(ticker: string, price: number): Promis
     localStorage.setItem(cacheKey, JSON.stringify(cacheData))
   } catch (error) {
     console.error(`Erro ao armazenar preço em cache para ${ticker}:`, error)
-    // Falha silenciosa - não queremos que erros de cache afetem a funcionalidade principal
   }
 }
 
-/**
- * Remove um preço de ação do cache
- * @param ticker Código da ação
- */
 export async function clearStockPriceCache(ticker: string): Promise<void> {
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
     localStorage.removeItem(cacheKey)
   } catch (error) {
     console.error(`Erro ao limpar cache para ${ticker}:`, error)
-    // Falha silenciosa
   }
 }

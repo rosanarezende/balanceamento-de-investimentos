@@ -1,11 +1,14 @@
 import { POST } from "@/app/api/ai-recommendation/route"
-import { generateText } from "ai"
+import { generateText } from "@/lib/ai"
 import { jest } from "@jest/globals"
 
 // Mock do AI SDK
-jest.mock("ai", () => ({
+jest.mock("@/lib/ai", () => ({
   generateText: jest.fn(),
 }))
+
+const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>
+
 
 describe("API de Recomendação de IA", () => {
   beforeEach(() => {
@@ -31,7 +34,7 @@ describe("API de Recomendação de IA", () => {
   it("deve gerar uma recomendação usando o AI SDK", async () => {
     // Mock da resposta do AI SDK
     const mockRecommendation = "Esta é uma recomendação de teste gerada pela IA."
-    ;(generateText as jest.Mock).mockResolvedValue({
+    mockGenerateText.mockResolvedValue({
       text: mockRecommendation,
     })
 
@@ -50,16 +53,18 @@ describe("API de Recomendação de IA", () => {
 
     expect(response.status).toBe(200)
     expect(data.recommendation).toBe(mockRecommendation)
-    expect(generateText).toHaveBeenCalledWith(
+    expect(mockGenerateText).toHaveBeenCalledWith(
       expect.objectContaining({
         prompt: "Analisar esta carteira de investimentos",
+        maxTokens: 150,
+        temperature: 0.7,
       }),
     )
   })
 
   it("deve retornar erro 500 se ocorrer um erro ao gerar a recomendação", async () => {
     // Mock de erro no AI SDK
-    ;(generateText as jest.Mock).mockRejectedValue(new Error("Erro de API"))
+    mockGenerateText.mockRejectedValue(new Error("Erro de API"))
 
     const request = new Request("http://localhost:3000/api/ai-recommendation", {
       method: "POST",
