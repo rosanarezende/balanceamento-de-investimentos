@@ -11,21 +11,7 @@ import {
   setDoc,
 } from "firebase/firestore"
 import { db } from "./firebase"
-
-export interface Stock {
-  ticker: string
-  quantity: number
-  targetPercentage: number
-  userRecommendation: string
-}
-
-export interface Portfolio {
-  [ticker: string]: {
-    quantity: number
-    targetPercentage: number
-    userRecommendation: string
-  }
-}
+import type { Portfolio } from "./types"
 
 export interface SimulationAllocation {
   ticker: string

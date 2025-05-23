@@ -2,21 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/contexts/auth-context"
-import { getUserPortfolio, updateStock, removeStock, updateUserRecommendation, type Portfolio } from "@/lib/firestore"
-import { fetchStockPrice } from "@/lib/api"
+import type { StockWithDetails, Portfolio } from "@/lib/types"
+import { getUserPortfolio, updateStock, removeStock, updateUserRecommendation } from "@/lib/firestore"
 import { getPortfolioCache, setPortfolioCache, isPortfolioCacheValid } from "@/lib/client-utils/portfolio-cache"
-
-export interface StockWithDetails {
-  ticker: string
-  quantity: number
-  targetPercentage: number
-  userRecommendation: string
-  currentPrice: number
-  currentValue: number
-  currentPercentage: number
-  toBuy: number
-  excess: number
-}
+import { calculatePortfolioDetails } from "@/lib/client-utils/calculate-portfolio-details"
 
 export function usePortfolio() {
   const { user } = useAuth()
@@ -95,7 +84,7 @@ export function usePortfolio() {
   // Calcular detalhes da carteira
   useEffect(() => {
     let cancelled = false
-    async function calculatePortfolioDetails() {
+    async function runCalculatePortfolioDetails() {
       if (!user || Object.keys(portfolio).length === 0) {
         if (!cancelled) {
           setStocksWithDetails([])
@@ -107,46 +96,7 @@ export function usePortfolio() {
       setLoading(true)
       setError(null)
       try {
-        const stockPrices: Record<string, number> = {}
-        const failedStocks: string[] = []
-        const pricePromises = Object.keys(portfolio).map(async (ticker) => {
-          try {
-            const price = await fetchStockPrice(ticker)
-            return { ticker, price }
-          } catch {
-            failedStocks.push(ticker)
-            return { ticker, price: 0 }
-          }
-        })
-        const priceResults = await Promise.all(pricePromises)
-        priceResults.forEach(({ ticker, price }) => {
-          stockPrices[ticker] = price
-        })
-        const portfolioEntries: [string, { quantity: number; targetPercentage: number; userRecommendation?: string; }][]
-          = Object.entries(portfolio)
-        const totalValue = portfolioEntries.reduce((accumulator, [ticker, stockItem]) => {
-          const price = stockPrices[ticker] || 0
-          return accumulator + stockItem.quantity * price
-        }, 0)
-        const detailedStocks = portfolioEntries.map(([ticker, stock]) => {
-          const currentPrice = stockPrices[ticker] || 0
-          const currentValue = stock.quantity * currentPrice
-          const currentPercentage = totalValue > 0 ? (currentValue / totalValue) * 100 : 0
-          const targetValue = (stock.targetPercentage / 100) * totalValue
-          const toBuy = Math.max(0, targetValue - currentValue)
-          const excess = Math.max(0, currentValue - targetValue)
-          return {
-            ticker,
-            quantity: stock.quantity,
-            targetPercentage: stock.targetPercentage,
-            userRecommendation: stock.userRecommendation || "Comprar",
-            currentPrice,
-            currentValue,
-            currentPercentage,
-            toBuy,
-            excess,
-          }
-        })
+        const { detailedStocks, totalValue, failedStocks } = await calculatePortfolioDetails(portfolio)
         if (!cancelled) {
           setTotalPortfolioValue(totalValue)
           setStocksWithDetails(detailedStocks)
@@ -157,14 +107,17 @@ export function usePortfolio() {
             )
           }
         }
-      } catch (err) {
+      }
+      catch (err) {
         console.error("Erro ao calcular detalhes da carteira:", err)
         if (!cancelled) setError("Não foi possível calcular os detalhes da sua carteira. Por favor, tente novamente.")
-      } finally {
+      }
+      finally {
         if (!cancelled) setLoading(false)
       }
     }
-    calculatePortfolioDetails()
+    
+    runCalculatePortfolioDetails()
     return () => { cancelled = true }
   }, [portfolio, user])
 
@@ -360,7 +313,7 @@ export function usePortfolio() {
     lastUpdated: Date | null
   }
 
-  const result: UsePortfolioResult = {
+  return {
     portfolio,
     stocksWithDetails,
     loading,
@@ -376,7 +329,5 @@ export function usePortfolio() {
     hasEligibleStocks,
     isRefreshing,
     lastUpdated
-  }
-
-  return result
+  } as UsePortfolioResult
 }
