@@ -82,4 +82,42 @@ describe("API de Recomendação de IA", () => {
     expect(response.status).toBe(500)
     expect(data.error).toBe("Erro ao gerar recomendação")
   })
+
+  it("deve retornar erro 400 se não houver ações elegíveis para investimento", async () => {
+    const request = new Request("http://localhost:3000/api/ai-recommendation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: "Analisar esta carteira de investimentos",
+        eligibleStocks: [],
+      }),
+    })
+
+    const response = await POST(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toBe("Não há ações elegíveis para investimento")
+  })
+
+  it("deve retornar erro 400 se o valor de investimento for inválido", async () => {
+    const request = new Request("http://localhost:3000/api/ai-recommendation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: "Analisar esta carteira de investimentos",
+        investmentValue: -1000,
+      }),
+    })
+
+    const response = await POST(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toBe("Valor de investimento inválido")
+  })
 })

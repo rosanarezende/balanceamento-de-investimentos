@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, AlertTriangle, RefreshCw } from "lucide-react"
 import AuthGuard from "@/components/auth-guard"
 import { usePortfolio } from "@/hooks/use-portfolio"
+import { Menu } from "@/components/ui/menu"
 
 export default function CalculadoraBalanceamento() {
   const [investmentValue, setInvestmentValue] = useState("")
@@ -238,6 +239,7 @@ export default function CalculadoraBalanceamento() {
           </CardContent>
         </Card>
       </div>
+      <Menu />
     </AuthGuard>
   )
 }

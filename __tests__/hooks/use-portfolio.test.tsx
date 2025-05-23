@@ -266,4 +266,36 @@ describe("usePortfolio hook", () => {
     // Verificar se o portfólio foi atualizado
     expect(result.current.portfolio.PETR4.quantity).toBe(15)
   })
+
+  it("should get eligible stocks for investment", async () => {
+    const { result } = renderHook(() => usePortfolio())
+
+    // Aguardar o carregamento dos dados
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Obter ações elegíveis para investimento
+    const eligibleStocks = result.current.getEligibleStocks()
+
+    // Verificar se a ação PETR4 é elegível
+    expect(eligibleStocks).toHaveLength(1)
+    expect(eligibleStocks[0].ticker).toBe("PETR4")
+  })
+
+  it("should get underweight stocks", async () => {
+    const { result } = renderHook(() => usePortfolio())
+
+    // Aguardar o carregamento dos dados
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Obter ações abaixo do peso
+    const underweightStocks = result.current.getUnderweightStocks()
+
+    // Verificar se a ação PETR4 está abaixo do peso
+    expect(underweightStocks).toHaveLength(1)
+    expect(underweightStocks[0].ticker).toBe("PETR4")
+  })
 })

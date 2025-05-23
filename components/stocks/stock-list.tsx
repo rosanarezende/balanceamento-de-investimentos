@@ -7,7 +7,7 @@ import { StockDeleteModal } from "@/components/stocks/stock-delete-modal"
 import { SectionTitle } from "@/components/ui/section-title"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Briefcase, Plus, ArrowUpDown } from "lucide-react"
+import { Briefcase, Plus, ArrowUpDown, RefreshCw } from "lucide-react"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import { LoadingState } from "@/components/ui/loading-state"
 import type { StockWithDetails } from "@/hooks/use-portfolio"
@@ -24,7 +24,7 @@ type SortOption =
   | "recommendation"
 
 export function StockList() {
-  const { stocksWithDetails, loading, error, addOrUpdateStock, removeStockFromPortfolio } = usePortfolio()
+  const { stocksWithDetails, loading, error, addOrUpdateStock, removeStockFromPortfolio, refreshPortfolio, hasEligibleStocks } = usePortfolio()
 
   const [sortedStocks, setSortedStocks] = useState<StockWithDetails[]>([])
   const [sortOption, setSortOption] = useState<SortOption>("ticker-asc")
@@ -33,6 +33,7 @@ export function StockList() {
   const [selectedStock, setSelectedStock] = useState<StockWithDetails | null>(null)
   const [isNewStock, setIsNewStock] = useState(false)
   const [stocksWithDailyChange, setStocksWithDailyChange] = useState<StockWithDetails[]>([])
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Gere os valores aleatórios apenas uma vez, quando stocksWithDetails mudar
   useEffect(() => {
@@ -121,6 +122,20 @@ export function StockList() {
     }
   }
 
+  // Função para forçar a atualização da carteira
+  const handleRefreshPortfolio = async () => {
+    setIsRefreshing(true)
+    try {
+      await refreshPortfolio()
+    } catch (error) {
+      console.error("Erro ao atualizar carteira:", error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  console.log({ sortedStocks })
+
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
@@ -154,6 +169,17 @@ export function StockList() {
           <Button onClick={handleAddStock} className="btn-primary">
             <Plus size={16} className="mr-2" />
             Adicionar Ativo
+          </Button>
+
+          {/* Botão para atualizar a carteira manualmente */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRefreshPortfolio} 
+            disabled={isRefreshing}
+            title="Atualizar carteira"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>

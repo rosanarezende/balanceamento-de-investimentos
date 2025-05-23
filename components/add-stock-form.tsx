@@ -16,7 +16,7 @@ interface AddStockFormProps {
 }
 
 export function AddStockForm({ onAddStock }: AddStockFormProps) {
-  const { addOrUpdateStock, refreshPortfolio } = usePortfolio()
+  const { addOrUpdateStock, refreshPortfolio, hasEligibleStocks } = usePortfolio()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -151,6 +151,14 @@ export function AddStockForm({ onAddStock }: AddStockFormProps) {
           <Alert className="mb-4 bg-destructive/10 text-destructive border-destructive/50">
             <AlertTriangle className="h-4 w-4 mr-2" />
             <span>{error}</span>
+          </Alert>
+        )}
+
+        {/* Mensagem se não há ativos elegíveis */}
+        {!hasEligibleStocks && (
+          <Alert className="mb-4 bg-yellow-500/10 text-yellow-500 border-yellow-500/50">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            <span>Não há ativos elegíveis para investimento. Adicione recomendações aos seus ativos.</span>
           </Alert>
         )}
 

@@ -117,7 +117,8 @@ export default function HomePage() {
           stocksData={stocksWithDetails}
         />
 
-        <InsightsPanel insights={generateInsights()} />
+        {/* Só mostra os insights quando não está carregando */}
+        {!loading && <InsightsPanel insights={generateInsights()} />}
 
         <StockList />
       </AppShell>

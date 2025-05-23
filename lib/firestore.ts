@@ -83,6 +83,7 @@ export async function updateStock(
   },
 ): Promise<void> {
   try {
+    console.log(`Atualizando ação ${ticker} para o usuário ${userId}`, data)
     const userRef = doc(db, "users", userId)
 
     await updateDoc(userRef, {
@@ -118,6 +119,20 @@ export async function updateUserRecommendation(userId: string, ticker: string, r
     })
   } catch (error) {
     console.error(`Erro ao atualizar recomendação para ${ticker}:`, error)
+    throw error
+  }
+}
+
+// Salvar uma recomendação manual
+export async function saveManualRecommendation(userId: string, ticker: string, recommendation: string): Promise<void> {
+  try {
+    const userRef = doc(db, "users", userId)
+
+    await updateDoc(userRef, {
+      [`portfolio.${ticker}.manualRecommendation`]: recommendation,
+    })
+  } catch (error) {
+    console.error(`Erro ao salvar recomendação manual para ${ticker}:`, error)
     throw error
   }
 }

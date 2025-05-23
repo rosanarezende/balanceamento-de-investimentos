@@ -5,8 +5,10 @@ interface CacheItem<T> {
 
 const STOCK_PRICE_CACHE_PREFIX = "stock_price_"
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutos em milissegundos
+const isBrowser = typeof window !== "undefined"
 
 export async function getCachedStockPrice(ticker: string): Promise<number | null> {
+  if (!isBrowser) return null
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
     const cachedData = localStorage.getItem(cacheKey)
@@ -31,6 +33,7 @@ export async function getCachedStockPrice(ticker: string): Promise<number | null
 }
 
 export async function setCachedStockPrice(ticker: string, price: number): Promise<void> {
+  if (!isBrowser) return
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
     const cacheData: CacheItem<number> = {
@@ -45,6 +48,7 @@ export async function setCachedStockPrice(ticker: string, price: number): Promis
 }
 
 export async function clearStockPriceCache(ticker: string): Promise<void> {
+  if (!isBrowser) return
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
     localStorage.removeItem(cacheKey)

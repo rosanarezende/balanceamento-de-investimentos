@@ -89,6 +89,7 @@ describe("Calculator Flow Integration", () => {
     stocksWithDetails: mockStocksWithDetails,
     loading: false,
     error: null,
+    refreshPortfolio: jest.fn(),
   }
 
   beforeEach(() => {
@@ -123,9 +124,6 @@ describe("Calculator Flow Integration", () => {
   })
 
   it("should validate investment value", async () => {
-    // Mock do window.alert
-    const alertMock = jest.spyOn(window, "alert").mockImplementation()
-
     render(<CalculadoraBalanceamento />)
 
     // Inserir um valor inválido (zero)
@@ -135,14 +133,11 @@ describe("Calculator Flow Integration", () => {
     // Clicar no botão de calcular
     fireEvent.click(screen.getByText("Calcular"))
 
-    // Verificar se o alerta foi exibido
-    expect(alertMock).toHaveBeenCalledWith("Por favor, insira um valor válido para o aporte.")
+    // Verificar se a mensagem de erro é exibida
+    expect(screen.getByText("Por favor, insira um valor válido para o aporte.")).toBeInTheDocument()
 
     // Verificar se o router.push não foi chamado
     expect(mockRouter.push).not.toHaveBeenCalled()
-
-    // Restaurar o mock do alert
-    alertMock.mockRestore()
   })
 
   it("should display calculation results", async () => {
@@ -235,5 +230,19 @@ describe("Calculator Flow Integration", () => {
 
     // Restaurar o console.error
     consoleSpy.mockRestore()
+  })
+
+  it("should refresh portfolio", async () => {
+    render(<CalculadoraBalanceamento />)
+
+    // Verificar se o botão de atualizar carteira é exibido
+    const refreshButton = screen.getByText("Atualizar Carteira")
+    expect(refreshButton).toBeInTheDocument()
+
+    // Clicar no botão de atualizar carteira
+    fireEvent.click(refreshButton)
+
+    // Verificar se a função de atualizar carteira foi chamada
+    expect(mockPortfolioHook.refreshPortfolio).toHaveBeenCalled()
   })
 })

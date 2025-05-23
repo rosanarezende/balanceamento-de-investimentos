@@ -48,4 +48,40 @@ describe("Stock Price API", () => {
     expect(data).toHaveProperty("error")
     expect(data.error).toBe("Erro ao buscar preço")
   })
+
+  it("deve retornar erro 400 se não houver ações elegíveis para investimento", async () => {
+    const request = new NextRequest("http://localhost:3000/api/stock-price", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        eligibleStocks: [],
+      }),
+    })
+
+    const response = await GET(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toBe("Não há ações elegíveis para investimento")
+  })
+
+  it("deve retornar erro 400 se o valor de investimento for inválido", async () => {
+    const request = new NextRequest("http://localhost:3000/api/stock-price", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        investmentValue: -1000,
+      }),
+    })
+
+    const response = await GET(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toBe("Valor de investimento inválido")
+  })
 })

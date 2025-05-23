@@ -24,123 +24,78 @@ export function usePortfolio() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0)
-  const [isRefreshing, setIsRefreshing] = useState(false)  // Novo estado para controlar atualizações
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Adicionar persistência local como backup
+  // Persistência local como backup
   useEffect(() => {
-    // Quando o portfolio for carregado do Firestore, salvar no localStorage
     if (Object.keys(portfolio).length > 0) {
       localStorage.setItem('userPortfolio', JSON.stringify(portfolio))
     }
   }, [portfolio])
 
   // Carregar a carteira do usuário
-  useEffect(() => {
-    let isMounted = true
-
-    async function loadPortfolio() {
-      if (!user) {
-        if (isMounted) {
-          setLoading(false)
-          setPortfolio({})
-        }
-        return
-      }
-
-      if (isMounted) {
-        setLoading(true)
-        setError(null)
-      }
-
-      try {
-        // Tentar carregar do localStorage primeiro para feedback imediato
-        const cachedPortfolio = localStorage.getItem('userPortfolio')
-        if (cachedPortfolio && isMounted) {
-          setPortfolio(JSON.parse(cachedPortfolio))
-        }
-
-        // Então carregar do Firestore (dados mais atualizados)
-        const userPortfolio = await getUserPortfolio(user.uid)
-        if (isMounted) {
-          setPortfolio(userPortfolio || {})
-          // Atualizar o cache
-          localStorage.setItem('userPortfolio', JSON.stringify(userPortfolio))
-        }
-      } catch (error) {
-        console.error("Erro ao carregar carteira:", error)
-        if (isMounted) {
-          setError("Não foi possível carregar sua carteira. Por favor, tente novamente.")
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
-      }
+  const loadPortfolio = useCallback(async () => {
+    if (!user) {
+      setPortfolio({})
+      setLoading(false)
+      return
     }
+    setLoading(true)
+    setError(null)
+    try {
+      // Feedback imediato do cache local
+      const cachedPortfolio = localStorage.getItem('userPortfolio')
+      if (cachedPortfolio) setPortfolio(JSON.parse(cachedPortfolio))
 
-    loadPortfolio()
-
-    return () => {
-      isMounted = false
+      // Buscar do Firestore
+      const userPortfolio = await getUserPortfolio(user.uid)
+      setPortfolio(userPortfolio || {})
+      localStorage.setItem('userPortfolio', JSON.stringify(userPortfolio || {}))
+    } catch (err) {
+      setError("Não foi possível carregar sua carteira. Por favor, tente novamente.")
+    } finally {
+      setLoading(false)
     }
   }, [user])
 
-  // Calcular detalhes da carteira quando o portfolio mudar
   useEffect(() => {
-    let isMounted = true
+    loadPortfolio()
+  }, [loadPortfolio])
 
+  // Calcular detalhes da carteira
+  useEffect(() => {
+    let cancelled = false
     async function calculatePortfolioDetails() {
       if (!user || Object.keys(portfolio).length === 0) {
-        if (isMounted) {
+        if (!cancelled) {
           setStocksWithDetails([])
           setTotalPortfolioValue(0)
           setLoading(false)
         }
         return
       }
-
-      if (isMounted) {
-        setLoading(true)
-        setError(null)
-      }
-
+      setLoading(true)
+      setError(null)
       try {
-        // Buscar preços atuais para todas as ações
         const stockPrices: Record<string, number> = {}
         const failedStocks: string[] = []
-
-        // Buscar preços em paralelo para melhorar performance
         const pricePromises = Object.keys(portfolio).map(async (ticker) => {
           try {
             const price = await fetchStockPrice(ticker)
             return { ticker, price }
-          } catch (err) {
-            console.error(`Erro ao buscar preço para ${ticker}:`, err)
+          } catch {
             failedStocks.push(ticker)
             return { ticker, price: 0 }
           }
         })
-
-        // Aguardar todas as requisições de preço
         const priceResults = await Promise.all(pricePromises)
-
-        // Preencher o objeto de preços
         priceResults.forEach(({ ticker, price }) => {
           stockPrices[ticker] = price
         })
-
-        // Se alguma ação falhou, mostrar aviso mas continuar
-        if (failedStocks.length > 0) {
-          console.warn(`Não foi possível obter preços para: ${failedStocks.join(", ")}`)
-        }
-
-        // Calcular o valor total da carteira
         const totalValue = Object.entries(portfolio).reduce((total, [ticker, stock]) => {
           const price = stockPrices[ticker] || 0
           return total + stock.quantity * price
         }, 0)
-
-        // Calcular informações detalhadas para cada ação
         const detailedStocks = Object.entries(portfolio).map(([ticker, stock]) => {
           const currentPrice = stockPrices[ticker] || 0
           const currentValue = stock.quantity * currentPrice
@@ -148,7 +103,6 @@ export function usePortfolio() {
           const targetValue = (stock.targetPercentage / 100) * totalValue
           const toBuy = Math.max(0, targetValue - currentValue)
           const excess = Math.max(0, currentValue - targetValue)
-
           return {
             ticker,
             quantity: stock.quantity,
@@ -161,145 +115,104 @@ export function usePortfolio() {
             excess,
           }
         })
-
-        if (isMounted) {
+        if (!cancelled) {
           setTotalPortfolioValue(totalValue)
           setStocksWithDetails(detailedStocks)
+          // Notificar usuário se algum preço falhou
+          if (failedStocks.length > 0) {
+            setError(
+              `Não foi possível atualizar o preço de ${failedStocks.length === 1 ? 'um ativo' : failedStocks.length + ' ativos'}: ${failedStocks.join(', ')}. Os valores podem estar desatualizados.`
+            )
+          }
         }
-      } catch (error) {
-        console.error("Erro ao calcular detalhes da carteira:", error)
-        if (isMounted) {
-          setError("Não foi possível calcular os detalhes da sua carteira. Por favor, tente novamente.")
-        }
+      } catch (err) {
+        if (!cancelled) setError("Não foi possível calcular os detalhes da sua carteira. Por favor, tente novamente.")
       } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
+        if (!cancelled) setLoading(false)
       }
     }
-
     calculatePortfolioDetails()
-
-    return () => {
-      isMounted = false
-    }
+    return () => { cancelled = true }
   }, [portfolio, user])
 
   // Adicionar ou atualizar uma ação
   const addOrUpdateStock = useCallback(
     async (ticker: string, quantity: number, targetPercentage: number, userRecommendation = "Comprar") => {
       if (!user) return
-
+      setLoading(true)
+      setError(null)
       try {
-        // Atualizar no Firestore
-        await updateStock(user.uid, ticker, {
-          quantity,
-          targetPercentage,
-          userRecommendation,
-        })
-
-        // Atualizar o estado local
-        setPortfolio((prev) => ({
-          ...prev,
-          [ticker]: {
-            quantity,
-            targetPercentage,
-            userRecommendation,
-          },
-        }))
-        
-        // Aguardar o próximo ciclo de renderização
-        await new Promise(resolve => setTimeout(resolve, 50))
-        
+        await updateStock(user.uid, ticker, { quantity, targetPercentage, userRecommendation })
+        await loadPortfolio() // Sempre recarrega do Firestore após alteração
         return true
-      } catch (error) {
-        console.error(`Erro ao adicionar/atualizar ação ${ticker}:`, error)
-        throw error
+      } catch (err) {
+        setError(`Erro ao adicionar/atualizar ação ${ticker}.`)
+        throw err
+      } finally {
+        setLoading(false)
       }
     },
-    [user],
+    [user, loadPortfolio]
   )
 
   // Remover uma ação
   const removeStockFromPortfolio = useCallback(
     async (ticker: string) => {
       if (!user) return
-
+      setLoading(true)
+      setError(null)
       try {
         await removeStock(user.uid, ticker)
-
-        // Atualizar o estado local
-        setPortfolio((prev) => {
-          const newPortfolio = { ...prev }
-          delete newPortfolio[ticker]
-          return newPortfolio
-        })
-      } catch (error) {
-        console.error(`Erro ao remover ação ${ticker}:`, error)
-        throw error
+        await loadPortfolio()
+      } catch (err) {
+        setError(`Erro ao remover ação ${ticker}.`)
+        throw err
+      } finally {
+        setLoading(false)
       }
     },
-    [user],
+    [user, loadPortfolio]
   )
 
-  // Atualizar a recomendação do usuário
+  // Atualizar recomendação
   const updateRecommendation = useCallback(
     async (ticker: string, recommendation: string) => {
       if (!user) return
-
+      setLoading(true)
+      setError(null)
       try {
         await updateUserRecommendation(user.uid, ticker, recommendation)
-
-        // Atualizar o estado local
-        setPortfolio((prev) => ({
-          ...prev,
-          [ticker]: {
-            ...prev[ticker],
-            userRecommendation: recommendation,
-          },
-        }))
-      } catch (error) {
-        console.error(`Erro ao atualizar recomendação para ${ticker}:`, error)
-        throw error
+        await loadPortfolio()
+      } catch (err) {
+        setError(`Erro ao atualizar recomendação para ${ticker}.`)
+        throw err
+      } finally {
+        setLoading(false)
       }
     },
-    [user],
+    [user, loadPortfolio]
   )
 
-  // Função para forçar a atualização dos dados da carteira
+  // Forçar atualização
   const refreshPortfolio = useCallback(async () => {
     if (!user || isRefreshing) return
-
     setIsRefreshing(true)
     setLoading(true)
     setError(null)
-
     try {
-      const userPortfolio = await getUserPortfolio(user.uid)
-      setPortfolio(userPortfolio || {})
-
-      // Aguardar o próximo ciclo de renderização para garantir que o estado foi atualizado
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
-      return userPortfolio
-    } catch (error) {
-      console.error("Erro ao atualizar carteira:", error)
-      setError("Não foi possível atualizar sua carteira. Por favor, tente novamente.")
+      await loadPortfolio()
     } finally {
       setLoading(false)
       setIsRefreshing(false)
     }
-  }, [user, isRefreshing])
+  }, [user, isRefreshing, loadPortfolio])
 
-  // Adicionar método para verificar ativos elegíveis
-  const getEligibleStocks = (recommendation = "Comprar") => {
-    return stocksWithDetails.filter(stock => stock.userRecommendation === recommendation)
-  }
+  // Métodos utilitários
+  const getEligibleStocks = (recommendation = "Comprar") =>
+    stocksWithDetails.filter(stock => stock.userRecommendation === recommendation)
 
-  // Adicionar método para verificar se há ativos abaixo do peso
-  const getUnderweightStocks = () => {
-    return stocksWithDetails.filter(stock => stock.currentPercentage < stock.targetPercentage)
-  }
+  const getUnderweightStocks = () =>
+    stocksWithDetails.filter(stock => stock.currentPercentage < stock.targetPercentage)
 
   return {
     portfolio,
