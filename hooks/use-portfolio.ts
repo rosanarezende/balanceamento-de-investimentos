@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { getUserPortfolio, updateStock, removeStock, updateUserRecommendation, type Portfolio } from "@/lib/firestore"
 import { fetchStockPrice } from "@/lib/api"
+import { getPortfolioCache, setPortfolioCache, isPortfolioCacheValid } from "@/lib/client-utils/portfolio-cache"
 
 export interface StockWithDetails {
   ticker: string
@@ -30,10 +31,22 @@ export function usePortfolio() {
   // Persistência local como backup
   useEffect(() => {
     if (Object.keys(portfolio).length > 0) {
-      localStorage.setItem('userPortfolio', JSON.stringify(portfolio))
-      localStorage.setItem('portfolioLastUpdated', new Date().toISOString())
+      setPortfolioCache(portfolio)
     }
   }, [portfolio])
+
+  // Função utilitária para verificar e usar cache local
+  function tryUseRecentCache(): boolean {
+    const cache = getPortfolioCache()
+    const isValidCache = cache && isPortfolioCacheValid(cache.lastUpdated)
+    if (isValidCache) {
+      setPortfolio(cache.portfolio)
+      setLastUpdated(cache.lastUpdated)
+      setLoading(false)
+      return true // Cache usado
+    }
+    return false // Cache não usado
+  }
 
   // Carregar a carteira do usuário
   const loadPortfolio = useCallback(async () => {
@@ -42,50 +55,32 @@ export function usePortfolio() {
       setLoading(false)
       return
     }
+
     setLoading(true)
     setError(null)
+    
     try {
       // Feedback imediato do cache local
-      const cachedPortfolio = localStorage.getItem('userPortfolio')
-      if (cachedPortfolio) {
-        const parsedPortfolio = JSON.parse(cachedPortfolio)
-        setPortfolio(parsedPortfolio)
-        
-        // Verificar se o cache é recente (menos de 5 minutos)
-        const lastUpdatedStr = localStorage.getItem('portfolioLastUpdated')
-        if (lastUpdatedStr) {
-          const lastUpdated = new Date(lastUpdatedStr)
-          const now = new Date()
-          const diffMinutes = (now.getTime() - lastUpdated.getTime()) / (1000 * 60)
-          
-          // Se o cache for recente, podemos usá-lo temporariamente enquanto buscamos dados atualizados
-          if (diffMinutes < 5) {
-            setLastUpdated(lastUpdated)
-          }
-        }
-      }
+      if (tryUseRecentCache()) return // Não busca do Firestore/API se cache é recente
 
-      // Buscar do Firestore (sempre busca para garantir dados atualizados)
+      // Se não há cache ou está velho, busca do Firestore
       const userPortfolio = await getUserPortfolio(user.uid)
-      
       if (userPortfolio) {
         setPortfolio(userPortfolio)
-        localStorage.setItem('userPortfolio', JSON.stringify(userPortfolio))
+        setPortfolioCache(userPortfolio)
+        
         const now = new Date()
-        localStorage.setItem('portfolioLastUpdated', now.toISOString())
         setLastUpdated(now)
-      } else if (Object.keys(portfolio).length === 0) {
-        // Se não há dados no Firestore e não temos cache, definir como objeto vazio
+      } else {
         setPortfolio({})
       }
     } catch (err) {
       console.error("Erro ao carregar carteira:", err)
       setError("Não foi possível carregar sua carteira. Por favor, tente novamente.")
-      
       // Se temos dados em cache, mantemos eles mesmo com erro
-      const cachedPortfolio = localStorage.getItem('userPortfolio')
-      if (cachedPortfolio && Object.keys(portfolio).length === 0) {
-        setPortfolio(JSON.parse(cachedPortfolio))
+      const cachedPortfolio = getPortfolioCache()
+      if (cachedPortfolio) {
+        setPortfolio(cachedPortfolio.portfolio)
       }
     } finally {
       setLoading(false)
@@ -128,8 +123,8 @@ export function usePortfolio() {
           stockPrices[ticker] = price
         })
         const portfolioEntries: [string, { quantity: number; targetPercentage: number; userRecommendation?: string; }][]
-         = Object.entries(portfolio)
-        const totalValue = portfolioEntries.reduce( (accumulator, [ticker, stockItem]) => {
+          = Object.entries(portfolio)
+        const totalValue = portfolioEntries.reduce((accumulator, [ticker, stockItem]) => {
           const price = stockPrices[ticker] || 0
           return accumulator + stockItem.quantity * price
         }, 0)
@@ -177,47 +172,47 @@ export function usePortfolio() {
   const addOrUpdateStock = useCallback(
     async (ticker: string, quantity: number, targetPercentage: number, userRecommendation = "Comprar") => {
       if (!user) return false
-      
+
       setLoading(true)
       setError(null)
-      
+
       // Implementação com retry
       const maxRetries = 3
       let retryCount = 0
       let success = false
-      
+
       while (retryCount < maxRetries && !success) {
         try {
           // Atualizar no Firestore
           await updateStock(user.uid, ticker, { quantity, targetPercentage, userRecommendation })
-          
+
           // Atualizar cache local imediatamente para feedback rápido
-            setPortfolio((prev: Portfolio): Portfolio => ({
+          setPortfolio((prev: Portfolio): Portfolio => ({
             ...prev,
             [ticker]: { quantity, targetPercentage, userRecommendation }
-            }))
-          
+          }))
+
           // Forçar recarga completa dos dados
           await loadPortfolio()
-          
+
           success = true
           return true
         } catch (err) {
           console.error(`Tentativa ${retryCount + 1} falhou ao adicionar/atualizar ação ${ticker}:`, err)
           retryCount++
-          
+
           // Esperar antes de tentar novamente (backoff exponencial)
           if (retryCount < maxRetries) {
             await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)))
           }
         }
       }
-      
+
       if (!success) {
         setError(`Erro ao adicionar/atualizar ação ${ticker} após ${maxRetries} tentativas.`)
         throw new Error(`Falha ao adicionar/atualizar ação ${ticker}`)
       }
-      
+
       setLoading(false)
       return success
     },
@@ -228,20 +223,20 @@ export function usePortfolio() {
   const removeStockFromPortfolio = useCallback(
     async (ticker: string) => {
       if (!user) return false
-      
+
       setLoading(true)
       setError(null)
-      
+
       try {
         await removeStock(user.uid, ticker)
-        
+
         // Atualizar cache local imediatamente
         setPortfolio((prev: Portfolio): Portfolio => {
           const newPortfolio: Portfolio = { ...prev }
           delete newPortfolio[ticker]
           return newPortfolio
         })
-        
+
         // Forçar recarga completa
         await loadPortfolio()
         return true
@@ -260,17 +255,17 @@ export function usePortfolio() {
   const updateRecommendation = useCallback(
     async (ticker: string, recommendation: string) => {
       if (!user) return false
-      
+
       setLoading(true)
       setError(null)
-      
+
       try {
         await updateUserRecommendation(user.uid, ticker, recommendation)
-        
+
         // Atualizar cache local imediatamente
         setPortfolio((prev: Portfolio) => {
           if (!prev[ticker]) return prev
-          
+
           return {
             ...prev,
             [ticker]: {
@@ -279,7 +274,7 @@ export function usePortfolio() {
             }
           }
         })
-        
+
         // Forçar recarga completa
         await loadPortfolio()
         return true
@@ -297,11 +292,11 @@ export function usePortfolio() {
   // Forçar atualização com proteção contra chamadas simultâneas
   const refreshPortfolio = useCallback(async () => {
     if (!user || isRefreshing) return null
-    
+
     setIsRefreshing(true)
     setLoading(true)
     setError(null)
-    
+
     try {
       await loadPortfolio()
       return portfolio
@@ -337,8 +332,8 @@ export function usePortfolio() {
     [stocksWithDetails]
   )
 
-  const hasEligibleStocks: boolean = 
-     stocksWithDetails.some((stock: StockWithDetails) => stock.userRecommendation === "Comprar")
+  const hasEligibleStocks: boolean =
+    stocksWithDetails.some((stock: StockWithDetails) => stock.userRecommendation === "Comprar")
 
   const hasStocks: boolean = stocksWithDetails.length > 0
 

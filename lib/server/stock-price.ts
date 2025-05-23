@@ -1,4 +1,4 @@
-import { getCachedStockPrice, setCachedStockPrice } from "@/lib/cache"
+import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
 
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo"
 
