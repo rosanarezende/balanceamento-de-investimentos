@@ -1,5 +1,4 @@
-import { Portfolio } from "@/lib/firestore"
-
+import type { Portfolio } from "@/lib/types"
 
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutos em milissegundos
 const PORTFOLIO_CACHE_KEY = "userPortfolio"
