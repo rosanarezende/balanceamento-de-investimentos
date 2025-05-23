@@ -90,7 +90,7 @@ export function usePortfolio() {
     } finally {
       setLoading(false)
     }
-  }, [user, portfolio])
+  }, [user])
 
   // Carregar a carteira ao inicializar
   useEffect(() => {
@@ -127,11 +127,13 @@ export function usePortfolio() {
         priceResults.forEach(({ ticker, price }) => {
           stockPrices[ticker] = price
         })
-        const totalValue = Object.entries(portfolio).reduce((total, [ticker, stock]) => {
+        const portfolioEntries: [string, { quantity: number; targetPercentage: number; userRecommendation?: string; }][]
+         = Object.entries(portfolio)
+        const totalValue = portfolioEntries.reduce( (accumulator, [ticker, stockItem]) => {
           const price = stockPrices[ticker] || 0
-          return total + stock.quantity * price
+          return accumulator + stockItem.quantity * price
         }, 0)
-        const detailedStocks = Object.entries(portfolio).map(([ticker, stock]) => {
+        const detailedStocks = portfolioEntries.map(([ticker, stock]) => {
           const currentPrice = stockPrices[ticker] || 0
           const currentValue = stock.quantity * currentPrice
           const currentPercentage = totalValue > 0 ? (currentValue / totalValue) * 100 : 0
@@ -190,10 +192,10 @@ export function usePortfolio() {
           await updateStock(user.uid, ticker, { quantity, targetPercentage, userRecommendation })
           
           // Atualizar cache local imediatamente para feedback rápido
-          setPortfolio(prev => ({
+            setPortfolio((prev: Portfolio): Portfolio => ({
             ...prev,
             [ticker]: { quantity, targetPercentage, userRecommendation }
-          }))
+            }))
           
           // Forçar recarga completa dos dados
           await loadPortfolio()
@@ -234,8 +236,8 @@ export function usePortfolio() {
         await removeStock(user.uid, ticker)
         
         // Atualizar cache local imediatamente
-        setPortfolio(prev => {
-          const newPortfolio = { ...prev }
+        setPortfolio((prev: Portfolio): Portfolio => {
+          const newPortfolio: Portfolio = { ...prev }
           delete newPortfolio[ticker]
           return newPortfolio
         })
@@ -266,7 +268,7 @@ export function usePortfolio() {
         await updateUserRecommendation(user.uid, ticker, recommendation)
         
         // Atualizar cache local imediatamente
-        setPortfolio(prev => {
+        setPortfolio((prev: Portfolio) => {
           if (!prev[ticker]) return prev
           
           return {
@@ -313,17 +315,57 @@ export function usePortfolio() {
   }, [user, isRefreshing, loadPortfolio, portfolio])
 
   // Métodos utilitários
-  const getEligibleStocks = useCallback((recommendation = "Comprar") => 
-    stocksWithDetails.filter(stock => stock.userRecommendation === recommendation),
+  interface GetEligibleStocks {
+    (recommendation?: string): StockWithDetails[]
+  }
+
+  const getEligibleStocks: GetEligibleStocks = useCallback(
+    (recommendation = "Comprar") =>
+      stocksWithDetails.filter((stock: StockWithDetails) => stock.userRecommendation === recommendation),
     [stocksWithDetails]
   )
 
-  const getUnderweightStocks = useCallback(() => 
-    stocksWithDetails.filter(stock => stock.currentPercentage < stock.targetPercentage),
+  interface GetUnderweightStocks {
+    (): StockWithDetails[]
+  }
+
+  const getUnderweightStocks: GetUnderweightStocks = useCallback(
+    () =>
+      stocksWithDetails.filter(
+        (stock: StockWithDetails) => stock.currentPercentage < stock.targetPercentage
+      ),
     [stocksWithDetails]
   )
 
-  return {
+  const hasEligibleStocks: boolean = 
+     stocksWithDetails.some((stock: StockWithDetails) => stock.userRecommendation === "Comprar")
+
+  const hasStocks: boolean = stocksWithDetails.length > 0
+
+  interface UsePortfolioResult {
+    portfolio: Portfolio
+    stocksWithDetails: StockWithDetails[]
+    loading: boolean
+    error: string | null
+    totalPortfolioValue: number
+    addOrUpdateStock: (
+      ticker: string,
+      quantity: number,
+      targetPercentage: number,
+      userRecommendation?: string
+    ) => Promise<boolean>
+    removeStockFromPortfolio: (ticker: string) => Promise<boolean>
+    updateRecommendation: (ticker: string, recommendation: string) => Promise<boolean>
+    refreshPortfolio: () => Promise<Portfolio | null>
+    getEligibleStocks: (recommendation?: string) => StockWithDetails[]
+    getUnderweightStocks: () => StockWithDetails[]
+    hasStocks: boolean
+    hasEligibleStocks: boolean
+    isRefreshing: boolean
+    lastUpdated: Date | null
+  }
+
+  const result: UsePortfolioResult = {
     portfolio,
     stocksWithDetails,
     loading,
@@ -335,9 +377,11 @@ export function usePortfolio() {
     refreshPortfolio,
     getEligibleStocks,
     getUnderweightStocks,
-    hasStocks: stocksWithDetails.length > 0,
-    hasEligibleStocks: stocksWithDetails.some(stock => stock.userRecommendation === "Comprar"),
+    hasStocks,
+    hasEligibleStocks,
     isRefreshing,
     lastUpdated
   }
+
+  return result
 }
