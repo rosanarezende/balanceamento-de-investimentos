@@ -134,6 +134,11 @@ export function StockList() {
     }
   }
 
+  // P0149: Add useEffect to refresh portfolio on component mount
+  useEffect(() => {
+    refreshPortfolio()
+  }, [refreshPortfolio])
+
   console.log({ sortedStocks })
 
   return (

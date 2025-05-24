@@ -67,6 +67,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     loadTheme()
   }, [user])
 
+  // Fetch user preferences on component mount
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      if (user) {
+        try {
+          const userPreferences = await getUserPreferences(user.uid)
+          if (userPreferences && userPreferences.theme) {
+            setTheme(userPreferences.theme)
+            applyTheme(userPreferences.theme)
+          }
+        } catch (error) {
+          console.error("Erro ao buscar preferências do usuário:", error)
+        }
+      }
+    }
+
+    fetchUserPreferences()
+  }, [user])
+
   const applyTheme = (newTheme: Theme) => {
     // Verificar se estamos no navegador
     if (typeof document === "undefined") return

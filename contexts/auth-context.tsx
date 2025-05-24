@@ -68,6 +68,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  useEffect(() => {
+    // Fetch user data on component mount
+    if (user) {
+      // Fetch user data logic here
+    }
+  }, [user])
+
   const clearError = () => {
     setError(null)
   }

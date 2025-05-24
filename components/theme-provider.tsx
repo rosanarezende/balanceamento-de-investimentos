@@ -8,7 +8,11 @@ import {
 import { useTheme } from '@/contexts/theme-context'
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  const { theme } = useTheme()
+  const { theme, fetchUserPreferences } = useTheme()
+
+  React.useEffect(() => {
+    fetchUserPreferences()
+  }, [fetchUserPreferences])
 
   return (
     <NextThemesProvider {...props} attribute="class" defaultTheme={theme}>
