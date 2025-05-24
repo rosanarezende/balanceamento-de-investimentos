@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation"
 import AuthGuard from "@/components/auth-guard"
 import { useAuth } from "@/contexts/auth-context"
 import { usePreviewAuth } from "@/contexts/preview-auth-context"
+import { useTheme } from "@/contexts/theme-context"
 
 // Mock do useRouter
 jest.mock("next/navigation", () => ({
@@ -17,6 +18,11 @@ jest.mock("@/contexts/auth-context", () => ({
 // Mock do usePreviewAuth
 jest.mock("@/contexts/preview-auth-context", () => ({
   usePreviewAuth: jest.fn(),
+}))
+
+// Mock do useTheme
+jest.mock("@/contexts/theme-context", () => ({
+  useTheme: jest.fn(),
 }))
 
 describe("AuthGuard", () => {
@@ -136,5 +142,30 @@ describe("AuthGuard", () => {
     await waitFor(() => {
       expect(screen.getByText(/carregando/i)).toBeInTheDocument()
     })
+  })
+
+  it("should toggle theme when toggleTheme is called", async () => {
+    const mockToggleTheme = jest.fn()
+    ;(useTheme as jest.Mock).mockReturnValue({
+      theme: "light",
+      toggleTheme: mockToggleTheme,
+    })
+
+    render(
+      <AuthGuard>
+        <div data-testid="protected-content">Protected Content</div>
+      </AuthGuard>,
+    )
+
+    // Verificar se o conteúdo protegido foi renderizado
+    expect(screen.getByTestId("protected-content")).toBeInTheDocument()
+
+    // Verificar se o redirecionamento não foi chamado
+    expect(mockPush).not.toHaveBeenCalled()
+
+    // Verificar se o tema é alternado
+    const toggleButton = screen.getByTitle("Alternar tema")
+    toggleButton.click()
+    expect(mockToggleTheme).toHaveBeenCalled()
   })
 })

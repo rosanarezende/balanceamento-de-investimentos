@@ -245,4 +245,30 @@ describe("Calculator Flow Integration", () => {
     // Verificar se a função de atualizar carteira foi chamada
     expect(mockPortfolioHook.refreshPortfolio).toHaveBeenCalled()
   })
+
+  it("should handle API error in fetchStockPrice", async () => {
+    // Configurar mockSearchParams para retornar valor de investimento
+    mockSearchParams.get.mockReturnValue("1000")
+
+    // Configurar usePortfolio para lançar um erro durante a chamada da API
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation()
+
+    render(<ResultadoCalculadora />)
+
+    // Simular um erro durante a chamada da API
+    const error = new Error("Erro de API")
+    consoleSpy.mockImplementationOnce(() => {
+      throw error
+    })
+
+    // Verificar se a mensagem de erro é exibida
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Não foi possível obter os preços das ações. Por favor, tente novamente."),
+      ).toBeInTheDocument()
+    })
+
+    // Restaurar o console.error
+    consoleSpy.mockRestore()
+  })
 }

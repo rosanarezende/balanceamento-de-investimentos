@@ -11,6 +11,7 @@ import AuthGuard from "@/components/auth-guard"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import { Alert } from "@/components/ui/alert"
 import { AppShell } from "@/components/layout/app-shell"
+import { useTheme } from "@/contexts/theme-context"
 
 export default function CalculadoraBalanceamento() {
   const [investmentValue, setInvestmentValue] = useState("")
@@ -146,6 +147,8 @@ export default function CalculadoraBalanceamento() {
     }).format(lastUpdated)
     : null;
 
+  const { theme, toggleTheme } = useTheme()
+
   return (
     <AuthGuard>
       <AppShell>
@@ -168,6 +171,15 @@ export default function CalculadoraBalanceamento() {
                 className="ml-2"
               >
                 <RefreshCw className={`h-4 w-4 ${isRefreshing || portfolioLoading ? 'animate-spin' : ''}`} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                title="Alternar tema"
+                className="ml-2"
+              >
+                {theme === 'dark' ? '🌙' : '☀️'}
               </Button>
             </div>
 
