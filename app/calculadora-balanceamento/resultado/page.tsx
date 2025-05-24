@@ -11,7 +11,6 @@ import { usePortfolio } from "@/hooks/use-portfolio"
 import { saveSimulation } from "@/lib/firestore"
 import AuthGuard from "@/components/auth-guard"
 import { LoadingState } from "@/components/ui/loading-state"
-import { Menu } from "@/components/ui/menu"
 
 interface StockAllocation {
   ticker: string
@@ -43,6 +42,7 @@ export default function ResultadoCalculadora() {
   const [aiRecommendation, setAiRecommendation] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [triedRefresh, setTriedRefresh] = useState(false)
 
   useEffect(() => {
     const calculateAllocations = async () => {
@@ -57,19 +57,13 @@ export default function ResultadoCalculadora() {
 
       // Verificar se há ativos na carteira
       if (stocksWithDetails.length === 0) {
-        try {
-          await refreshPortfolio()
-
+        if (!triedRefresh) {
+          setError("Você precisa atualizar sua carteira antes de usar a calculadora.")
+        } else {
           setError("Você precisa adicionar ativos à sua carteira antes de usar a calculadora.")
-          setLoading(false)
-          return
-        } 
-        catch (error) {
-          console.error("Erro ao atualizar carteira:", error)
-          setError("Não foi possível carregar sua carteira. Por favor, tente novamente.")
-          setLoading(false)
-          return
         }
+        setLoading(false)
+        return
       }
 
       // Verificar se há ativos elegíveis para investimento
@@ -221,19 +215,11 @@ export default function ResultadoCalculadora() {
       }
     }
 
-    // Só calcular se houver ativos ou se estiver carregando
-    if (stocksWithDetails.length > 0 || portfolioLoading) {
+    // Só calcular se houver ativos e não estiver carregando
+    if (stocksWithDetails.length > 0 && !portfolioLoading) {
       calculateAllocations()
-    } else {
-      // Tentar atualizar a carteira uma vez
-      refreshPortfolio().then(() => {
-        if (stocksWithDetails.length === 0) {
-          setError("Você precisa adicionar ativos à sua carteira antes de usar a calculadora.")
-          setLoading(false)
-        }
-      })
     }
-  }, [stocksWithDetails, searchParams, router, portfolioLoading, refreshPortfolio])
+  }, [stocksWithDetails, searchParams, router, portfolioLoading, triedRefresh])
 
   // Função para gerar recomendação de IA
   const generateAiRecommendation = async (
@@ -343,10 +329,13 @@ export default function ResultadoCalculadora() {
   // Função para forçar a atualização da carteira
   const handleRefreshPortfolio = async () => {
     setIsRefreshing(true)
+    setTriedRefresh(true)
+    setError(null)
     try {
       await refreshPortfolio()
     } catch (error) {
       console.error("Erro ao atualizar carteira:", error)
+      setError("Não foi possível atualizar a carteira. Por favor, tente novamente.")
     } finally {
       setIsRefreshing(false)
     }
@@ -600,7 +589,6 @@ export default function ResultadoCalculadora() {
           </div>
         )}
       </div>
-      <Menu />
     </AuthGuard>
   )
 }
