@@ -364,3 +364,16 @@ export async function saveStockToDatabase(stock: {
     throw error
   }
 }
+
+// Verificar se a ação existe no Firestore
+export async function verifyStockExists(ticker: string): Promise<boolean> {
+  try {
+    const stockRef = doc(db, "stocks", ticker)
+    const stockDoc = await getDoc(stockRef)
+
+    return stockDoc.exists()
+  } catch (error) {
+    console.error(`Erro ao verificar se a ação ${ticker} existe:`, error)
+    throw error
+  }
+}

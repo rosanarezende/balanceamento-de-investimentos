@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
 import { AppShell } from "@/components/layout/app-shell"
-import { saveStockToDatabase } from "@/lib/firestore"
-import { validateUserInput } from "@/lib/firestore"
+import { saveStockToDatabase, validateUserInput, verifyStockExists } from "@/lib/firestore"
 
 // Tipo para representar uma ação na carteira
 interface Stock {
@@ -57,7 +56,7 @@ export default function EditarAtivos() {
     }
   }
 
-  const handleStockChange = (index: number, field: keyof Stock, value: string) => {
+  const handleStockChange = async (index: number, field: keyof Stock, value: string) => {
     const updatedStocks = [...stocks]
 
     if (field === "ticker") {
@@ -69,6 +68,13 @@ export default function EditarAtivos() {
     }
 
     setStocks(updatedStocks)
+
+    try {
+      await saveStockToDatabase(updatedStocks[index])
+    } catch (err) {
+      console.error("Erro ao salvar ação no banco de dados:", err)
+      setError("Ocorreu um erro ao salvar a ação. Por favor, tente novamente.")
+    }
   }
 
   const handleRemoveStock = (index: number) => {
@@ -91,7 +97,7 @@ export default function EditarAtivos() {
     setNewStock(updatedNewStock)
   }
 
-  const handleAddStock = () => {
+  const handleAddStock = async () => {
     if (!newStock.ticker) {
       setError("Por favor, insira o código do ativo.")
       return
@@ -103,6 +109,12 @@ export default function EditarAtivos() {
     }
 
     try {
+      const stockExists = await verifyStockExists(newStock.ticker)
+      if (!stockExists) {
+        setError("O ativo não existe.")
+        return
+      }
+
       validateUserInput(newStock)
       setStocks([...stocks, newStock])
       setNewStock({ ticker: "", quantity: 0, targetPercentage: 0 })

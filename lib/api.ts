@@ -73,3 +73,18 @@ export async function fetchDailyChange(ticker: string): Promise<{ change: number
     changePercentage: data.changePercentage,
   }
 }
+
+export async function verifyStockExists(ticker: string): Promise<boolean> {
+  const response = await fetch(`/api/stock-exists?ticker=${ticker}`)
+
+  if (!response.ok) {
+    throw new Error(`Erro ao verificar existência do ativo: ${response.status}`)
+  }
+
+  const data = await response.json()
+  if (!data || typeof data.exists !== "boolean") {
+    throw new Error("Dados inválidos recebidos da API")
+  }
+
+  return data.exists
+}
