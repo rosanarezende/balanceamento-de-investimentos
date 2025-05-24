@@ -364,3 +364,5 @@ export async function saveStockToDatabase(stock: {
     throw error
   }
 }
+
+export { saveStockToDatabase }

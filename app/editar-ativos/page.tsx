@@ -252,6 +252,13 @@ export default function EditarAtivos() {
           <Save className="mr-2 h-4 w-4" />
           SALVAR ALTERAÇÕES
         </Button>
+
+        <div className="mt-4">
+          <Button className="w-full" size="lg" onClick={() => router.push("/editar-ativos")}>
+            <Save className="mr-2 h-4 w-4" />
+            Acessar Edição de Ativos
+          </Button>
+        </div>
       </div>
     </AppShell>
   )
