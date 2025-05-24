@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event"
 import { AuthProvider, useAuth } from "@/contexts/auth-context"
 import { auth, googleProvider } from "@/lib/firebase"
 import { signInWithPopup, signOut } from "firebase/auth"
+import { doc, getDoc, setDoc } from "firebase/firestore"
 
 // Mock do Firebase Auth
 jest.mock("@/lib/firebase", () => ({
@@ -161,5 +162,51 @@ describe("AuthContext", () => {
 
     // Verificar se o erro foi limpo
     expect(screen.getByTestId("error").textContent).toBe("No Error")
+  })
+
+  it("should create a new user document if it does not exist", async () => {
+    // Mock de usuário autenticado
+    const mockUser = { uid: "123", email: "test@example.com", displayName: "Test User" }
+
+    // Configurar o mock para simular login bem-sucedido
+    ;(signInWithPopup as jest.Mock).mockResolvedValueOnce({
+      user: mockUser,
+    })
+
+    // Configurar o mock para simular que o documento do usuário não existe
+    ;(getDoc as jest.Mock).mockResolvedValueOnce({
+      exists: () => false,
+    })
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("loading").textContent).toBe("Not Loading")
+    })
+
+    // Clicar no botão de login
+    await act(async () => {
+      userEvent.click(screen.getByTestId("login-btn"))
+    })
+
+    // Verificar se signInWithPopup foi chamado
+    expect(signInWithPopup).toHaveBeenCalledWith(auth, googleProvider)
+
+    // Verificar se setDoc foi chamado para criar um novo documento de usuário
+    await waitFor(() => {
+      expect(setDoc).toHaveBeenCalledWith(expect.anything(), {
+        email: mockUser.email,
+        displayName: mockUser.displayName,
+        portfolio: {},
+        watchlist: {},
+        preferences: {
+          theme: "dark",
+        },
+      })
+    })
   })
 })

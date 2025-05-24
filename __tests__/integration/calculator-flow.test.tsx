@@ -245,4 +245,4 @@ describe("Calculator Flow Integration", () => {
     // Verificar se a função de atualizar carteira foi chamada
     expect(mockPortfolioHook.refreshPortfolio).toHaveBeenCalled()
   })
-})
+}
