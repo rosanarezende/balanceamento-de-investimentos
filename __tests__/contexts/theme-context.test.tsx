@@ -156,4 +156,42 @@ describe("ThemeContext", () => {
     // Verificar se a classe "dark" foi adicionada ao documento
     expect(document.documentElement.classList.contains("dark")).toBe(true)
   })
+
+  it("should support consistent light/dark themes", async () => {
+    render(
+      <ThemeProvider>
+        <TestComponent />
+      </ThemeProvider>,
+    )
+
+    // Verificar se o tema padrão é "dark"
+    await waitFor(() => {
+      expect(screen.getByTestId("theme").textContent).toBe("dark")
+    })
+
+    // Verificar se a classe "dark" foi adicionada ao documento
+    expect(document.documentElement.classList.contains("dark")).toBe(true)
+
+    // Clicar no botão de alternar tema
+    await act(async () => {
+      userEvent.click(screen.getByTestId("toggle-btn"))
+    })
+
+    // Verificar se o tema foi alterado para "light"
+    expect(screen.getByTestId("theme").textContent).toBe("light")
+
+    // Verificar se a classe "dark" foi removida do documento
+    expect(document.documentElement.classList.contains("dark")).toBe(false)
+
+    // Clicar novamente no botão de alternar tema
+    await act(async () => {
+      userEvent.click(screen.getByTestId("toggle-btn"))
+    })
+
+    // Verificar se o tema foi alterado de volta para "dark"
+    expect(screen.getByTestId("theme").textContent).toBe("dark")
+
+    // Verificar se a classe "dark" foi adicionada ao documento
+    expect(document.documentElement.classList.contains("dark")).toBe(true)
+  })
 })
