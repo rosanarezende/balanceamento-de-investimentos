@@ -1,16 +1,24 @@
+import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
+
 export async function fetchStockPrice(ticker: string): Promise<number> {
-    const response = await fetch(`/api/stock-price?ticker=${ticker}`)
+  let cachedPrice = getCachedStockPrice(ticker)
+  if (cachedPrice !== null) {
+    return cachedPrice
+  }
 
-    if (!response.ok) {
-      throw new Error(`Erro ao buscar preço: ${response.status}`)
-    }
+  const response = await fetch(`/api/stock-price?ticker=${ticker}`)
 
-    const data = await response.json()
-    if (!data || !data.price) {
-      throw new Error("Dados inválidos recebidos da API")
-    }
+  if (!response.ok) {
+    throw new Error(`Erro ao buscar preço: ${response.status}`)
+  }
 
-    return data.price
+  const data = await response.json()
+  if (!data || !data.price) {
+    throw new Error("Dados inválidos recebidos da API")
+  }
+
+  setCachedStockPrice(ticker, data.price)
+  return data.price
 }
 
 // Tipos de recomendação disponíveis

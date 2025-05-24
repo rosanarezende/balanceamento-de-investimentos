@@ -326,3 +326,23 @@ export async function getUserPreferences(userId: string): Promise<{ theme: "ligh
     throw error
   }
 }
+
+// Validação de entrada do usuário antes de salvar no banco de dados
+export function validateUserInput(data: {
+  quantity: number
+  targetPercentage: number
+  userRecommendation: string
+}): void {
+  if (data.quantity <= 0) {
+    throw new Error("A quantidade deve ser maior que zero.")
+  }
+
+  if (data.targetPercentage <= 0 || data.targetPercentage > 100) {
+    throw new Error("O percentual META deve estar entre 0 e 100.")
+  }
+
+  const validRecommendations = ["Comprar", "Vender", "Aguardar"]
+  if (!validRecommendations.includes(data.userRecommendation)) {
+    throw new Error("Recomendação inválida.")
+  }
+}

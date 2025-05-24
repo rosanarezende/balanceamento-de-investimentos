@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/utils"
 import { Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface StockCardProps {
   ticker: string
@@ -21,6 +22,7 @@ interface StockCardProps {
   userRecommendation: string
   onEdit: () => void
   onDelete: () => void
+  loading?: boolean
 }
 
 export function StockCard({
@@ -37,6 +39,7 @@ export function StockCard({
   userRecommendation,
   onEdit,
   onDelete,
+  loading = false,
 }: StockCardProps) {
   // Determinar o status com base na recomendação
   const getRecommendationStatus = (recommendation: string) => {
@@ -67,6 +70,12 @@ export function StockCard({
       )}
       hoverEffect
     >
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+          <LoadingSpinner size="lg" />
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center">
           <div className="mr-3">

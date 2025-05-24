@@ -53,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (err) {
         console.error("Erro ao verificar autenticação:", err)
+        setError("Erro ao verificar autenticação. Por favor, tente novamente.")
       } finally {
         if (isMounted) {
           setLoading(false)
@@ -89,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await firebaseSignOut(auth)
     } catch (error) {
       console.error("Erro ao fazer logout:", error)
+      setError("Erro ao fazer logout. Por favor, tente novamente.")
     }
   }
 

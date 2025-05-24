@@ -60,3 +60,16 @@ export function clearStockPriceCache(ticker: string): void {
     console.error(`Erro ao limpar cache para ${ticker}:`, error)
   }
 }
+
+export function clearAllStockPriceCache(): void {
+  if (!isBrowser()) return
+  try {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith(STOCK_PRICE_CACHE_PREFIX)) {
+        localStorage.removeItem(key)
+      }
+    })
+  } catch (error) {
+    console.error("Erro ao limpar todo o cache de preços de ações:", error)
+  }
+}

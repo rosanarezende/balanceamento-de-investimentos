@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { fetchStockPrice, saveManualRecommendation, RECOMMENDATION_TYPES } from "@/lib/api"
+import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 // Tipo para representar uma ação na carteira
 interface Stock {
@@ -61,7 +63,11 @@ export default function RecomendacoesBTG() {
 
         for (const stock of initialStocks) {
           try {
-            const currentPrice = await fetchStockPrice(stock.ticker)
+            let currentPrice = getCachedStockPrice(stock.ticker)
+            if (currentPrice === null) {
+              currentPrice = await fetchStockPrice(stock.ticker)
+              setCachedStockPrice(stock.ticker, currentPrice)
+            }
             stocksWithPrices.push({
               ...stock,
               currentPrice,
@@ -149,7 +155,8 @@ export default function RecomendacoesBTG() {
 
           {loading ? (
             <div className="py-8 text-center">
-              <p className="text-gray-500">Carregando dados das ações...</p>
+              <LoadingSpinner size="lg" />
+              <p className="text-gray-500 mt-4">Carregando dados das ações...</p>
             </div>
           ) : error ? (
             <div className="py-8 text-center">

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
 import { AppShell } from "@/components/layout/app-shell"
+import { saveStockToDatabase } from "@/lib/firestore"
 
 // Tipo para representar uma ação na carteira
 interface Stock {
@@ -30,23 +31,29 @@ const initialStocks: Stock[] = [
 export default function EditarAtivos() {
   const [stocks, setStocks] = useState<Stock[]>(initialStocks)
   const [newStock, setNewStock] = useState<Stock>({ ticker: "", quantity: 0, targetPercentage: 0 })
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleBack = () => {
     router.back()
   }
 
-  const handleSave = () => {
-    // Aqui seria implementada a lógica para salvar as alterações
+  const handleSave = async () => {
     // Verificar se a soma dos percentuais é 100%
     const totalPercentage = stocks.reduce((sum, stock) => sum + stock.targetPercentage, 0)
 
     if (Math.abs(totalPercentage - 100) > 0.01) {
-      alert(`A soma dos percentuais META deve ser 100%. Atualmente é ${totalPercentage.toFixed(2)}%.`)
+      setError(`A soma dos percentuais META deve ser 100%. Atualmente é ${totalPercentage.toFixed(2)}%.`)
       return
     }
 
-    router.push("/")
+    try {
+      await Promise.all(stocks.map(stock => saveStockToDatabase(stock)))
+      router.push("/")
+    } catch (err) {
+      console.error("Erro ao salvar ações no banco de dados:", err)
+      setError("Ocorreu um erro ao salvar as ações. Por favor, tente novamente.")
+    }
   }
 
   const handleStockChange = (index: number, field: keyof Stock, value: string) => {
@@ -85,17 +92,18 @@ export default function EditarAtivos() {
 
   const handleAddStock = () => {
     if (!newStock.ticker) {
-      alert("Por favor, insira o código do ativo.")
+      setError("Por favor, insira o código do ativo.")
       return
     }
 
     if (stocks.some((stock) => stock.ticker === newStock.ticker)) {
-      alert("Este ativo já existe na sua carteira.")
+      setError("Este ativo já existe na sua carteira.")
       return
     }
 
     setStocks([...stocks, newStock])
     setNewStock({ ticker: "", quantity: 0, targetPercentage: 0 })
+    setError(null)
   }
 
   // Calcular o total dos percentuais META
@@ -109,6 +117,12 @@ export default function EditarAtivos() {
         </Button>
 
         <h1 className="text-2xl font-bold mb-6">Editar Ativos Manualmente</h1>
+
+        {error && (
+          <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
+            {error}
+          </div>
+        )}
 
         <div className="space-y-4 mb-6">
           {stocks.map((stock, index) => (

@@ -219,6 +219,7 @@ export function StockList() {
               userRecommendation={stock.userRecommendation}
               onEdit={() => handleEditStock(stock)}
               onDelete={() => handleDeleteStock(stock)}
+              loading={loading}
             />
           ))}
         </div>
