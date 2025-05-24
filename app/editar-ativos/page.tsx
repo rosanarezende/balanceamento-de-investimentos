@@ -78,9 +78,14 @@ export default function EditarAtivos() {
   }
 
   const handleRemoveStock = (index: number) => {
-    const updatedStocks = [...stocks]
-    updatedStocks.splice(index, 1)
-    setStocks(updatedStocks)
+    try {
+      const updatedStocks = [...stocks]
+      updatedStocks.splice(index, 1)
+      setStocks(updatedStocks)
+    } catch (err) {
+      console.error("Erro ao remover ação:", err)
+      setError("Ocorreu um erro ao remover a ação. Por favor, tente novamente.")
+    }
   }
 
   const handleNewStockChange = (field: keyof Stock, value: string) => {
@@ -120,6 +125,7 @@ export default function EditarAtivos() {
       setNewStock({ ticker: "", quantity: 0, targetPercentage: 0 })
       setError(null)
     } catch (validationError) {
+      console.error("Erro ao adicionar novo ativo:", validationError)
       setError(validationError.message)
     }
   }

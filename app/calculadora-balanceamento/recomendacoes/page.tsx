@@ -93,7 +93,11 @@ export default function RecomendacoesBTG() {
       }
     }
 
-    fetchStockData()
+    fetchStockData().catch((err) => {
+      console.error("Erro ao buscar dados das ações:", err)
+      setError("Não foi possível carregar os dados das ações. Por favor, tente novamente.")
+      setLoading(false)
+    })
   }, [searchParams, router])
 
   const handleBack = () => {
@@ -101,7 +105,12 @@ export default function RecomendacoesBTG() {
   }
 
   const handleRecommendationChange = (ticker: string, recommendation: string) => {
-    setStocks(stocks.map((stock) => (stock.ticker === ticker ? { ...stock, recommendation } : stock)))
+    try {
+      setStocks(stocks.map((stock) => (stock.ticker === ticker ? { ...stock, recommendation } : stock)))
+    } catch (err) {
+      console.error(`Erro ao alterar recomendação para ${ticker}:`, err)
+      setError("Não foi possível alterar a recomendação. Por favor, tente novamente.")
+    }
   }
 
   const handleSkip = () => {
@@ -110,13 +119,18 @@ export default function RecomendacoesBTG() {
   }
 
   const handleContinue = () => {
-    // Salvar todas as recomendações
-    stocks.forEach((stock) => {
-      saveManualRecommendation(stock.ticker, stock.recommendation)
-    })
+    try {
+      // Salvar todas as recomendações
+      stocks.forEach((stock) => {
+        saveManualRecommendation(stock.ticker, stock.recommendation)
+      })
 
-    // Navegar para o resultado
-    router.push(`/calculadora-balanceamento/resultado?valor=${investmentValue}`)
+      // Navegar para o resultado
+      router.push(`/calculadora-balanceamento/resultado?valor=${investmentValue}`)
+    } catch (err) {
+      console.error("Erro ao salvar recomendações:", err)
+      setError("Não foi possível salvar as recomendações. Por favor, tente novamente.")
+    }
   }
 
   const handleRetry = () => {

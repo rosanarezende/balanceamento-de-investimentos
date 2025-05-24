@@ -54,7 +54,10 @@ export default function CalculadoraBalanceamento() {
   // Verificar se há ativos na carteira ao carregar a página
   useEffect(() => {
     // Forçar uma atualização da carteira ao montar o componente
-    handleRefreshPortfolio()
+    handleRefreshPortfolio().catch((error) => {
+      console.error("Erro ao forçar atualização da carteira:", error)
+      setError("Ocorreu um erro ao forçar a atualização da carteira. Por favor, tente novamente.")
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
