@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
 import { AppShell } from "@/components/layout/app-shell"
 import { saveStockToDatabase } from "@/lib/firestore"
+import { validateUserInput } from "@/lib/firestore"
 
 // Tipo para representar uma ação na carteira
 interface Stock {
@@ -101,9 +102,14 @@ export default function EditarAtivos() {
       return
     }
 
-    setStocks([...stocks, newStock])
-    setNewStock({ ticker: "", quantity: 0, targetPercentage: 0 })
-    setError(null)
+    try {
+      validateUserInput(newStock)
+      setStocks([...stocks, newStock])
+      setNewStock({ ticker: "", quantity: 0, targetPercentage: 0 })
+      setError(null)
+    } catch (validationError) {
+      setError(validationError.message)
+    }
   }
 
   // Calcular o total dos percentuais META

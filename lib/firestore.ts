@@ -346,3 +346,21 @@ export function validateUserInput(data: {
     throw new Error("Recomendação inválida.")
   }
 }
+
+// Salvar ação no banco de dados
+export async function saveStockToDatabase(stock: {
+  ticker: string
+  quantity: number
+  targetPercentage: number
+}): Promise<void> {
+  try {
+    const userRef = doc(db, "users", stock.ticker)
+    await updateDoc(userRef, {
+      quantity: stock.quantity,
+      targetPercentage: stock.targetPercentage,
+    })
+  } catch (error) {
+    console.error("Erro ao salvar ação no banco de dados:", error)
+    throw error
+  }
+}
