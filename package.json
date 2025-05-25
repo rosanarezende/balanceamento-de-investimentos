@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write .",
-    "test": "jest"
+    "test": "jest",
+    "install": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",
