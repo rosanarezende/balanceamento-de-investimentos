@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS, fetchStockPrice } from "@/lib/api"
 import { HelpCircle } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { verifyStockExists, validateUserInput, saveStockToDatabase } from "@/lib/firestore"
 
 interface StockEditModalProps {
   open: boolean

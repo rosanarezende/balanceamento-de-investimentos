@@ -25,6 +25,7 @@ interface StockCardProps {
   onEdit: () => void
   onDelete: () => void
   loading?: boolean
+} {
 }
 
 export function StockCard({

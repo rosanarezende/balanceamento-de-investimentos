@@ -1,5 +1,4 @@
 import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
-
 export async function fetchStockPrice(ticker: string): Promise<number> {
   let cachedPrice = getCachedStockPrice(ticker)
   if (cachedPrice !== null) {
@@ -87,4 +86,43 @@ export async function verifyStockExists(ticker: string): Promise<boolean> {
   }
 
   return data.exists
+}
+
+export async function saveStockToDatabase(stock: {
+  ticker: string
+  quantity: number
+  targetPercentage: number
+}): Promise<void> {
+  // Placeholder function to simulate saving stock to database
+  console.log(`Saving stock to database: ${JSON.stringify(stock)}`)
+  return Promise.resolve()
+}
+
+export function validateUserInput(data: {
+  quantity: number
+  targetPercentage: number
+  userRecommendation: string
+}): void {
+  if (data.quantity <= 0) {
+    throw new Error("A quantidade deve ser maior que zero.")
+  }
+
+  if (data.targetPercentage <= 0 || data.targetPercentage > 100) {
+    throw new Error("O percentual META deve estar entre 0 e 100.")
+  }
+
+  if (!RECOMMENDATION_TYPES.includes(data.userRecommendation)) {
+    throw new Error("Recomendação inválida.")
+  }
+}
+
+export function clearAllStockPriceCache(): void {
+  // Placeholder function to simulate clearing stock price cache
+  console.log("Clearing all stock price cache")
+}
+
+export const useMemoizedPortfolioDetails = (portfolio: Portfolio) => {
+  // Placeholder function to simulate memoized portfolio details
+  console.log(`Memoizing portfolio details for: ${JSON.stringify(portfolio)}`)
+  return portfolio
 }
