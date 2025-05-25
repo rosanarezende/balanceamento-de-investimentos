@@ -1,5 +1,6 @@
 import { fetchStockPrice } from "@/lib/api"
 import type { Portfolio, StockWithDetails } from "@/lib/types"
+import { useMemo } from "react"
 
 export async function calculatePortfolioDetails(portfolio: Portfolio): Promise<{
     detailedStocks: StockWithDetails[]
@@ -52,4 +53,8 @@ export async function calculatePortfolioDetails(portfolio: Portfolio): Promise<{
   })
 
   return { detailedStocks, totalValue, failedStocks }
+}
+
+export const useMemoizedPortfolioDetails = (portfolio: Portfolio) => {
+  return useMemo(() => calculatePortfolioDetails(portfolio), [portfolio])
 }

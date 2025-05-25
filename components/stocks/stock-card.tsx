@@ -6,6 +6,9 @@ import { formatCurrency } from "@/lib/utils"
 import { Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { useEffect, useState } from "react"
+import { fetchDailyChange } from "@/lib/api"
 
 interface StockCardProps {
   ticker: string
@@ -21,6 +24,8 @@ interface StockCardProps {
   userRecommendation: string
   onEdit: () => void
   onDelete: () => void
+  loading?: boolean
+} {
 }
 
 export function StockCard({
@@ -37,7 +42,21 @@ export function StockCard({
   userRecommendation,
   onEdit,
   onDelete,
+  loading = false,
 }: StockCardProps) {
+  const [dailyChangeState, setDailyChangeState] = useState(dailyChange)
+  const [dailyChangePercentageState, setDailyChangePercentageState] = useState(dailyChangePercentage)
+
+  useEffect(() => {
+    const fetchChange = async () => {
+      const { change, changePercentage } = await fetchDailyChange(ticker)
+      setDailyChangeState(change)
+      setDailyChangePercentageState(changePercentage)
+    }
+
+    fetchChange()
+  }, [ticker])
+
   // Determinar o status com base na recomendação
   const getRecommendationStatus = (recommendation: string) => {
     switch (recommendation) {
@@ -67,6 +86,12 @@ export function StockCard({
       )}
       hoverEffect
     >
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+          <LoadingSpinner size="lg" />
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center">
           <div className="mr-3">
@@ -135,11 +160,11 @@ export function StockCard({
           <div
             className={cn(
               "flex items-center font-medium",
-              dailyChange >= 0 ? "text-state-success" : "text-state-error",
+              dailyChangeState >= 0 ? "text-state-success" : "text-state-error",
             )}
           >
-            {dailyChange >= 0 ? <TrendingUp size={14} className="mr-1" /> : <TrendingDown size={14} className="mr-1" />}
-            {Math.abs(dailyChangePercentage).toFixed(2)}%
+            {dailyChangeState >= 0 ? <TrendingUp size={14} className="mr-1" /> : <TrendingDown size={14} className="mr-1" />}
+            {Math.abs(dailyChangePercentageState).toFixed(2)}%
           </div>
         </div>
 

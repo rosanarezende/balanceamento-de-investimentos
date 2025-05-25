@@ -1,16 +1,23 @@
+import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
 export async function fetchStockPrice(ticker: string): Promise<number> {
-    const response = await fetch(`/api/stock-price?ticker=${ticker}`)
+  let cachedPrice = getCachedStockPrice(ticker)
+  if (cachedPrice !== null) {
+    return cachedPrice
+  }
 
-    if (!response.ok) {
-      throw new Error(`Erro ao buscar preço: ${response.status}`)
-    }
+  const response = await fetch(`/api/stock-price?ticker=${ticker}`)
 
-    const data = await response.json()
-    if (!data || !data.price) {
-      throw new Error("Dados inválidos recebidos da API")
-    }
+  if (!response.ok) {
+    throw new Error(`Erro ao buscar preço: ${response.status}`)
+  }
 
-    return data.price
+  const data = await response.json()
+  if (!data || !data.price) {
+    throw new Error("Dados inválidos recebidos da API")
+  }
+
+  setCachedStockPrice(ticker, data.price)
+  return data.price
 }
 
 // Tipos de recomendação disponíveis
@@ -46,4 +53,76 @@ export async function getDailyChange(ticker: string): Promise<{ change: number; 
     change: data.change,
     changePercentage: data.changePercentage,
   }
+}
+
+export async function fetchDailyChange(ticker: string): Promise<{ change: number; changePercentage: number }> {
+  const response = await fetch(`/api/stock-daily-change?ticker=${ticker}`)
+
+  if (!response.ok) {
+    throw new Error(`Erro ao buscar variação diária: ${response.status}`)
+  }
+
+  const data = await response.json()
+  if (!data || typeof data.change !== "number" || typeof data.changePercentage !== "number") {
+    throw new Error("Dados inválidos recebidos da API")
+  }
+
+  return {
+    change: data.change,
+    changePercentage: data.changePercentage,
+  }
+}
+
+export async function verifyStockExists(ticker: string): Promise<boolean> {
+  const response = await fetch(`/api/stock-exists?ticker=${ticker}`)
+
+  if (!response.ok) {
+    throw new Error(`Erro ao verificar existência do ativo: ${response.status}`)
+  }
+
+  const data = await response.json()
+  if (!data || typeof data.exists !== "boolean") {
+    throw new Error("Dados inválidos recebidos da API")
+  }
+
+  return data.exists
+}
+
+export async function saveStockToDatabase(stock: {
+  ticker: string
+  quantity: number
+  targetPercentage: number
+}): Promise<void> {
+  // Placeholder function to simulate saving stock to database
+  console.log(`Saving stock to database: ${JSON.stringify(stock)}`)
+  return Promise.resolve()
+}
+
+export function validateUserInput(data: {
+  quantity: number
+  targetPercentage: number
+  userRecommendation: string
+}): void {
+  if (data.quantity <= 0) {
+    throw new Error("A quantidade deve ser maior que zero.")
+  }
+
+  if (data.targetPercentage <= 0 || data.targetPercentage > 100) {
+    throw new Error("O percentual META deve estar entre 0 e 100.")
+  }
+
+  if (!RECOMMENDATION_TYPES.includes(data.userRecommendation)) {
+    throw new Error("Recomendação inválida.")
+  }
+}
+
+export function clearAllStockPriceCache(): void {
+  // Placeholder function to simulate clearing stock price cache
+  console.log("Clearing all stock price cache")
+}
+
+export const useMemoizedPortfolioDetails = (portfolio: Portfolio) => {
+  // Placeholder function to simulate memoized portfolio details
+  console.log(`Memoizing portfolio details for: ${JSON.stringify(portfolio)}`)
+  return portfolio
 }

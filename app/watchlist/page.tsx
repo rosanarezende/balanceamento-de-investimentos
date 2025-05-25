@@ -14,7 +14,9 @@ import { Eye, Plus } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { getUserWatchlist, addToWatchlist, updateWatchlistItem, removeFromWatchlist } from "@/lib/firestore"
 import { fetchStockPrice } from "@/lib/api"
+import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
 import AuthGuard from "@/components/auth-guard"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface WatchlistItem {
   ticker: string
@@ -50,7 +52,11 @@ export default function WatchlistPage() {
         const watchlistWithPrices = await Promise.all(
           userWatchlist.map(async (item) => {
             try {
-              const currentPrice = await fetchStockPrice(item.ticker)
+              let currentPrice = getCachedStockPrice(item.ticker)
+              if (currentPrice === null) {
+                currentPrice = await fetchStockPrice(item.ticker)
+                setCachedStockPrice(item.ticker, currentPrice)
+              }
 
               // Simular variação diária
               const dailyChangePercentage = Math.random() * 10 - 5 // -5% a +5%
@@ -110,7 +116,11 @@ export default function WatchlistPage() {
       await addToWatchlist(user.uid, data)
 
       // Simular preço atual e variação para o novo item
-      const currentPrice = await fetchStockPrice(data.ticker)
+      let currentPrice = getCachedStockPrice(data.ticker)
+      if (currentPrice === null) {
+        currentPrice = await fetchStockPrice(data.ticker)
+        setCachedStockPrice(data.ticker, currentPrice)
+      }
       const dailyChangePercentage = Math.random() * 10 - 5
       const dailyChange = currentPrice * (dailyChangePercentage / 100)
 
@@ -165,7 +175,7 @@ export default function WatchlistPage() {
 
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-primary"></div>
+            <LoadingSpinner size="lg" />
           </div>
         ) : error ? (
           <div className="p-4 rounded-lg bg-state-error/10 border border-state-error/20 text-state-error">

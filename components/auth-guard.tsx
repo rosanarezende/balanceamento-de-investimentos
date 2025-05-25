@@ -28,6 +28,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [authUser, previewUser, authLoading, previewLoading, router, pathname])
 
+  useEffect(() => {
+    // Fetch user data on component mount
+    if (authUser) {
+      // Fetch user data logic here
+    }
+  }, [authUser])
+
   // Durante a renderização no servidor ou antes da montagem, retornamos um placeholder
   if (!mounted || authLoading || previewLoading) {
     return (

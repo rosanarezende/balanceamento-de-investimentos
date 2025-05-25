@@ -326,3 +326,54 @@ export async function getUserPreferences(userId: string): Promise<{ theme: "ligh
     throw error
   }
 }
+
+// Validação de entrada do usuário antes de salvar no banco de dados
+export function validateUserInput(data: {
+  quantity: number
+  targetPercentage: number
+  userRecommendation: string
+}): void {
+  if (data.quantity <= 0) {
+    throw new Error("A quantidade deve ser maior que zero.")
+  }
+
+  if (data.targetPercentage <= 0 || data.targetPercentage > 100) {
+    throw new Error("O percentual META deve estar entre 0 e 100.")
+  }
+
+  const validRecommendations = ["Comprar", "Vender", "Aguardar"]
+  if (!validRecommendations.includes(data.userRecommendation)) {
+    throw new Error("Recomendação inválida.")
+  }
+}
+
+// Salvar ação no banco de dados
+export async function saveStockToDatabase(stock: {
+  ticker: string
+  quantity: number
+  targetPercentage: number
+}): Promise<void> {
+  try {
+    const userRef = doc(db, "users", stock.ticker)
+    await updateDoc(userRef, {
+      quantity: stock.quantity,
+      targetPercentage: stock.targetPercentage,
+    })
+  } catch (error) {
+    console.error("Erro ao salvar ação no banco de dados:", error)
+    throw error
+  }
+}
+
+// Verificar se a ação existe no Firestore
+export async function verifyStockExists(ticker: string): Promise<boolean> {
+  try {
+    const stockRef = doc(db, "stocks", ticker)
+    const stockDoc = await getDoc(stockRef)
+
+    return stockDoc.exists()
+  } catch (error) {
+    console.error(`Erro ao verificar se a ação ${ticker} existe:`, error)
+    throw error
+  }
+}

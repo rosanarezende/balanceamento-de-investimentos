@@ -1,12 +1,12 @@
 "use client"
 
 import { usePortfolio } from "@/hooks/use-portfolio"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Plus, RefreshCw, CheckCircle, AlertTriangle } from "lucide-react"
-import { RECOMMENDATION_TYPES } from "@/lib/api"
+import { RECOMMENDATION_TYPES, fetchStockPrice } from "@/lib/api"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Alert } from "@/components/ui/alert"
@@ -119,6 +119,20 @@ export function AddStockForm({ onAddStock }: AddStockFormProps) {
       setIsRefreshing(false)
     }
   }
+
+  useEffect(() => {
+    if (newStock.ticker) {
+      const fetchPrice = async () => {
+        try {
+          const price = await fetchStockPrice(newStock.ticker)
+          console.log(`Preço da ação ${newStock.ticker}: ${price}`)
+        } catch (error) {
+          console.error("Erro ao buscar preço da ação:", error)
+        }
+      }
+      fetchPrice()
+    }
+  }, [newStock.ticker])
 
   return (
     <Card className="mb-6">

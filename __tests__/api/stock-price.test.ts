@@ -84,4 +84,40 @@ describe("Stock Price API", () => {
     expect(response.status).toBe(400)
     expect(data.error).toBe("Valor de investimento inválido")
   })
+
+  it("deve retornar erro 400 se o valor de investimento for zero", async () => {
+    const request = new NextRequest("http://localhost:3000/api/stock-price", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        investmentValue: 0,
+      }),
+    })
+
+    const response = await GET(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toBe("Valor de investimento não pode ser zero")
+  })
+
+  it("deve retornar erro 400 se o valor de investimento for não numérico", async () => {
+    const request = new NextRequest("http://localhost:3000/api/stock-price", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        investmentValue: "mil",
+      }),
+    })
+
+    const response = await GET(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toBe("Valor de investimento deve ser numérico")
+  })
 })

@@ -298,4 +298,24 @@ describe("usePortfolio hook", () => {
     expect(underweightStocks).toHaveLength(1)
     expect(underweightStocks[0].ticker).toBe("PETR4")
   })
+
+  it("should memoize calculatePortfolioDetails function", async () => {
+    const { result } = renderHook(() => usePortfolio())
+
+    // Aguardar o carregamento dos dados
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Verificar se calculatePortfolioDetails foi memorizado
+    const initialDetails = result.current.stocksWithDetails
+
+    // Atualizar o portfólio sem alterar os dados
+    await act(async () => {
+      await result.current.refreshPortfolio()
+    })
+
+    // Verificar se os detalhes das ações não foram recalculados
+    expect(result.current.stocksWithDetails).toBe(initialDetails)
+  })
 })

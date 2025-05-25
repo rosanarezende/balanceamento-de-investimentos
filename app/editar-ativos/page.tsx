@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
 import { AppShell } from "@/components/layout/app-shell"
+import { saveStockToDatabase, validateUserInput, verifyStockExists } from "@/lib/firestore"
 
 // Tipo para representar uma ação na carteira
 interface Stock {
@@ -30,26 +31,32 @@ const initialStocks: Stock[] = [
 export default function EditarAtivos() {
   const [stocks, setStocks] = useState<Stock[]>(initialStocks)
   const [newStock, setNewStock] = useState<Stock>({ ticker: "", quantity: 0, targetPercentage: 0 })
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleBack = () => {
     router.back()
   }
 
-  const handleSave = () => {
-    // Aqui seria implementada a lógica para salvar as alterações
+  const handleSave = async () => {
     // Verificar se a soma dos percentuais é 100%
     const totalPercentage = stocks.reduce((sum, stock) => sum + stock.targetPercentage, 0)
 
     if (Math.abs(totalPercentage - 100) > 0.01) {
-      alert(`A soma dos percentuais META deve ser 100%. Atualmente é ${totalPercentage.toFixed(2)}%.`)
+      setError(`A soma dos percentuais META deve ser 100%. Atualmente é ${totalPercentage.toFixed(2)}%.`)
       return
     }
 
-    router.push("/")
+    try {
+      await Promise.all(stocks.map(stock => saveStockToDatabase(stock)))
+      router.push("/")
+    } catch (err) {
+      console.error("Erro ao salvar ações no banco de dados:", err)
+      setError("Ocorreu um erro ao salvar as ações. Por favor, tente novamente.")
+    }
   }
 
-  const handleStockChange = (index: number, field: keyof Stock, value: string) => {
+  const handleStockChange = async (index: number, field: keyof Stock, value: string) => {
     const updatedStocks = [...stocks]
 
     if (field === "ticker") {
@@ -61,12 +68,24 @@ export default function EditarAtivos() {
     }
 
     setStocks(updatedStocks)
+
+    try {
+      await saveStockToDatabase(updatedStocks[index])
+    } catch (err) {
+      console.error("Erro ao salvar ação no banco de dados:", err)
+      setError("Ocorreu um erro ao salvar a ação. Por favor, tente novamente.")
+    }
   }
 
   const handleRemoveStock = (index: number) => {
-    const updatedStocks = [...stocks]
-    updatedStocks.splice(index, 1)
-    setStocks(updatedStocks)
+    try {
+      const updatedStocks = [...stocks]
+      updatedStocks.splice(index, 1)
+      setStocks(updatedStocks)
+    } catch (err) {
+      console.error("Erro ao remover ação:", err)
+      setError("Ocorreu um erro ao remover a ação. Por favor, tente novamente.")
+    }
   }
 
   const handleNewStockChange = (field: keyof Stock, value: string) => {
@@ -83,19 +102,32 @@ export default function EditarAtivos() {
     setNewStock(updatedNewStock)
   }
 
-  const handleAddStock = () => {
+  const handleAddStock = async () => {
     if (!newStock.ticker) {
-      alert("Por favor, insira o código do ativo.")
+      setError("Por favor, insira o código do ativo.")
       return
     }
 
     if (stocks.some((stock) => stock.ticker === newStock.ticker)) {
-      alert("Este ativo já existe na sua carteira.")
+      setError("Este ativo já existe na sua carteira.")
       return
     }
 
-    setStocks([...stocks, newStock])
-    setNewStock({ ticker: "", quantity: 0, targetPercentage: 0 })
+    try {
+      const stockExists = await verifyStockExists(newStock.ticker)
+      if (!stockExists) {
+        setError("O ativo não existe.")
+        return
+      }
+
+      validateUserInput(newStock)
+      setStocks([...stocks, newStock])
+      setNewStock({ ticker: "", quantity: 0, targetPercentage: 0 })
+      setError(null)
+    } catch (validationError) {
+      console.error("Erro ao adicionar novo ativo:", validationError)
+      setError(validationError.message)
+    }
   }
 
   // Calcular o total dos percentuais META
@@ -109,6 +141,12 @@ export default function EditarAtivos() {
         </Button>
 
         <h1 className="text-2xl font-bold mb-6">Editar Ativos Manualmente</h1>
+
+        {error && (
+          <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
+            {error}
+          </div>
+        )}
 
         <div className="space-y-4 mb-6">
           {stocks.map((stock, index) => (
@@ -218,7 +256,7 @@ export default function EditarAtivos() {
           <div className="flex justify-between items-center">
             <span className="font-medium">Total META:</span>
             <span
-              className={`font-bold ${Math.abs(totalTargetPercentage - 100) > 0.01 ? "text-red-600" : "text-green-600"}`}
+              class={`font-bold ${Math.abs(totalTargetPercentage - 100) > 0.01 ? "text-red-600" : "text-green-600"}`}
             >
               {totalTargetPercentage.toFixed(2)}%
             </span>
@@ -232,6 +270,13 @@ export default function EditarAtivos() {
           <Save className="mr-2 h-4 w-4" />
           SALVAR ALTERAÇÕES
         </Button>
+
+        <div className="mt-4">
+          <Button className="w-full" size="lg" onClick={() => router.push("/editar-ativos")}>
+            <Save className="mr-2 h-4 w-4" />
+            Acessar Edição de Ativos
+          </Button>
+        </div>
       </div>
     </AppShell>
   )

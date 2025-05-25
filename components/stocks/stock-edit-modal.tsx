@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS } from "@/lib/api"
+import { RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS, fetchStockPrice } from "@/lib/api"
 import { HelpCircle } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { verifyStockExists, validateUserInput, saveStockToDatabase } from "@/lib/firestore"
 
 interface StockEditModalProps {
   open: boolean
@@ -57,6 +58,20 @@ export function StockEditModal({ open, onClose, onSave, stock, isNew = false }: 
       })
     }
   }, [stock, isNew])
+
+  useEffect(() => {
+    if (open && formData.ticker) {
+      const fetchPrice = async () => {
+        try {
+          const price = await fetchStockPrice(formData.ticker)
+          console.log(`Fetched price for ${formData.ticker}: ${price}`)
+        } catch (err) {
+          console.error(`Failed to fetch price for ${formData.ticker}:`, err)
+        }
+      }
+      fetchPrice()
+    }
+  }, [open, formData.ticker])
 
   const handleChange = (field: keyof StockEditData, value: string | number) => {
     setFormData((prev) => ({

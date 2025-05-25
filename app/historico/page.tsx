@@ -39,7 +39,11 @@ export default function Historico() {
       }
     }
 
-    loadSimulations()
+    loadSimulations().catch((error) => {
+      console.error("Erro ao carregar simulações:", error)
+      setError("Não foi possível carregar o histórico de simulações. Por favor, tente novamente.")
+      setLoading(false)
+    })
   }, [user])
 
   const handleBack = () => {
@@ -47,7 +51,12 @@ export default function Historico() {
   }
 
   const handleViewDetails = (id: string) => {
-    router.push(`/historico/${id}`)
+    try {
+      router.push(`/historico/${id}`)
+    } catch (error) {
+      console.error("Erro ao visualizar detalhes:", error)
+      setError("Não foi possível visualizar os detalhes da simulação. Por favor, tente novamente.")
+    }
   }
 
   // Formatar data para exibição

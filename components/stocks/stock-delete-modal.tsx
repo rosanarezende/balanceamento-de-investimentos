@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle } from "lucide-react"
+import { clearStockPriceCache } from "@/lib/cache"
 
 interface StockDeleteModalProps {
   open: boolean
@@ -30,6 +31,12 @@ export function StockDeleteModal({ open, onClose, onConfirm, ticker }: StockDele
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!open && ticker) {
+      clearStockPriceCache(ticker)
+    }
+  }, [open, ticker])
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

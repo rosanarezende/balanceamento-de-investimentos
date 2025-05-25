@@ -1,10 +1,24 @@
 import { render, screen, fireEvent } from "@testing-library/react"
 import { StockCard } from "@/components/stocks/stock-card"
 import { formatCurrency } from "@/lib/utils"
+import { calculatePortfolioDetails } from "@/lib/client-utils/calculate-portfolio-details"
 
 // Mock da função formatCurrency
 jest.mock("@/lib/utils", () => ({
   formatCurrency: jest.fn((value) => `R$ ${value.toFixed(2)}`),
+}))
+
+// Mock da função calculatePortfolioDetails
+jest.mock("@/lib/client-utils/calculate-portfolio-details", () => ({
+  calculatePortfolioDetails: jest.fn((portfolio) => ({
+    totalValue: 1000,
+    totalPercentage: 100,
+    stocks: portfolio.map(stock => ({
+      ...stock,
+      currentValue: stock.quantity * stock.currentPrice,
+      currentPercentage: (stock.quantity * stock.currentPrice) / 1000 * 100,
+    })),
+  })),
 }))
 
 describe("StockCard", () => {
@@ -112,5 +126,28 @@ describe("StockCard", () => {
     const dailyChangePercentage = screen.getByText(/-5\.00%/i)
     expect(dailyChangePercentage).toBeInTheDocument()
     expect(dailyChangePercentage).toHaveClass("text-red-500")
+  })
+
+  it("should memoize calculatePortfolioDetails function", () => {
+    const portfolio = [
+      { ticker: "PETR4", quantity: 10, currentPrice: 50 },
+      { ticker: "VALE3", quantity: 5, currentPrice: 100 },
+    ]
+
+    // Primeira chamada
+    calculatePortfolioDetails(portfolio)
+    expect(calculatePortfolioDetails).toHaveBeenCalledTimes(1)
+
+    // Segunda chamada com os mesmos dados
+    calculatePortfolioDetails(portfolio)
+    expect(calculatePortfolioDetails).toHaveBeenCalledTimes(1)
+
+    // Terceira chamada com dados diferentes
+    const newPortfolio = [
+      { ticker: "PETR4", quantity: 10, currentPrice: 50 },
+      { ticker: "VALE3", quantity: 5, currentPrice: 110 },
+    ]
+    calculatePortfolioDetails(newPortfolio)
+    expect(calculatePortfolioDetails).toHaveBeenCalledTimes(2)
   })
 })

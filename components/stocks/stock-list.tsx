@@ -134,6 +134,11 @@ export function StockList() {
     }
   }
 
+  // P0149: Add useEffect to refresh portfolio on component mount
+  useEffect(() => {
+    refreshPortfolio()
+  }, [refreshPortfolio])
+
   console.log({ sortedStocks })
 
   return (
@@ -219,6 +224,7 @@ export function StockList() {
               userRecommendation={stock.userRecommendation}
               onEdit={() => handleEditStock(stock)}
               onDelete={() => handleDeleteStock(stock)}
+              loading={loading}
             />
           ))}
         </div>
