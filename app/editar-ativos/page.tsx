@@ -62,7 +62,12 @@ export default function EditarAtivos() {
     if (field === "ticker") {
       updatedStocks[index].ticker = value.toUpperCase()
     } else if (field === "quantity") {
-      updatedStocks[index].quantity = Number.parseInt(value) || 0
+      const quantity = Number.parseInt(value) || 0
+      if (quantity <= 0) {
+        setError("A quantidade deve ser maior que zero.")
+        return
+      }
+      updatedStocks[index].quantity = quantity
     } else if (field === "targetPercentage") {
       updatedStocks[index].targetPercentage = Number.parseFloat(value) || 0
     }
@@ -110,6 +115,11 @@ export default function EditarAtivos() {
 
     if (stocks.some((stock) => stock.ticker === newStock.ticker)) {
       setError("Este ativo já existe na sua carteira.")
+      return
+    }
+
+    if (newStock.quantity <= 0) {
+      setError("A quantidade deve ser maior que zero.")
       return
     }
 

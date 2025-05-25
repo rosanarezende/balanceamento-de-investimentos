@@ -208,25 +208,32 @@ export function StockList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {sortedStocks.map((stock) => (
-            <StockCard
-              key={stock.ticker}
-              ticker={stock.ticker}
-              quantity={stock.quantity}
-              currentValue={stock.currentValue}
-              currentPercentage={stock.currentPercentage}
-              targetPercentage={stock.targetPercentage}
-              toBuy={stock.toBuy}
-              excess={stock.excess}
-              currentPrice={stock.currentPrice}
-              dailyChange={(stock as any).dailyChange}
-              dailyChangePercentage={(stock as any).dailyChangePercentage}
-              userRecommendation={stock.userRecommendation}
-              onEdit={() => handleEditStock(stock)}
-              onDelete={() => handleDeleteStock(stock)}
-              loading={loading}
-            />
-          ))}
+          {sortedStocks.map((stock) => {
+            if (typeof stock.currentValue !== "number" || stock.currentValue <= 0) {
+              console.error(`Invalid currentValue for stock ${stock.ticker}: ${stock.currentValue}`)
+              return null
+            }
+
+            return (
+              <StockCard
+                key={stock.ticker}
+                ticker={stock.ticker}
+                quantity={stock.quantity}
+                currentValue={stock.currentValue}
+                currentPercentage={stock.currentPercentage}
+                targetPercentage={stock.targetPercentage}
+                toBuy={stock.toBuy}
+                excess={stock.excess}
+                currentPrice={stock.currentPrice}
+                dailyChange={(stock as any).dailyChange}
+                dailyChangePercentage={(stock as any).dailyChangePercentage}
+                userRecommendation={stock.userRecommendation}
+                onEdit={() => handleEditStock(stock)}
+                onDelete={() => handleDeleteStock(stock)}
+                loading={loading}
+              />
+            )
+          })}
         </div>
       )}
 

@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "test": "npm install",
+    "build": "npm run clean"
+  }
+}

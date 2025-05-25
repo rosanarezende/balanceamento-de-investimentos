@@ -18,6 +18,27 @@ if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
   console.error("Variáveis de ambiente do Firebase não estão definidas corretamente")
 }
 
+// Verificar se o objeto firebaseConfig não é nulo e possui as propriedades necessárias
+if (!firebaseConfig) {
+  throw new Error("Configuração do Firebase não pode ser nula")
+}
+
+const requiredProperties = [
+  "apiKey",
+  "authDomain",
+  "projectId",
+  "storageBucket",
+  "messagingSenderId",
+  "appId",
+  "measurementId",
+]
+
+requiredProperties.forEach((property) => {
+  if (!firebaseConfig[property]) {
+    throw new Error(`Propriedade ${property} está faltando na configuração do Firebase`)
+  }
+})
+
 // Inicializar o Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
 const auth = getAuth(app)

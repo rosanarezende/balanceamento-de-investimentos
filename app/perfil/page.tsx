@@ -34,6 +34,16 @@ export default function ProfilePage() {
     setLoading(false)
   }
 
+  // Verificar se o objeto user não é nulo
+  if (!user) {
+    return <div className="min-h-screen bg-background">Usuário não autenticado</div>
+  }
+
+  // Verificar se o objeto user tem a propriedade displayName
+  if (!user.displayName) {
+    return <div className="min-h-screen bg-background">Nome de exibição não disponível</div>
+  }
+
   // Não renderizamos nada durante a pré-renderização no servidor
   if (!mounted) {
     return <div className="min-h-screen bg-background"></div>

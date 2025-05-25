@@ -26,7 +26,12 @@ export default function HomePage() {
   // Simular variação diária
   useEffect(() => {
     try {
-      if (totalPortfolioValue > 0 && !loading) {
+      if (typeof totalPortfolioValue !== "number" || totalPortfolioValue <= 0) {
+        console.error("Invalid totalPortfolioValue:", totalPortfolioValue)
+        return
+      }
+
+      if (!loading) {
         // Simular uma variação entre -3% e +3%
         const changePercentage = Math.random() * 6 - 3
         const change = totalPortfolioValue * (changePercentage / 100)

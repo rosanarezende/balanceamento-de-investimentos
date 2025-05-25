@@ -1,5 +1,14 @@
 import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
+
 export async function fetchStockPrice(ticker: string): Promise<number> {
+  if (typeof ticker !== "string") {
+    throw new Error("Ticker deve ser uma string")
+  }
+
+  if (!ticker.trim()) {
+    throw new Error("Ticker não pode estar vazio")
+  }
+
   let cachedPrice = getCachedStockPrice(ticker)
   if (cachedPrice !== null) {
     return cachedPrice

@@ -57,6 +57,11 @@ export function StockCard({
     fetchChange()
   }, [ticker])
 
+  // Check if currentValue is a number and greater than 0
+  if (typeof currentValue !== "number" || currentValue <= 0) {
+    throw new Error("currentValue must be a number greater than 0")
+  }
+
   // Determinar o status com base na recomendação
   const getRecommendationStatus = (recommendation: string) => {
     switch (recommendation) {

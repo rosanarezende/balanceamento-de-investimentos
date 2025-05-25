@@ -5,8 +5,12 @@ export async function POST(request: Request) {
   try {
     const { prompt } = await request.json();
 
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt é obrigatório" }, { status: 400 });
+    if (typeof prompt !== "string") {
+      return NextResponse.json({ error: "Prompt deve ser uma string" }, { status: 400 });
+    }
+
+    if (!prompt.trim()) {
+      return NextResponse.json({ error: "Prompt não pode estar vazio" }, { status: 400 });
     }
 
     const { text } = await generateText({

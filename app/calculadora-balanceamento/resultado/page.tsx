@@ -55,6 +55,15 @@ export default function ResultadoCalculadora() {
         return
       }
 
+      const investmentValue = Number.parseFloat(investmentParam)
+      if (isNaN(investmentValue) || investmentValue <= 0) {
+        setError("Por favor, insira um valor de investimento válido.")
+        setLoading(false)
+        return
+      }
+
+      setTotalInvestment(investmentValue)
+
       // Verificar se há ativos na carteira
       if (stocksWithDetails.length === 0) {
         if (!triedRefresh) {
@@ -73,9 +82,6 @@ export default function ResultadoCalculadora() {
         setLoading(false)
         return
       }
-
-      const investmentValue = Number.parseFloat(investmentParam)
-      setTotalInvestment(investmentValue)
 
       try {
         // Calcular o valor total atual da carteira

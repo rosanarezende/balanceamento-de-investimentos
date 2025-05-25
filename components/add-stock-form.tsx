@@ -45,6 +45,11 @@ export function AddStockForm({ onAddStock }: AddStockFormProps) {
       return false
     }
 
+    if (typeof newStock.quantity !== "number") {
+      setError("A quantidade deve ser um número.")
+      return false
+    }
+
     if (newStock.quantity <= 0) {
       setError("A quantidade deve ser maior que zero.")
       return false

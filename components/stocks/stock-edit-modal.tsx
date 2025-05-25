@@ -89,6 +89,11 @@ export function StockEditModal({ open, onClose, onSave, stock, isNew = false }: 
       return
     }
 
+    if (typeof formData.quantity !== "number") {
+      setError("A quantidade deve ser um número")
+      return
+    }
+
     if (formData.quantity <= 0) {
       setError("A quantidade deve ser maior que zero")
       return

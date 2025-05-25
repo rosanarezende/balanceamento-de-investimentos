@@ -55,6 +55,13 @@ export default function RecomendacoesBTG() {
         return
       }
 
+      const investmentValueNumber = Number(investmentParam)
+      if (isNaN(investmentValueNumber) || investmentValueNumber <= 0) {
+        setError("Por favor, insira um valor de investimento válido.")
+        setLoading(false)
+        return
+      }
+
       setInvestmentValue(investmentParam)
 
       try {
