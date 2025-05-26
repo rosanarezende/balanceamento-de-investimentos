@@ -194,4 +194,58 @@ describe("ThemeContext", () => {
     // Verificar se a classe "dark" foi adicionada ao documento
     expect(document.documentElement.classList.contains("dark")).toBe(true)
   })
+
+  it("should handle error when loading theme from Firestore", async () => {
+    // Configurar getUserPreferences para lançar um erro
+    ;(getUserPreferences as jest.Mock).mockRejectedValueOnce(new Error("Failed to load preferences"))
+
+    render(
+      <ThemeProvider>
+        <TestComponent />
+      </ThemeProvider>,
+    )
+
+    // Verificar se o tema padrão é "dark"
+    await waitFor(() => {
+      expect(screen.getByTestId("theme").textContent).toBe("dark")
+    })
+
+    // Verificar se a classe "dark" foi adicionada ao documento
+    expect(document.documentElement.classList.contains("dark")).toBe(true)
+
+    // Verificar se getUserPreferences foi chamado
+    expect(getUserPreferences).toHaveBeenCalledWith("test-user-id")
+  })
+
+  it("should handle error when saving theme to Firestore", async () => {
+    // Configurar saveUserPreferences para lançar um erro
+    ;(saveUserPreferences as jest.Mock).mockRejectedValueOnce(new Error("Failed to save preferences"))
+
+    render(
+      <ThemeProvider>
+        <TestComponent />
+      </ThemeProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("theme").textContent).toBe("dark")
+    })
+
+    // Clicar no botão de alternar tema
+    await act(async () => {
+      userEvent.click(screen.getByTestId("toggle-btn"))
+    })
+
+    // Verificar se o tema foi alterado para "light"
+    expect(screen.getByTestId("theme").textContent).toBe("light")
+
+    // Verificar se a classe "dark" foi removida do documento
+    expect(document.documentElement.classList.contains("dark")).toBe(false)
+
+    // Verificar se o tema foi salvo no localStorage
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith("theme", "light")
+
+    // Verificar se saveUserPreferences foi chamado
+    expect(saveUserPreferences).toHaveBeenCalledWith("test-user-id", { theme: "light" })
+  })
 })

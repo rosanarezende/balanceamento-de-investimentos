@@ -271,4 +271,28 @@ describe("Calculator Flow Integration", () => {
     // Restaurar o console.error
     consoleSpy.mockRestore()
   })
+
+  it("should handle user authentication", async () => {
+    render(<CalculadoraBalanceamento />)
+
+    // Verificar se o usuário está autenticado
+    expect(useAuth).toHaveBeenCalled()
+
+    // Verificar se o usuário autenticado é exibido
+    expect(screen.getByText("Usuário autenticado: test-user-id")).toBeInTheDocument()
+  })
+
+  it("should handle theme context", async () => {
+    render(<CalculadoraBalanceamento />)
+
+    // Verificar se o ThemeProvider é utilizado
+    expect(screen.getByText("ThemeProvider")).toBeInTheDocument()
+  })
+
+  it("should handle auth guard", async () => {
+    render(<CalculadoraBalanceamento />)
+
+    // Verificar se o AuthGuard é utilizado
+    expect(screen.getByText("AuthGuard")).toBeInTheDocument()
+  })
 })

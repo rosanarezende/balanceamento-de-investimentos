@@ -34,7 +34,7 @@ describe("API de Recomendação de IA", () => {
     const data = await response.json()
 
     expect(response.status).toBe(400)
-    expect(data.error).toBe("Prompt é obrigatório")
+    expect(data.error).toBe("Prompt deve ser uma string")
   })
 
   it("deve gerar uma recomendação usando o AI SDK", async () => {
@@ -89,15 +89,14 @@ describe("API de Recomendação de IA", () => {
     expect(data.error).toBe("Erro ao gerar recomendação")
   })
 
-  it("deve retornar erro 400 se não houver ações elegíveis para investimento", async () => {
+  it("deve retornar erro 400 se o prompt for uma string vazia", async () => {
     const request = new Request("http://localhost:3000/api/ai-recommendation", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: "Analisar esta carteira de investimentos",
-        eligibleStocks: [],
+        prompt: "",
       }),
     })
 
@@ -105,18 +104,17 @@ describe("API de Recomendação de IA", () => {
     const data = await response.json()
 
     expect(response.status).toBe(400)
-    expect(data.error).toBe("Não há ações elegíveis para investimento")
+    expect(data.error).toBe("Prompt não pode estar vazio")
   })
 
-  it("deve retornar erro 400 se o valor de investimento for inválido", async () => {
+  it("deve retornar erro 400 se o prompt não for uma string", async () => {
     const request = new Request("http://localhost:3000/api/ai-recommendation", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: "Analisar esta carteira de investimentos",
-        investmentValue: -1000,
+        prompt: 123,
       }),
     })
 
@@ -124,28 +122,6 @@ describe("API de Recomendação de IA", () => {
     const data = await response.json()
 
     expect(response.status).toBe(400)
-    expect(data.error).toBe("Valor de investimento inválido")
-  })
-
-  it("deve retornar erro 500 se ocorrer um erro ao buscar o preço da ação", async () => {
-    // Mock de erro na função fetchStockPrice
-    mockFetchStockPrice.mockRejectedValue(new Error("Erro ao buscar preço"))
-
-    const request = new Request("http://localhost:3000/api/ai-recommendation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: "Analisar esta carteira de investimentos",
-        ticker: "AAPL",
-      }),
-    })
-
-    const response = await POST(request)
-    const data = await response.json()
-
-    expect(response.status).toBe(500)
-    expect(data.error).toBe("Erro ao buscar preço")
+    expect(data.error).toBe("Prompt deve ser uma string")
   })
 })

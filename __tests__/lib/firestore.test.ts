@@ -1,5 +1,20 @@
-import { getUserPortfolio, updateStock, removeStock, updateUserRecommendation, saveSimulation, saveManualRecommendation } from "@/lib/firestore"
-import { doc, getDoc, updateDoc, deleteField, collection, addDoc } from "firebase/firestore"
+import {
+  getUserPortfolio,
+  updateStock,
+  removeStock,
+  updateUserRecommendation,
+  saveSimulation,
+  saveManualRecommendation,
+  getSimulations,
+  getSimulation,
+  getUserWatchlist,
+  addToWatchlist,
+  updateWatchlistItem,
+  removeFromWatchlist,
+  saveUserPreferences,
+  getUserPreferences,
+} from "@/lib/firestore"
+import { doc, getDoc, updateDoc, deleteField, collection, addDoc, setDoc, getDocs, query, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
 // Mock do Firebase Firestore
@@ -263,6 +278,488 @@ describe("Firestore", () => {
 
       // Verificar se a função lança um erro
       await expect(saveManualRecommendation("user123", recommendationData)).rejects.toThrow("Firestore error")
+    })
+  })
+
+  describe("getSimulations", () => {
+    it("should return simulations when user has simulations", async () => {
+      // Configurar o mock para simular simulações existentes
+      const mockSimulations = [
+        {
+          id: "sim1",
+          date: new Date("2023-01-01"),
+          investmentAmount: 1000,
+          portfolioValueBefore: 5000,
+          portfolioValueAfter: 6000,
+          allocations: [
+            {
+              ticker: "PETR4",
+              currentValue: 500,
+              currentPercentage: 10,
+              targetPercentage: 15,
+              currentQuantity: 10,
+              investmentAmount: 250,
+              newQuantity: 15,
+              quantityToAcquire: 5,
+              currentPrice: 50,
+              userRecommendation: "Comprar",
+            },
+          ],
+        },
+      ]
+      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+      ;(query as jest.Mock).mockReturnValueOnce("queryRef")
+      ;(getDocs as jest.Mock).mockResolvedValueOnce({
+        forEach: (callback: (doc: any) => void) => {
+          mockSimulations.forEach((simulation) => {
+            callback({
+              id: simulation.id,
+              data: () => ({
+                date: {
+                  toDate: () => simulation.date,
+                },
+                investmentAmount: simulation.investmentAmount,
+                portfolioValueBefore: simulation.portfolioValueBefore,
+                portfolioValueAfter: simulation.portfolioValueAfter,
+                allocations: simulation.allocations,
+              }),
+            })
+          })
+        },
+      })
+
+      const simulations = await getSimulations("user123")
+
+      // Verificar se collection foi chamado com os parâmetros corretos
+      expect(collection).toHaveBeenCalledWith(db, "users", "user123", "simulations")
+
+      // Verificar se query foi chamado com os parâmetros corretos
+      expect(query).toHaveBeenCalledWith("simulationsRef", orderBy("date", "desc"))
+
+      // Verificar se as simulações foram retornadas corretamente
+      expect(simulations).toEqual(mockSimulations)
+    })
+
+    it("should return empty array when user has no simulations", async () => {
+      // Configurar o mock para simular ausência de simulações
+      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+      ;(query as jest.Mock).mockReturnValueOnce("queryRef")
+      ;(getDocs as jest.Mock).mockResolvedValueOnce({
+        forEach: (callback: (doc: any) => void) => {
+          // Não chamar o callback para simular ausência de simulações
+        },
+      })
+
+      const simulations = await getSimulations("user123")
+
+      // Verificar se as simulações estão vazias
+      expect(simulations).toEqual([])
+    })
+
+    it("should throw error when getDocs fails", async () => {
+      // Configurar o mock para simular erro
+      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+      ;(query as jest.Mock).mockReturnValueOnce("queryRef")
+      ;(getDocs as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      // Verificar se a função lança um erro
+      await expect(getSimulations("user123")).rejects.toThrow("Firestore error")
+    })
+  })
+
+  describe("getSimulation", () => {
+    it("should return simulation when simulation exists", async () => {
+      // Configurar o mock para simular simulação existente
+      const mockSimulation = {
+        id: "sim1",
+        date: new Date("2023-01-01"),
+        investmentAmount: 1000,
+        portfolioValueBefore: 5000,
+        portfolioValueAfter: 6000,
+        allocations: [
+          {
+            ticker: "PETR4",
+            currentValue: 500,
+            currentPercentage: 10,
+            targetPercentage: 15,
+            currentQuantity: 10,
+            investmentAmount: 250,
+            newQuantity: 15,
+            quantityToAcquire: 5,
+            currentPrice: 50,
+            userRecommendation: "Comprar",
+          },
+        ],
+      }
+      ;(doc as jest.Mock).mockReturnValueOnce("simulationRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          date: {
+            toDate: () => mockSimulation.date,
+          },
+          investmentAmount: mockSimulation.investmentAmount,
+          portfolioValueBefore: mockSimulation.portfolioValueBefore,
+          portfolioValueAfter: mockSimulation.portfolioValueAfter,
+          allocations: mockSimulation.allocations,
+        }),
+      })
+
+      const simulation = await getSimulation("user123", "sim1")
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123", "simulations", "sim1")
+
+      // Verificar se a simulação foi retornada corretamente
+      expect(simulation).toEqual(mockSimulation)
+    })
+
+    it("should return null when simulation does not exist", async () => {
+      // Configurar o mock para simular ausência de simulação
+      ;(doc as jest.Mock).mockReturnValueOnce("simulationRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => false,
+      })
+
+      const simulation = await getSimulation("user123", "sim1")
+
+      // Verificar se a simulação é nula
+      expect(simulation).toBeNull()
+    })
+
+    it("should throw error when getDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("simulationRef")
+      ;(getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      // Verificar se a função lança um erro
+      await expect(getSimulation("user123", "sim1")).rejects.toThrow("Firestore error")
+    })
+  })
+
+  describe("getUserWatchlist", () => {
+    it("should return watchlist when user has watchlist", async () => {
+      // Configurar o mock para simular watchlist existente
+      const mockWatchlist = {
+        PETR4: { targetPrice: 50, notes: "Comprar quando atingir R$ 50" },
+      }
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ watchlist: mockWatchlist }),
+      })
+
+      const watchlist = await getUserWatchlist("user123")
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123")
+
+      // Verificar se getDoc foi chamado com a referência correta
+      expect(getDoc).toHaveBeenCalledWith("userRef")
+
+      // Verificar se a watchlist foi retornada corretamente
+      expect(watchlist).toEqual([
+        { ticker: "PETR4", targetPrice: 50, notes: "Comprar quando atingir R$ 50" },
+      ])
+    })
+
+    it("should return empty array when user has no watchlist", async () => {
+      // Configurar o mock para simular ausência de watchlist
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({}),
+      })
+
+      const watchlist = await getUserWatchlist("user123")
+
+      // Verificar se a watchlist está vazia
+      expect(watchlist).toEqual([])
+    })
+
+    it("should return empty array when user does not exist", async () => {
+      // Configurar o mock para simular usuário inexistente
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => false,
+      })
+
+      const watchlist = await getUserWatchlist("user123")
+
+      // Verificar se a watchlist está vazia
+      expect(watchlist).toEqual([])
+    })
+
+    it("should throw error when getDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      // Verificar se a função lança um erro
+      await expect(getUserWatchlist("user123")).rejects.toThrow("Firestore error")
+    })
+  })
+
+  describe("addToWatchlist", () => {
+    it("should add item to watchlist correctly", async () => {
+      // Configurar o mock
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+
+      const watchlistItem = {
+        ticker: "PETR4",
+        targetPrice: 50,
+        notes: "Comprar quando atingir R$ 50",
+      }
+
+      await addToWatchlist("user123", watchlistItem)
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123")
+
+      // Verificar se updateDoc foi chamado com os parâmetros corretos
+      expect(updateDoc).toHaveBeenCalledWith("userRef", {
+        "watchlist.PETR4": {
+          targetPrice: 50,
+          notes: "Comprar quando atingir R$ 50",
+        },
+      })
+    })
+
+    it("should throw error when updateDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      const watchlistItem = {
+        ticker: "PETR4",
+        targetPrice: 50,
+        notes: "Comprar quando atingir R$ 50",
+      }
+
+      // Verificar se a função lança um erro
+      await expect(addToWatchlist("user123", watchlistItem)).rejects.toThrow("Firestore error")
+    })
+  })
+
+  describe("updateWatchlistItem", () => {
+    it("should update watchlist item correctly", async () => {
+      // Configurar o mock
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+
+      const watchlistItem = {
+        targetPrice: 55,
+        notes: "Atualizar preço alvo para R$ 55",
+      }
+
+      await updateWatchlistItem("user123", "PETR4", watchlistItem)
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123")
+
+      // Verificar se updateDoc foi chamado com os parâmetros corretos
+      expect(updateDoc).toHaveBeenCalledWith("userRef", {
+        "watchlist.PETR4": {
+          targetPrice: 55,
+          notes: "Atualizar preço alvo para R$ 55",
+        },
+      })
+    })
+
+    it("should throw error when updateDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      const watchlistItem = {
+        targetPrice: 55,
+        notes: "Atualizar preço alvo para R$ 55",
+      }
+
+      // Verificar se a função lança um erro
+      await expect(updateWatchlistItem("user123", "PETR4", watchlistItem)).rejects.toThrow("Firestore error")
+    })
+  })
+
+  describe("removeFromWatchlist", () => {
+    it("should remove item from watchlist correctly", async () => {
+      // Configurar o mock
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+
+      await removeFromWatchlist("user123", "PETR4")
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123")
+
+      // Verificar se deleteField foi chamado
+      expect(deleteField).toHaveBeenCalled()
+
+      // Verificar se updateDoc foi chamado com os parâmetros corretos
+      expect(updateDoc).toHaveBeenCalledWith("userRef", {
+        "watchlist.PETR4": "DELETE_FIELD",
+      })
+    })
+
+    it("should throw error when updateDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      // Verificar se a função lança um erro
+      await expect(removeFromWatchlist("user123", "PETR4")).rejects.toThrow("Firestore error")
+    })
+  })
+
+  describe("saveUserPreferences", () => {
+    it("should save user preferences correctly", async () => {
+      // Configurar o mock
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+      })
+      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+
+      const preferences = {
+        theme: "dark",
+      }
+
+      await saveUserPreferences("user123", preferences)
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123")
+
+      // Verificar se getDoc foi chamado com a referência correta
+      expect(getDoc).toHaveBeenCalledWith("userRef")
+
+      // Verificar se updateDoc foi chamado com os parâmetros corretos
+      expect(updateDoc).toHaveBeenCalledWith("userRef", {
+        preferences,
+      })
+    })
+
+    it("should create new user document if it does not exist", async () => {
+      // Configurar o mock para simular ausência de documento do usuário
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => false,
+      })
+      ;(setDoc as jest.Mock).mockResolvedValueOnce(undefined)
+
+      const preferences = {
+        theme: "dark",
+      }
+
+      await saveUserPreferences("user123", preferences)
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123")
+
+      // Verificar se getDoc foi chamado com a referência correta
+      expect(getDoc).toHaveBeenCalledWith("userRef")
+
+      // Verificar se setDoc foi chamado com os parâmetros corretos
+      expect(setDoc).toHaveBeenCalledWith("userRef", {
+        preferences,
+        portfolio: {},
+        watchlist: {},
+      })
+    })
+
+    it("should throw error when updateDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+      })
+      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      const preferences = {
+        theme: "dark",
+      }
+
+      // Verificar se a função lança um erro
+      await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Firestore error")
+    })
+
+    it("should throw error when setDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => false,
+      })
+      ;(setDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      const preferences = {
+        theme: "dark",
+      }
+
+      // Verificar se a função lança um erro
+      await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Firestore error")
+    })
+  })
+
+  describe("getUserPreferences", () => {
+    it("should return user preferences when user has preferences", async () => {
+      // Configurar o mock para simular preferências existentes
+      const mockPreferences = {
+        theme: "dark",
+      }
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ preferences: mockPreferences }),
+      })
+
+      const preferences = await getUserPreferences("user123")
+
+      // Verificar se doc foi chamado com os parâmetros corretos
+      expect(doc).toHaveBeenCalledWith(db, "users", "user123")
+
+      // Verificar se getDoc foi chamado com a referência correta
+      expect(getDoc).toHaveBeenCalledWith("userRef")
+
+      // Verificar se as preferências foram retornadas corretamente
+      expect(preferences).toEqual(mockPreferences)
+    })
+
+    it("should return null when user has no preferences", async () => {
+      // Configurar o mock para simular ausência de preferências
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({}),
+      })
+
+      const preferences = await getUserPreferences("user123")
+
+      // Verificar se as preferências são nulas
+      expect(preferences).toBeNull()
+    })
+
+    it("should return null when user does not exist", async () => {
+      // Configurar o mock para simular usuário inexistente
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => false,
+      })
+
+      const preferences = await getUserPreferences("user123")
+
+      // Verificar se as preferências são nulas
+      expect(preferences).toBeNull()
+    })
+
+    it("should throw error when getDoc fails", async () => {
+      // Configurar o mock para simular erro
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+
+      // Verificar se a função lança um erro
+      await expect(getUserPreferences("user123")).rejects.toThrow("Firestore error")
     })
   })
 })

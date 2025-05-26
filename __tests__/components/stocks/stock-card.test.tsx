@@ -1,24 +1,21 @@
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { StockCard } from "@/components/stocks/stock-card"
 import { formatCurrency } from "@/lib/utils"
-import { calculatePortfolioDetails } from "@/lib/client-utils/calculate-portfolio-details"
+import { fetchDailyChange } from "@/lib/api"
 
 // Mock da função formatCurrency
 jest.mock("@/lib/utils", () => ({
   formatCurrency: jest.fn((value) => `R$ ${value.toFixed(2)}`),
 }))
 
-// Mock da função calculatePortfolioDetails
-jest.mock("@/lib/client-utils/calculate-portfolio-details", () => ({
-  calculatePortfolioDetails: jest.fn((portfolio) => ({
-    totalValue: 1000,
-    totalPercentage: 100,
-    stocks: portfolio.map(stock => ({
-      ...stock,
-      currentValue: stock.quantity * stock.currentPrice,
-      currentPercentage: (stock.quantity * stock.currentPrice) / 1000 * 100,
-    })),
-  })),
+// Mock da função fetchDailyChange
+jest.mock("@/lib/api", () => ({
+  fetchDailyChange: jest.fn(async (ticker) => {
+    if (ticker === "PETR4") {
+      return { change: 1.5, changePercentage: 3 }
+    }
+    return { change: 0, changePercentage: 0 }
+  }),
 }))
 
 describe("StockCard", () => {
@@ -31,11 +28,12 @@ describe("StockCard", () => {
     toBuy: 250,
     excess: 0,
     currentPrice: 50,
-    dailyChange: 25,
-    dailyChangePercentage: 5,
+    dailyChange: 1.5,
+    dailyChangePercentage: 3,
     userRecommendation: "Comprar",
     onEdit: jest.fn(),
     onDelete: jest.fn(),
+    loading: false,
   }
 
   beforeEach(() => {
@@ -61,7 +59,7 @@ describe("StockCard", () => {
     expect(screen.getByText("15.00%")).toBeInTheDocument()
 
     // Verificar se o valor a comprar é exibido
-    expect(screen.getByText(/a comprar/i)).toBeInTheDocument()
+    expect(screen.getByText(/abaixo da meta/i)).toBeInTheDocument()
     expect(formatCurrency).toHaveBeenCalledWith(250)
 
     // Verificar se o preço atual é exibido
@@ -76,7 +74,7 @@ describe("StockCard", () => {
     render(<StockCard {...defaultProps} toBuy={0} excess={100} />)
 
     // Verificar se o excesso é exibido
-    expect(screen.getByText(/excesso/i)).toBeInTheDocument()
+    expect(screen.getByText(/acima da meta/i)).toBeInTheDocument()
     expect(formatCurrency).toHaveBeenCalledWith(100)
   })
 
@@ -100,54 +98,45 @@ describe("StockCard", () => {
     expect(defaultProps.onDelete).toHaveBeenCalled()
   })
 
-  it("should display positive daily change correctly", () => {
+  it("should display positive daily change correctly", async () => {
     render(<StockCard {...defaultProps} />)
 
     // Verificar se a variação diária positiva é exibida corretamente
-    const dailyChange = screen.getByText(/\+R\$ 25\.00/i)
-    expect(dailyChange).toBeInTheDocument()
-    expect(dailyChange).toHaveClass("text-green-500")
-
-    // Verificar se o percentual de variação diária positiva é exibido corretamente
-    const dailyChangePercentage = screen.getByText(/\+5\.00%/i)
-    expect(dailyChangePercentage).toBeInTheDocument()
-    expect(dailyChangePercentage).toHaveClass("text-green-500")
+    await waitFor(() => {
+      const dailyChange = screen.getByText("3.00%")
+      expect(dailyChange).toBeInTheDocument()
+      expect(dailyChange).toHaveClass("text-state-success")
+    })
   })
 
-  it("should display negative daily change correctly", () => {
-    render(<StockCard {...defaultProps} dailyChange={-25} dailyChangePercentage={-5} />)
+  it("should display negative daily change correctly", async () => {
+    render(<StockCard {...defaultProps} dailyChange={-1.5} dailyChangePercentage={-3} />)
 
     // Verificar se a variação diária negativa é exibida corretamente
-    const dailyChange = screen.getByText(/-R\$ 25\.00/i)
-    expect(dailyChange).toBeInTheDocument()
-    expect(dailyChange).toHaveClass("text-red-500")
-
-    // Verificar se o percentual de variação diária negativa é exibido corretamente
-    const dailyChangePercentage = screen.getByText(/-5\.00%/i)
-    expect(dailyChangePercentage).toBeInTheDocument()
-    expect(dailyChangePercentage).toHaveClass("text-red-500")
+    await waitFor(() => {
+      const dailyChange = screen.getByText("3.00%")
+      expect(dailyChange).toBeInTheDocument()
+      expect(dailyChange).toHaveClass("text-state-error")
+    })
   })
 
-  it("should memoize calculatePortfolioDetails function", () => {
-    const portfolio = [
-      { ticker: "PETR4", quantity: 10, currentPrice: 50 },
-      { ticker: "VALE3", quantity: 5, currentPrice: 100 },
-    ]
+  it("should display loading state correctly", () => {
+    render(<StockCard {...defaultProps} loading={true} />)
 
-    // Primeira chamada
-    calculatePortfolioDetails(portfolio)
-    expect(calculatePortfolioDetails).toHaveBeenCalledTimes(1)
+    // Verificar se o indicador de carregamento é exibido
+    expect(screen.getByRole("status")).toBeInTheDocument()
+  })
 
-    // Segunda chamada com os mesmos dados
-    calculatePortfolioDetails(portfolio)
-    expect(calculatePortfolioDetails).toHaveBeenCalledTimes(1)
+  it("should fetch daily change on mount", async () => {
+    render(<StockCard {...defaultProps} />)
 
-    // Terceira chamada com dados diferentes
-    const newPortfolio = [
-      { ticker: "PETR4", quantity: 10, currentPrice: 50 },
-      { ticker: "VALE3", quantity: 5, currentPrice: 110 },
-    ]
-    calculatePortfolioDetails(newPortfolio)
-    expect(calculatePortfolioDetails).toHaveBeenCalledTimes(2)
+    // Verificar se fetchDailyChange foi chamado
+    expect(fetchDailyChange).toHaveBeenCalledWith("PETR4")
+
+    // Verificar se a variação diária é exibida corretamente
+    await waitFor(() => {
+      const dailyChange = screen.getByText("3.00%")
+      expect(dailyChange).toBeInTheDocument()
+    })
   })
 })

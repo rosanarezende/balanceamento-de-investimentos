@@ -209,4 +209,100 @@ describe("AuthContext", () => {
       })
     })
   })
+
+  it("should handle sign out error", async () => {
+    // Configurar o mock para simular erro de logout
+    const mockError = new Error("Logout Error")
+    ;(signOut as jest.Mock).mockRejectedValueOnce(mockError)
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("loading").textContent).toBe("Not Loading")
+    })
+
+    // Clicar no botão de logout
+    await act(async () => {
+      userEvent.click(screen.getByTestId("logout-btn"))
+    })
+
+    // Verificar se o erro foi definido
+    await waitFor(() => {
+      expect(screen.getByTestId("error").textContent).toContain("Erro ao fazer logout")
+    })
+
+    // Clicar no botão de limpar erro
+    await act(async () => {
+      userEvent.click(screen.getByTestId("clear-error-btn"))
+    })
+
+    // Verificar se o erro foi limpo
+    expect(screen.getByTestId("error").textContent).toBe("No Error")
+  })
+
+  it("should handle user state change", async () => {
+    // Mock de usuário autenticado
+    const mockUser = { uid: "123", email: "test@example.com", displayName: "Test User" }
+
+    // Configurar o mock para simular mudança de estado de autenticação
+    ;(signInWithPopup as jest.Mock).mockResolvedValueOnce({
+      user: mockUser,
+    })
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("loading").textContent).toBe("Not Loading")
+    })
+
+    // Simular mudança de estado de autenticação
+    act(() => {
+      const callback = (onAuthStateChanged as jest.Mock).mock.calls[0][1]
+      callback(mockUser)
+    })
+
+    // Verificar se o usuário foi atualizado
+    await waitFor(() => {
+      expect(screen.getByTestId("user").textContent).toBe(mockUser.email)
+    })
+  })
+
+  it("should handle user state change error", async () => {
+    // Configurar o mock para simular erro de mudança de estado de autenticação
+    const mockError = new Error("Auth State Change Error")
+    ;(onAuthStateChanged as jest.Mock).mockImplementationOnce((auth, callback) => {
+      throw mockError
+    })
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("loading").textContent).toBe("Not Loading")
+    })
+
+    // Verificar se o erro foi definido
+    await waitFor(() => {
+      expect(screen.getByTestId("error").textContent).toContain("Erro ao verificar autenticação")
+    })
+
+    // Clicar no botão de limpar erro
+    await act(async () => {
+      userEvent.click(screen.getByTestId("clear-error-btn"))
+    })
+
+    // Verificar se o erro foi limpo
+    expect(screen.getByTestId("error").textContent).toBe("No Error")
+  })
 })

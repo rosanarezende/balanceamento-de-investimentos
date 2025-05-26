@@ -261,4 +261,103 @@ describe("Portfolio Flow Integration", () => {
     // Verificar se a mensagem de "sem ativos para compra" é exibida
     expect(screen.getByText("Não há ativos marcados como 'Comprar' na sua carteira. Adicione recomendações aos seus ativos.")).toBeInTheDocument()
   })
+
+  it("should handle adding a new stock", async () => {
+    render(
+      <AuthProvider>
+        <ThemeProvider>
+          <StockList />
+        </ThemeProvider>
+      </AuthProvider>,
+    )
+
+    // Clicar no botão de adicionar ativo
+    fireEvent.click(screen.getByText("Adicionar Ativo"))
+
+    // Verificar se o modal de adição é exibido
+    await waitFor(() => {
+      expect(screen.getByText("Adicionar Ativo")).toBeInTheDocument()
+    })
+
+    // Preencher o formulário de adição
+    fireEvent.change(screen.getByLabelText("Ticker"), { target: { value: "ITUB4" } })
+    fireEvent.change(screen.getByLabelText("Quantidade"), { target: { value: "20" } })
+    fireEvent.change(screen.getByLabelText("Percentual Meta"), { target: { value: "15" } })
+    fireEvent.change(screen.getByLabelText("Recomendação"), { target: { value: "Comprar" } })
+
+    // Submeter o formulário
+    fireEvent.click(screen.getByText("Adicionar"))
+
+    // Verificar se addOrUpdateStock foi chamado com os parâmetros corretos
+    await waitFor(() => {
+      expect(mockPortfolioHook.addOrUpdateStock).toHaveBeenCalledWith("ITUB4", {
+        quantity: 20,
+        targetPercentage: 15,
+        userRecommendation: "Comprar",
+      })
+    })
+  })
+
+  it("should handle updating an existing stock", async () => {
+    render(
+      <AuthProvider>
+        <ThemeProvider>
+          <StockList />
+        </ThemeProvider>
+      </AuthProvider>,
+    )
+
+    // Clicar no botão de editar de uma ação
+    const editButtons = screen.getAllByLabelText(/editar/i)
+    fireEvent.click(editButtons[0]) // Editar PETR4
+
+    // Verificar se o modal de edição é exibido com os dados corretos
+    await waitFor(() => {
+      expect(screen.getByText("Editar Ativo")).toBeInTheDocument()
+    })
+
+    // Atualizar o formulário de edição
+    fireEvent.change(screen.getByLabelText("Quantidade"), { target: { value: "15" } })
+    fireEvent.change(screen.getByLabelText("Percentual Meta"), { target: { value: "25" } })
+
+    // Submeter o formulário
+    fireEvent.click(screen.getByText("Salvar"))
+
+    // Verificar se addOrUpdateStock foi chamado com os parâmetros corretos
+    await waitFor(() => {
+      expect(mockPortfolioHook.addOrUpdateStock).toHaveBeenCalledWith("PETR4", {
+        quantity: 15,
+        targetPercentage: 25,
+        userRecommendation: "Comprar",
+      })
+    })
+  })
+
+  it("should handle deleting a stock", async () => {
+    render(
+      <AuthProvider>
+        <ThemeProvider>
+          <StockList />
+        </ThemeProvider>
+      </AuthProvider>,
+    )
+
+    // Clicar no botão de excluir de uma ação
+    const deleteButtons = screen.getAllByLabelText(/excluir/i)
+    fireEvent.click(deleteButtons[0]) // Excluir PETR4
+
+    // Verificar se o modal de confirmação é exibido
+    await waitFor(() => {
+      expect(screen.getByText("Excluir Ativo")).toBeInTheDocument()
+      expect(screen.getByText(/Tem certeza que deseja excluir PETR4/i)).toBeInTheDocument()
+    })
+
+    // Confirmar a exclusão
+    fireEvent.click(screen.getByText("Excluir"))
+
+    // Verificar se removeStockFromPortfolio foi chamado
+    await waitFor(() => {
+      expect(mockPortfolioHook.removeStockFromPortfolio).toHaveBeenCalledWith("PETR4")
+    })
+  })
 })

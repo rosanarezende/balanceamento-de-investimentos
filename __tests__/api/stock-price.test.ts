@@ -71,7 +71,7 @@ describe("Stock Price API", () => {
     const request = new NextRequest("http://localhost:3000/api/stock-price", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+: "application/json",
       },
       body: JSON.stringify({
         investmentValue: -1000,
@@ -119,5 +119,37 @@ describe("Stock Price API", () => {
 
     expect(response.status).toBe(400)
     expect(data.error).toBe("Valor de investimento deve ser numérico")
+  })
+
+  it("deve retornar erro 500 se ocorrer um erro ao buscar o preço da ação", async () => {
+    mockedFetchStockPriceServer.mockRejectedValueOnce(new Error("Erro ao buscar preço"))
+
+    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=PETR4")
+    const response = await GET(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(500)
+    expect(data).toHaveProperty("error")
+    expect(data.error).toBe("Erro ao buscar preço")
+  })
+
+  it("deve retornar erro 400 se o ticker for uma string vazia", async () => {
+    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=")
+    const response = await GET(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data).toHaveProperty("error")
+    expect(data.error).toBe("Ticker não fornecido")
+  })
+
+  it("deve retornar erro 400 se o ticker não for uma string", async () => {
+    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=123")
+    const response = await GET(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data).toHaveProperty("error")
+    expect(data.error).toBe("Ticker não fornecido")
   })
 })
