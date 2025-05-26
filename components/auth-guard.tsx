@@ -1,54 +1,36 @@
 "use client"
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
-import { usePreviewAuth } from "@/contexts/preview-auth-context"
+import { Skeleton } from "@/components/ui/skeleton"
 
+// Componente para proteger rotas que exigem autenticação
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user: authUser, loading: authLoading } = useAuth()
-  const { user: previewUser, loading: previewLoading } = usePreviewAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
-  const pathname = usePathname()
-  const [isAuthorized, setIsAuthorized] = useState(false)
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-
-    // Só verificamos a autenticação quando o loading terminar
-    if (!authLoading && !previewLoading) {
-      const user = authUser || previewUser
-      if (!user && pathname !== "/login") {
-        router.push("/login")
-      } else if (user) {
-        setIsAuthorized(true)
-      }
+    // Se não estiver carregando e não houver usuário, redirecionar para login
+    if (!loading && !user) {
+      router.push("/login")
     }
-  }, [authUser, previewUser, authLoading, previewLoading, router, pathname])
+  }, [user, loading, router])
 
-  useEffect(() => {
-    // Fetch user data on component mount
-    if (authUser) {
-      // Fetch user data logic here
-    }
-  }, [authUser])
-
-  // Durante a renderização no servidor ou antes da montagem, retornamos um placeholder
-  if (!mounted || authLoading || previewLoading) {
+  // Mostrar esqueleto de carregamento enquanto verifica autenticação
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="w-full h-screen flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-4">
+          <Skeleton className="h-8 w-3/4 mx-auto" />
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-8 w-1/2 mx-auto" />
+        </div>
       </div>
     )
   }
 
-  // Se estiver na página de login ou autorizado, renderiza o conteúdo
-  if (pathname === "/login" || isAuthorized) {
-    return <>{children}</>
-  }
-
-  // Caso contrário, não renderiza nada (redirecionando para login)
-  return null
+  // Se não estiver carregando e houver usuário, renderizar o conteúdo protegido
+  return user ? <>{children}</> : null
 }

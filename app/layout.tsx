@@ -5,6 +5,7 @@ import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/contexts/theme-context"
 import { PreviewAuthProvider } from "@/contexts/preview-auth-context"
+import { ToastContainer } from "@/components/ui/toast-container"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -27,7 +28,10 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
           <PreviewAuthProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              {children}
+              <ToastContainer />
+            </ThemeProvider>
           </PreviewAuthProvider>
         </AuthProvider>
       </body>
