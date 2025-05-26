@@ -34,11 +34,11 @@ describe("Firestore", () => {
       const mockPortfolio = {
         PETR4: { quantity: 10, targetPercentage: 20, userRecommendation: "Comprar" },
       }
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({ portfolio: mockPortfolio }),
-      })
+        ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+          data: () => ({ portfolio: mockPortfolio }),
+        })
 
       const portfolio = await getUserPortfolio("user123")
 
@@ -54,10 +54,10 @@ describe("Firestore", () => {
 
     it("should return empty object when user does not exist", async () => {
       // Configurar o mock para simular usuário inexistente
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => false,
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => false,
+        })
 
       const portfolio = await getUserPortfolio("user123")
 
@@ -67,11 +67,11 @@ describe("Firestore", () => {
 
     it("should return empty object when portfolio is undefined", async () => {
       // Configurar o mock para simular portfólio indefinido
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({}),
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+          data: () => ({}),
+        })
 
       const portfolio = await getUserPortfolio("user123")
 
@@ -81,8 +81,8 @@ describe("Firestore", () => {
 
     it("should throw error when getDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
       await expect(getUserPortfolio("user123")).rejects.toThrow("Firestore error")
@@ -94,10 +94,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       await expect(getUserPortfolio("user123")).rejects.toThrow("Unexpected Error")
     })
@@ -106,8 +106,8 @@ describe("Firestore", () => {
   describe("updateStock", () => {
     it("should update stock correctly", async () => {
       // Configurar o mock
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
 
       const stockData = {
         quantity: 10,
@@ -128,8 +128,8 @@ describe("Firestore", () => {
 
     it("should throw error when updateDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       const stockData = {
         quantity: 10,
@@ -173,10 +173,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       const stockData = {
         quantity: 10,
@@ -191,9 +191,9 @@ describe("Firestore", () => {
   describe("removeStock", () => {
     it("should remove stock correctly", async () => {
       // Configurar o mock
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
-      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+        ; (deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
 
       await removeStock("user123", "PETR4")
 
@@ -211,9 +211,9 @@ describe("Firestore", () => {
 
     it("should throw error when updateDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
-      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+        ; (updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
       await expect(removeStock("user123", "PETR4")).rejects.toThrow("Firestore error")
@@ -229,11 +229,11 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
-      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+        ; (updateDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       await expect(removeStock("user123", "PETR4")).rejects.toThrow("Unexpected Error")
     })
@@ -242,8 +242,8 @@ describe("Firestore", () => {
   describe("updateUserRecommendation", () => {
     it("should update recommendation correctly", async () => {
       // Configurar o mock
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
 
       await updateUserRecommendation("user123", "PETR4", "Vender")
 
@@ -258,8 +258,8 @@ describe("Firestore", () => {
 
     it("should throw error when updateDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
       await expect(updateUserRecommendation("user123", "PETR4", "Vender")).rejects.toThrow("Firestore error")
@@ -279,10 +279,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       await expect(updateUserRecommendation("user123", "PETR4", "Vender")).rejects.toThrow("Unexpected Error")
     })
@@ -291,8 +291,8 @@ describe("Firestore", () => {
   describe("saveSimulation", () => {
     it("should save simulation correctly", async () => {
       // Configurar o mock
-      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
-      ;(addDoc as jest.Mock).mockResolvedValueOnce({ id: "sim123" })
+      ; (collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+        ; (addDoc as jest.Mock).mockResolvedValueOnce({ id: "sim123" })
 
       const simulation = {
         date: new Date("2023-01-01"),
@@ -329,8 +329,8 @@ describe("Firestore", () => {
 
     it("should throw error when addDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
-      ;(addDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+        ; (addDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       const simulation = {
         date: new Date(),
@@ -370,10 +370,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
-      ;(addDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+        ; (addDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       const simulation = {
         date: new Date(),
@@ -390,15 +390,15 @@ describe("Firestore", () => {
   describe("saveManualRecommendation", () => {
     it("should save manual recommendation correctly", async () => {
       // Configurar o mock
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
 
       const recommendationData = {
         ticker: "PETR4",
         recommendation: "Comprar",
       }
 
-      await saveManualRecommendation("user123", recommendationData)
+      await saveManualRecommendation("user123", "PETR4", "Comprar")
 
       // Verificar se doc foi chamado com os parâmetros corretos
       expect(doc).toHaveBeenCalledWith(db, "users", "user123")
@@ -411,49 +411,29 @@ describe("Firestore", () => {
 
     it("should throw error when updateDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
-
-      const recommendationData = {
-        ticker: "PETR4",
-        recommendation: "Comprar",
-      }
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
-      await expect(saveManualRecommendation("user123", recommendationData)).rejects.toThrow("Firestore error")
+      await expect(saveManualRecommendation("user123", "PETR4", "Comprar")).rejects.toThrow("Firestore error")
     })
 
     // New tests for edge cases and error handling
     it("should handle invalid userId", async () => {
-      const recommendationData = {
-        ticker: "PETR4",
-        recommendation: "Comprar",
-      }
-
-      await expect(saveManualRecommendation("", recommendationData)).rejects.toThrow("userId não pode estar vazio")
+      await expect(saveManualRecommendation("", "PETR4", "Comprar")).rejects.toThrow("userId não pode estar vazio")
     })
 
     it("should handle invalid recommendation data", async () => {
-      const recommendationData = {
-        ticker: "PETR4",
-        recommendation: "Invalid",
-      }
-
-      await expect(saveManualRecommendation("user123", recommendationData)).rejects.toThrow("Recomendação inválida")
+      await expect(saveManualRecommendation("user123", "PETR4", "Invalid")).rejects.toThrow("Recomendação inválida")
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
-      const recommendationData = {
-        ticker: "PETR4",
-        recommendation: "Comprar",
-      }
-
-      await expect(saveManualRecommendation("user123", recommendationData)).rejects.toThrow("Unexpected Error")
+      await expect(saveManualRecommendation("user123", "PETR4", "Comprar")).rejects.toThrow("Unexpected Error")
     })
   })
 
@@ -483,26 +463,27 @@ describe("Firestore", () => {
           ],
         },
       ]
-      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
-      ;(query as jest.Mock).mockReturnValueOnce("queryRef")
-      ;(getDocs as jest.Mock).mockResolvedValueOnce({
-        forEach: (callback: (doc: any) => void) => {
-          mockSimulations.forEach((simulation) => {
-            callback({
-              id: simulation.id,
-              data: () => ({
-                date: {
-                  toDate: () => simulation.date,
-                },
-                investmentAmount: simulation.investmentAmount,
-                portfolioValueBefore: simulation.portfolioValueBefore,
-                portfolioValueAfter: simulation.portfolioValueAfter,
-                allocations: simulation.allocations,
-              }),
+        ; (collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+        ; (query as jest.Mock).mockReturnValueOnce("queryRef")
+        ; (getDocs as jest.Mock).mockResolvedValueOnce({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          forEach: (callback: (doc: any) => void) => {
+            mockSimulations.forEach((simulation) => {
+              callback({
+                id: simulation.id,
+                data: () => ({
+                  date: {
+                    toDate: () => simulation.date,
+                  },
+                  investmentAmount: simulation.investmentAmount,
+                  portfolioValueBefore: simulation.portfolioValueBefore,
+                  portfolioValueAfter: simulation.portfolioValueAfter,
+                  allocations: simulation.allocations,
+                }),
+              })
             })
-          })
-        },
-      })
+          },
+        })
 
       const simulations = await getSimulations("user123")
 
@@ -518,13 +499,13 @@ describe("Firestore", () => {
 
     it("should return empty array when user has no simulations", async () => {
       // Configurar o mock para simular ausência de simulações
-      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
-      ;(query as jest.Mock).mockReturnValueOnce("queryRef")
-      ;(getDocs as jest.Mock).mockResolvedValueOnce({
-        forEach: (callback: (doc: any) => void) => {
-          // Não chamar o callback para simular ausência de simulações
-        },
-      })
+      ; (collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+        ; (query as jest.Mock).mockReturnValueOnce("queryRef")
+        ; (getDocs as jest.Mock).mockResolvedValueOnce({
+          forEach: () => {
+            // Não chamar o callback para simular ausência de simulações
+          },
+        })
 
       const simulations = await getSimulations("user123")
 
@@ -534,9 +515,9 @@ describe("Firestore", () => {
 
     it("should throw error when getDocs fails", async () => {
       // Configurar o mock para simular erro
-      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
-      ;(query as jest.Mock).mockReturnValueOnce("queryRef")
-      ;(getDocs as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+        ; (query as jest.Mock).mockReturnValueOnce("queryRef")
+        ; (getDocs as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
       await expect(getSimulations("user123")).rejects.toThrow("Firestore error")
@@ -548,11 +529,11 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
-      ;(query as jest.Mock).mockReturnValueOnce("queryRef")
-      ;(getDocs as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+        ; (query as jest.Mock).mockReturnValueOnce("queryRef")
+        ; (getDocs as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       await expect(getSimulations("user123")).rejects.toThrow("Unexpected Error")
     })
@@ -582,19 +563,19 @@ describe("Firestore", () => {
           },
         ],
       }
-      ;(doc as jest.Mock).mockReturnValueOnce("simulationRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({
-          date: {
-            toDate: () => mockSimulation.date,
-          },
-          investmentAmount: mockSimulation.investmentAmount,
-          portfolioValueBefore: mockSimulation.portfolioValueBefore,
-          portfolioValueAfter: mockSimulation.portfolioValueAfter,
-          allocations: mockSimulation.allocations,
-        }),
-      })
+        ; (doc as jest.Mock).mockReturnValueOnce("simulationRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+          data: () => ({
+            date: {
+              toDate: () => mockSimulation.date,
+            },
+            investmentAmount: mockSimulation.investmentAmount,
+            portfolioValueBefore: mockSimulation.portfolioValueBefore,
+            portfolioValueAfter: mockSimulation.portfolioValueAfter,
+            allocations: mockSimulation.allocations,
+          }),
+        })
 
       const simulation = await getSimulation("user123", "sim1")
 
@@ -607,10 +588,10 @@ describe("Firestore", () => {
 
     it("should return null when simulation does not exist", async () => {
       // Configurar o mock para simular ausência de simulação
-      ;(doc as jest.Mock).mockReturnValueOnce("simulationRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => false,
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("simulationRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => false,
+        })
 
       const simulation = await getSimulation("user123", "sim1")
 
@@ -620,8 +601,8 @@ describe("Firestore", () => {
 
     it("should throw error when getDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("simulationRef")
-      ;(getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("simulationRef")
+        ; (getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
       await expect(getSimulation("user123", "sim1")).rejects.toThrow("Firestore error")
@@ -637,10 +618,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("simulationRef")
-      ;(getDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("simulationRef")
+        ; (getDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       await expect(getSimulation("user123", "sim1")).rejects.toThrow("Unexpected Error")
     })
@@ -652,11 +633,11 @@ describe("Firestore", () => {
       const mockWatchlist = {
         PETR4: { targetPrice: 50, notes: "Comprar quando atingir R$ 50" },
       }
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({ watchlist: mockWatchlist }),
-      })
+        ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+          data: () => ({ watchlist: mockWatchlist }),
+        })
 
       const watchlist = await getUserWatchlist("user123")
 
@@ -674,11 +655,11 @@ describe("Firestore", () => {
 
     it("should return empty array when user has no watchlist", async () => {
       // Configurar o mock para simular ausência de watchlist
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({}),
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+          data: () => ({}),
+        })
 
       const watchlist = await getUserWatchlist("user123")
 
@@ -688,10 +669,10 @@ describe("Firestore", () => {
 
     it("should return empty array when user does not exist", async () => {
       // Configurar o mock para simular usuário inexistente
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => false,
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => false,
+        })
 
       const watchlist = await getUserWatchlist("user123")
 
@@ -701,8 +682,8 @@ describe("Firestore", () => {
 
     it("should throw error when getDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
       await expect(getUserWatchlist("user123")).rejects.toThrow("Firestore error")
@@ -714,10 +695,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       await expect(getUserWatchlist("user123")).rejects.toThrow("Unexpected Error")
     })
@@ -726,8 +707,8 @@ describe("Firestore", () => {
   describe("addToWatchlist", () => {
     it("should add item to watchlist correctly", async () => {
       // Configurar o mock
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
 
       const watchlistItem = {
         ticker: "PETR4",
@@ -751,8 +732,8 @@ describe("Firestore", () => {
 
     it("should throw error when updateDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       const watchlistItem = {
         ticker: "PETR4",
@@ -786,10 +767,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       const watchlistItem = {
         ticker: "PETR4",
@@ -804,8 +785,8 @@ describe("Firestore", () => {
   describe("updateWatchlistItem", () => {
     it("should update watchlist item correctly", async () => {
       // Configurar o mock
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
 
       const watchlistItem = {
         targetPrice: 55,
@@ -828,8 +809,8 @@ describe("Firestore", () => {
 
     it("should throw error when updateDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       const watchlistItem = {
         targetPrice: 55,
@@ -869,10 +850,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       const watchlistItem = {
         targetPrice: 55,
@@ -886,9 +867,9 @@ describe("Firestore", () => {
   describe("removeFromWatchlist", () => {
     it("should remove item from watchlist correctly", async () => {
       // Configurar o mock
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
-      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+        ; (deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
 
       await removeFromWatchlist("user123", "PETR4")
 
@@ -906,9 +887,9 @@ describe("Firestore", () => {
 
     it("should throw error when updateDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
-      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+        ; (updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
       await expect(removeFromWatchlist("user123", "PETR4")).rejects.toThrow("Firestore error")
@@ -924,11 +905,11 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
-      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+        ; (updateDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       await expect(removeFromWatchlist("user123", "PETR4")).rejects.toThrow("Unexpected Error")
     })
@@ -937,17 +918,17 @@ describe("Firestore", () => {
   describe("saveUserPreferences", () => {
     it("should save user preferences correctly", async () => {
       // Configurar o mock
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-      })
-      ;(updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+        })
+        ; (updateDoc as jest.Mock).mockResolvedValueOnce(undefined)
 
       const preferences = {
         theme: "dark",
       }
 
-      await saveUserPreferences("user123", preferences)
+      await saveUserPreferences("user123", { theme: "dark" })
 
       // Verificar se doc foi chamado com os parâmetros corretos
       expect(doc).toHaveBeenCalledWith(db, "users", "user123")
@@ -963,17 +944,17 @@ describe("Firestore", () => {
 
     it("should create new user document if it does not exist", async () => {
       // Configurar o mock para simular ausência de documento do usuário
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => false,
-      })
-      ;(setDoc as jest.Mock).mockResolvedValueOnce(undefined)
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => false,
+        })
+        ; (setDoc as jest.Mock).mockResolvedValueOnce(undefined)
 
       const preferences = {
         theme: "dark",
       }
 
-      await saveUserPreferences("user123", preferences)
+      await saveUserPreferences("user123", { theme: "dark" })
 
       // Verificar se doc foi chamado com os parâmetros corretos
       expect(doc).toHaveBeenCalledWith(db, "users", "user123")
@@ -991,67 +972,48 @@ describe("Firestore", () => {
 
     it("should throw error when updateDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-      })
-      ;(updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
-
-      const preferences = {
-        theme: "dark",
-      }
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+        })
+        ; (updateDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
-      await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Firestore error")
+      await expect(saveUserPreferences("user123", { theme: "dark" })).rejects.toThrow("Firestore error")
     })
 
     it("should throw error when setDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => false,
-      })
-      ;(setDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
-
-      const preferences = {
-        theme: "dark",
-      }
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => false,
+        })
+        ; (setDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
-      await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Firestore error")
+      await expect(saveUserPreferences("user123", { theme: "dark" })).rejects.toThrow("Firestore error")
     })
 
     // New tests for edge cases and error handling
     it("should handle invalid userId", async () => {
-      const preferences = {
-        theme: "dark",
-      }
-
-      await expect(saveUserPreferences("", preferences)).rejects.toThrow("userId não pode estar vazio")
+      await expect(saveUserPreferences("", { theme: "dark" })).rejects.toThrow("userId não pode estar vazio")
     })
 
     it("should handle invalid preferences data", async () => {
-      const preferences = {
-        theme: "invalid",
-      }
-
-      await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Dados de preferências inválidos")
+      // @ts-expect-error Testando valor de tema inválido
+      await expect(saveUserPreferences("user123", { theme: "invalid" })).rejects.toThrow("Dados de preferências inválidos")
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-      })
-      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+        })
+        ; (updateDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
-      const preferences = {
-        theme: "dark",
-      }
-
-      await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Unexpected Error")
+      await expect(saveUserPreferences("user123", { theme: "dark" })).rejects.toThrow("Unexpected Error")
     })
   })
 
@@ -1061,11 +1023,11 @@ describe("Firestore", () => {
       const mockPreferences = {
         theme: "dark",
       }
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({ preferences: mockPreferences }),
-      })
+        ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+          data: () => ({ preferences: mockPreferences }),
+        })
 
       const preferences = await getUserPreferences("user123")
 
@@ -1081,11 +1043,11 @@ describe("Firestore", () => {
 
     it("should return null when user has no preferences", async () => {
       // Configurar o mock para simular ausência de preferências
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({}),
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => true,
+          data: () => ({}),
+        })
 
       const preferences = await getUserPreferences("user123")
 
@@ -1095,10 +1057,10 @@ describe("Firestore", () => {
 
     it("should return null when user does not exist", async () => {
       // Configurar o mock para simular usuário inexistente
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockResolvedValueOnce({
-        exists: () => false,
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockResolvedValueOnce({
+          exists: () => false,
+        })
 
       const preferences = await getUserPreferences("user123")
 
@@ -1108,8 +1070,8 @@ describe("Firestore", () => {
 
     it("should throw error when getDoc fails", async () => {
       // Configurar o mock para simular erro
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockRejectedValueOnce(new Error("Firestore error"))
 
       // Verificar se a função lança um erro
       await expect(getUserPreferences("user123")).rejects.toThrow("Firestore error")
@@ -1121,10 +1083,10 @@ describe("Firestore", () => {
     })
 
     it("should handle unexpected errors gracefully", async () => {
-      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
-      ;(getDoc as jest.Mock).mockImplementationOnce(() => {
-        throw new Error("Unexpected Error")
-      })
+      ; (doc as jest.Mock).mockReturnValueOnce("userRef")
+        ; (getDoc as jest.Mock).mockImplementationOnce(() => {
+          throw new Error("Unexpected Error")
+        })
 
       await expect(getUserPreferences("user123")).rejects.toThrow("Unexpected Error")
     })

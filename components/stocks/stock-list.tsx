@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, RefreshCw, ArrowUpDown, Trash2 } from "lucide-react"
+import { Plus, RefreshCw, Trash2 } from "lucide-react"
 import { AddStockForm } from "@/components/add-stock-form"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import { formatCurrency } from "@/lib/utils"

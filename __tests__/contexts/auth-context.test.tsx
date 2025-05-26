@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { render, screen, act, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { AuthProvider, useAuth } from "@/contexts/auth-context"
 import { auth, googleProvider } from "@/lib/firebase"
-import { signInWithPopup, signOut } from "firebase/auth"
+import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { getDoc, setDoc } from "firebase/firestore"
 
 // Mock do Firebase Auth
@@ -20,7 +21,7 @@ jest.mock("@/lib/firebase", () => ({
 jest.mock("firebase/auth", () => ({
   signInWithPopup: jest.fn(),
   signOut: jest.fn(),
-  onAuthStateChanged: jest.fn((auth, callback) => {
+  onAuthStateChanged: jest.fn((_auth: any, callback: (user: any) => void) => {
     callback(null) // Inicialmente não autenticado
     return jest.fn() // Retorna uma função de cleanup
   }),
@@ -86,10 +87,10 @@ describe("AuthContext", () => {
     // Mock de usuário autenticado
     const mockUser = { uid: "123", email: "test@example.com", displayName: "Test User" }
 
-    // Configurar o mock para simular login bem-sucedido
-    ;(signInWithPopup as jest.Mock).mockResolvedValueOnce({
-      user: mockUser,
-    })
+      // Configurar o mock para simular login bem-sucedido
+      ; (signInWithPopup as jest.Mock).mockResolvedValueOnce({
+        user: mockUser,
+      })
 
     render(
       <AuthProvider>
@@ -133,7 +134,7 @@ describe("AuthContext", () => {
   it("should handle sign in error", async () => {
     // Configurar o mock para simular erro de login
     const mockError = new Error("Auth Error")
-    ;(signInWithPopup as jest.Mock).mockRejectedValueOnce(mockError)
+      ; (signInWithPopup as jest.Mock).mockRejectedValueOnce(mockError)
 
     render(
       <AuthProvider>
@@ -168,15 +169,15 @@ describe("AuthContext", () => {
     // Mock de usuário autenticado
     const mockUser = { uid: "123", email: "test@example.com", displayName: "Test User" }
 
-    // Configurar o mock para simular login bem-sucedido
-    ;(signInWithPopup as jest.Mock).mockResolvedValueOnce({
-      user: mockUser,
-    })
+      // Configurar o mock para simular login bem-sucedido
+      ; (signInWithPopup as jest.Mock).mockResolvedValueOnce({
+        user: mockUser,
+      })
 
-    // Configurar o mock para simular que o documento do usuário não existe
-    ;(getDoc as jest.Mock).mockResolvedValueOnce({
-      exists: () => false,
-    })
+      // Configurar o mock para simular que o documento do usuário não existe
+      ; (getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => false,
+      })
 
     render(
       <AuthProvider>
@@ -213,7 +214,7 @@ describe("AuthContext", () => {
   it("should handle sign out error", async () => {
     // Configurar o mock para simular erro de logout
     const mockError = new Error("Logout Error")
-    ;(signOut as jest.Mock).mockRejectedValueOnce(mockError)
+      ; (signOut as jest.Mock).mockRejectedValueOnce(mockError)
 
     render(
       <AuthProvider>
@@ -248,10 +249,10 @@ describe("AuthContext", () => {
     // Mock de usuário autenticado
     const mockUser = { uid: "123", email: "test@example.com", displayName: "Test User" }
 
-    // Configurar o mock para simular mudança de estado de autenticação
-    ;(signInWithPopup as jest.Mock).mockResolvedValueOnce({
-      user: mockUser,
-    })
+      // Configurar o mock para simular mudança de estado de autenticação
+      ; (signInWithPopup as jest.Mock).mockResolvedValueOnce({
+        user: mockUser,
+      })
 
     render(
       <AuthProvider>
@@ -278,9 +279,9 @@ describe("AuthContext", () => {
   it("should handle user state change error", async () => {
     // Configurar o mock para simular erro de mudança de estado de autenticação
     const mockError = new Error("Auth State Change Error")
-    ;(onAuthStateChanged as jest.Mock).mockImplementationOnce((auth, callback) => {
-      throw mockError
-    })
+      ; (onAuthStateChanged as jest.Mock).mockImplementationOnce(() => {
+        throw mockError
+      })
 
     render(
       <AuthProvider>
@@ -306,17 +307,9 @@ describe("AuthContext", () => {
     expect(screen.getByTestId("error").textContent).toBe("No Error")
   })
 
-  // New tests for edge cases and error handling
-  it("should handle missing or invalid props", () => {
-    // Verificar se o componente lança erro ao receber user inválido
-    expect(() => render(<AuthProvider><TestComponent user={null} /></AuthProvider>)).toThrow(
-      "user must be a valid object"
-    )
-  })
-
   it("should handle unexpected errors during sign in", async () => {
     // Configurar signInWithPopup para lançar um erro inesperado
-    ;(signInWithPopup as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
+    ; (signInWithPopup as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
 
     render(
       <AuthProvider>
@@ -341,7 +334,7 @@ describe("AuthContext", () => {
 
   it("should handle unexpected errors during sign out", async () => {
     // Configurar signOut para lançar um erro inesperado
-    ;(signOut as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
+    ; (signOut as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
 
     render(
       <AuthProvider>

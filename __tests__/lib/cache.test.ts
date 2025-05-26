@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getCachedStockPrice, setCachedStockPrice, clearStockPriceCache } from "@/lib/cache"
 import { clearAllStockPriceCache } from "@/lib/client-utils/stock-price-cache"
 

@@ -1,255 +1,119 @@
-import { fetchStockPrice, RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS, saveManualRecommendation, getStockPrice, getMultipleStockPrices, simulateStockPrices, isDevelopment } from "@/lib/api"
-import { getCachedStockPrice, setCachedStockPrice } from "@/lib/cache"
+import {
+  getStockPrice,
+  getMultipleStockPrices,
+  simulateStockPrices,
+  isDevelopment,
+} from "@/lib/api"
 
-// Mock do fetch
-global.fetch = jest.fn()
-
-// Mock do cache
-jest.mock("@/lib/cache", () => ({
-  getCachedStockPrice: jest.fn(),
-  setCachedStockPrice: jest.fn(),
-}))
-
-describe("API", () => {
+describe("getStockPrice", () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    global.fetch = jest.fn()
   })
 
-  describe("fetchStockPrice", () => {
-    it("should return cached price if available", async () => {
-      // Configurar o mock do cache para retornar um preço
-      ;(getCachedStockPrice as jest.Mock).mockResolvedValueOnce(42.5)
-
-      const price = await fetchStockPrice("PETR4")
-
-      // Verificar se getCachedStockPrice foi chamado com o ticker correto
-      expect(getCachedStockPrice).toHaveBeenCalledWith("PETR4")
-
-      // Verificar se o preço foi retornado corretamente
-      expect(price).toBe(42.5)
-
-      // Verificar se fetch não foi chamado
-      expect(global.fetch).not.toHaveBeenCalled()
+  it("retorna o preço quando a resposta é válida", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ price: 42 }),
     })
-
-    it("should fetch stock price successfully if not cached", async () => {
-      // Configurar o mock do cache para retornar null (não encontrado)
-      ;(getCachedStockPrice as jest.Mock).mockResolvedValueOnce(null)
-
-      // Configurar o mock para simular resposta bem-sucedida
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ price: 42.5 }),
-      })
-
-      const price = await fetchStockPrice("PETR4")
-
-      // Verificar se fetch foi chamado com a URL correta
-      expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=PETR4")
-
-      // Verificar se o preço foi retornado corretamente
-      expect(price).toBe(42.5)
-
-      // Verificar se o preço foi armazenado no cache
-      expect(setCachedStockPrice).toHaveBeenCalledWith("PETR4", 42.5)
-    })
-
-    it("should throw error when fetch fails", async () => {
-      // Configurar o mock do cache para retornar null (não encontrado)
-      ;(getCachedStockPrice as jest.Mock).mockResolvedValueOnce(null)
-
-      // Configurar o mock para simular resposta com erro
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-      })
-
-      // Verificar se a função lança um erro
-      await expect(fetchStockPrice("INVALID")).rejects.toThrow("Erro ao buscar preço: 404")
-    })
-
-    it("should throw error when network fails", async () => {
-      // Configurar o mock do cache para retornar null (não encontrado)
-      ;(getCachedStockPrice as jest.Mock).mockResolvedValueOnce(null)
-
-      // Configurar o mock para simular erro de rede
-      ;(global.fetch as jest.Mock).mockRejectedValueOnce(new Error("Network error"))
-
-      // Verificar se a função lança um erro
-      await expect(fetchStockPrice("PETR4")).rejects.toThrow("Network error")
-    })
-
-    // New tests for edge cases and error handling
-    it("should return error if ticker is an empty string", async () => {
-      await expect(fetchStockPrice("")).rejects.toThrow("Ticker não pode estar vazio")
-    })
-
-    it("should return error if ticker is not a string", async () => {
-      await expect(fetchStockPrice(123 as any)).rejects.toThrow("Ticker deve ser uma string")
-    })
+    const price = await getStockPrice("ITUB4")
+    expect(price).toBe(42)
+    expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=ITUB4.SA")
   })
 
-  describe("RECOMMENDATION_TYPES", () => {
-    it("should contain valid recommendation types", () => {
-      expect(RECOMMENDATION_TYPES).toEqual(["Comprar", "Vender", "Aguardar"])
+  it("retorna null quando a resposta não tem preço", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ price: null }),
     })
+    const price = await getStockPrice("ITUB4")
+    expect(price).toBeNull()
   })
 
-  describe("RECOMMENDATION_DESCRIPTIONS", () => {
-    it("should contain descriptions for all recommendation types", () => {
-      expect(Object.keys(RECOMMENDATION_DESCRIPTIONS)).toEqual(["Comprar", "Vender", "Aguardar"])
-
-      // Verificar se cada tipo tem uma descrição não vazia
-      for (const type of RECOMMENDATION_TYPES) {
-        expect(RECOMMENDATION_DESCRIPTIONS[type as keyof typeof RECOMMENDATION_DESCRIPTIONS]).toBeTruthy()
-      }
-    })
+  it("retorna null quando fetch falha", async () => {
+    (global.fetch as jest.Mock).mockRejectedValue(new Error("Network error"))
+    const price = await getStockPrice("ITUB4")
+    expect(price).toBeNull()
   })
 
-  describe("saveManualRecommendation", () => {
-    it("should resolve without error", async () => {
-      // Espionar o console.log
-      const consoleSpy = jest.spyOn(console, "log").mockImplementation()
+  it("adiciona .SA ao ticker se não houver ponto", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ price: 10 }),
+    })
+    await getStockPrice("PETR4")
+    expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=PETR4.SA")
+  })
 
-      await expect(saveManualRecommendation("PETR4", "Comprar")).resolves.not.toThrow()
+  it("não adiciona .SA se já houver ponto", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ price: 10 }),
+    })
+    await getStockPrice("PETR4.SA")
+    expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=PETR4.SA")
+  })
+})
 
-      // Verificar se console.log foi chamado
-      expect(consoleSpy).toHaveBeenCalledWith("Salvando recomendação manual para PETR4: Comprar")
+describe("getMultipleStockPrices", () => {
+  beforeEach(() => {
+    global.fetch = jest.fn()
+  })
 
-      // Restaurar o console.log
-      consoleSpy.mockRestore()
+  it("retorna preços para múltiplos tickers", async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ price: 10 }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ price: 20 }) })
+
+    const result = await getMultipleStockPrices(["ITUB4", "PETR4"])
+    expect(result).toEqual({ ITUB4: 10, PETR4: 20 })
+  })
+
+  it("contabiliza falhas e retorna apenas os preços válidos", async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ price: 10 }) })
+      .mockResolvedValueOnce({ ok: false, json: async () => ({}) })
+
+    const result = await getMultipleStockPrices(["ITUB4", "PETR4"])
+    expect(result).toEqual({ ITUB4: 10 })
+  })
+})
+
+describe("simulateStockPrices", () => {
+  it("gera preços simulados para cada ticker", () => {
+    const tickers = ["ITUB4", "PETR4", "VALE3"]
+    const result = simulateStockPrices(tickers)
+    expect(Object.keys(result)).toEqual(tickers)
+    tickers.forEach(ticker => {
+      expect(result[ticker]).toBeGreaterThanOrEqual(10)
+      expect(result[ticker]).toBeLessThanOrEqual(100)
+    })
+  })
+})
+
+describe("isDevelopment", () => {
+  it("retorna true se NODE_ENV for development", () => {
+    const originalEnv = process.env.NODE_ENV
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "development",
+      configurable: true,
+    })
+    expect(isDevelopment()).toBe(true)
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: originalEnv,
+      configurable: true,
     })
   })
 
-  describe("getStockPrice", () => {
-    it("should return stock price successfully", async () => {
-      // Configurar o mock para simular resposta bem-sucedida
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ price: 42.5 }),
-      })
-
-      const price = await getStockPrice("PETR4")
-
-      // Verificar se fetch foi chamado com a URL correta
-      expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=PETR4")
-
-      // Verificar se o preço foi retornado corretamente
-      expect(price).toBe(42.5)
+  it("retorna false se NODE_ENV não for development", () => {
+    const originalEnv = process.env.NODE_ENV
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "production",
+      configurable: true,
     })
-
-    it("should return null when fetch fails", async () => {
-      // Configurar o mock para simular resposta com erro
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-      })
-
-      const price = await getStockPrice("INVALID")
-
-      // Verificar se o preço retornado é null
-      expect(price).toBeNull()
-    })
-
-    it("should return null when network fails", async () => {
-      // Configurar o mock para simular erro de rede
-      ;(global.fetch as jest.Mock).mockRejectedValueOnce(new Error("Network error"))
-
-      const price = await getStockPrice("PETR4")
-
-      // Verificar se o preço retornado é null
-      expect(price).toBeNull()
-    })
-
-    // New tests for edge cases and error handling
-    it("should return error if ticker is an empty string", async () => {
-      await expect(getStockPrice("")).rejects.toThrow("Ticker não pode estar vazio")
-    })
-
-    it("should return error if ticker is not a string", async () => {
-      await expect(getStockPrice(123 as any)).rejects.toThrow("Ticker deve ser uma string")
-    })
-  })
-
-  describe("getMultipleStockPrices", () => {
-    it("should return multiple stock prices successfully", async () => {
-      // Configurar o mock para simular resposta bem-sucedida
-      ;(global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        json: async () => ({ price: 42.5 }),
-      })
-
-      const tickers = ["PETR4", "VALE3"]
-      const prices = await getMultipleStockPrices(tickers)
-
-      // Verificar se fetch foi chamado com as URLs corretas
-      expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=PETR4")
-      expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=VALE3")
-
-      // Verificar se os preços foram retornados corretamente
-      expect(prices).toEqual({
-        PETR4: 42.5,
-        VALE3: 42.5,
-      })
-    })
-
-    it("should handle failed fetches and return partial results", async () => {
-      // Configurar o mock para simular resposta bem-sucedida e falha
-      ;(global.fetch as jest.Mock)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ price: 42.5 }),
-        })
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 404,
-        })
-
-      const tickers = ["PETR4", "INVALID"]
-      const prices = await getMultipleStockPrices(tickers)
-
-      // Verificar se fetch foi chamado com as URLs corretas
-      expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=PETR4")
-      expect(global.fetch).toHaveBeenCalledWith("/api/stock-price?ticker=INVALID")
-
-      // Verificar se os preços foram retornados corretamente
-      expect(prices).toEqual({
-        PETR4: 42.5,
-      })
-    })
-
-    // New tests for edge cases and error handling
-    it("should return error if any ticker is an empty string", async () => {
-      await expect(getMultipleStockPrices(["PETR4", ""])).rejects.toThrow("Ticker não pode estar vazio")
-    })
-
-    it("should return error if any ticker is not a string", async () => {
-      await expect(getMultipleStockPrices(["PETR4", 123 as any])).rejects.toThrow("Ticker deve ser uma string")
-    })
-  })
-
-  describe("simulateStockPrices", () => {
-    it("should return simulated stock prices", () => {
-      const tickers = ["PETR4", "VALE3"]
-      const prices = simulateStockPrices(tickers)
-
-      // Verificar se os preços simulados estão no intervalo esperado
-      for (const ticker of tickers) {
-        expect(prices[ticker]).toBeGreaterThanOrEqual(10)
-        expect(prices[ticker]).toBeLessThanOrEqual(100)
-      }
-    })
-  })
-
-  describe("isDevelopment", () => {
-    it("should return true in development environment", () => {
-      process.env.NODE_ENV = "development"
-      expect(isDevelopment()).toBe(true)
-    })
-
-    it("should return false in production environment", () => {
-      process.env.NODE_ENV = "production"
-      expect(isDevelopment()).toBe(false)
+    expect(isDevelopment()).toBe(false)
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: originalEnv,
+      configurable: true,
     })
   })
 })

@@ -1,7 +1,6 @@
 import { POST } from "@/app/api/ai-recommendation/route"
 import { generateText } from "@/lib/ai"
 import { jest } from "@jest/globals"
-import { fetchStockPrice } from "@/lib/api"
 
 // Mock do AI SDK
 jest.mock("@/lib/ai", () => ({
@@ -9,12 +8,6 @@ jest.mock("@/lib/ai", () => ({
 }))
 
 const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>
-
-jest.mock("@/lib/api", () => ({
-  fetchStockPrice: jest.fn(),
-}))
-
-const mockFetchStockPrice = fetchStockPrice as jest.MockedFunction<typeof fetchStockPrice>
 
 describe("API de Recomendação de IA", () => {
   beforeEach(() => {
