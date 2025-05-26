@@ -121,7 +121,9 @@ export default function Historico() {
                           setError("O valor do aporte deve ser um número maior que zero.")
                           return
                         }
-                        simulation.id && handleViewDetails(simulation.id)
+                        if (simulation.id) {
+                          handleViewDetails(simulation.id)
+                        }
                       }}
                     >
                       <Eye className="mr-2 h-4 w-4" />

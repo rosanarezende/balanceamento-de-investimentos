@@ -175,14 +175,14 @@ export default function RecomendacoesBTG() {
           </p>
 
           {loading ? (
-            <div class="py-8 text-center">
+            <div className="py-8 text-center">
               <LoadingSpinner size="lg" />
-              <p class="text-gray-500 mt-4">Carregando dados das ações...</p>
+              <p className="text-gray-500 mt-4">Carregando dados das ações...</p>
             </div>
           ) : error ? (
-            <div class="py-8 text-center">
-              <p class="text-red-500 mb-4">{error}</p>
-              <div class="flex justify-center space-x-4">
+            <div className="py-8 text-center">
+              <p className="text-red-500 mb-4">{error}</p>
+              <div className="flex justify-center space-x-4">
                 <Button variant="outline" onClick={handleRetry}>
                   Tentar Novamente
                 </Button>
@@ -190,13 +190,13 @@ export default function RecomendacoesBTG() {
               </div>
             </div>
           ) : (
-            <div class="space-y-4 mb-6">
+            <div className="space-y-4 mb-6">
               {stocks.map((stock) => (
-                <Card key={stock.ticker} class="p-4">
-                  <div class="flex justify-between items-center mb-3">
+                <Card key={stock.ticker} className="p-4">
+                  <div className="flex justify-between items-center mb-3">
                     <div>
-                      <h3 class="font-bold">{stock.ticker}</h3>
-                      <p class="text-xs text-gray-500">
+                      <h3 className="font-bold">{stock.ticker}</h3>
+                      <p className="text-xs text-gray-500">
                         Preço atual:{" "}
                         {stock.currentPrice > 0
                           ? stock.currentPrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
@@ -206,18 +206,18 @@ export default function RecomendacoesBTG() {
                   </div>
 
                   <div>
-                    <p class="text-sm font-medium mb-2">Recomendação BTG:</p>
+                    <p className="text-sm font-medium mb-2">Recomendação BTG:</p>
                     <RadioGroup
                       value={stock.recommendation}
                       onValueChange={(value) => handleRecommendationChange(stock.ticker, value)}
-                      class="flex space-x-4"
+                      className="flex space-x-4"
                     >
                       {RECOMMENDATION_TYPES.map((type) => (
-                        <div key={type} class="flex items-center space-x-1">
+                        <div key={type} className="flex items-center space-x-1">
                           <RadioGroupItem value={type} id={`${stock.ticker}-${type}`} />
                           <Label
                             htmlFor={`${stock.ticker}-${type}`}
-                            class={`text-xs font-normal ${
+                            className={`text-xs font-normal ${
                               type === "COMPRAR"
                                 ? "text-green-600"
                                 : type === "AGUARDAR"
@@ -236,12 +236,12 @@ export default function RecomendacoesBTG() {
             </div>
           )}
 
-          <div class="flex space-x-4">
-            <Button variant="outline" class="flex-1 border-blue-600 text-blue-600" onClick={handleSkip}>
+          <div className="flex space-x-4">
+            <Button variant="outline" className="flex-1 border-blue-600 text-blue-600" onClick={handleSkip}>
               Pular
             </Button>
             <Button
-              class="flex-1 bg-blue-600"
+              className="flex-1 bg-blue-600"
               onClick={handleContinue}
               disabled={loading || (stocks.length === 0 && !error)}
             >

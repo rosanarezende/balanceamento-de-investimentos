@@ -58,7 +58,6 @@ export default function CalculadoraBalanceamento() {
       console.error("Erro ao forçar atualização da carteira:", error)
       setError("Ocorreu um erro ao forçar a atualização da carteira. Por favor, tente novamente.")
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleBack = () => {
@@ -254,7 +253,7 @@ export default function CalculadoraBalanceamento() {
                           <div>
                             <h3 className="font-medium text-foreground">Sem ativos para compra</h3>
                             <p className="text-sm text-muted-foreground">
-                              Não há ativos marcados como "Comprar" na sua carteira. Adicione recomendações aos seus ativos.
+                              Não há ativos marcados como &quot;Comprar&quot; na sua carteira. Adicione recomendações aos seus ativos.
                             </p>
                             <Button
                               variant="outline"

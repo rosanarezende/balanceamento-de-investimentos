@@ -10,7 +10,6 @@ import { InsightsPanel } from "@/components/dashboard/insights-panel"
 import { StockList } from "@/components/stocks/stock-list"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import AuthGuard from "@/components/auth-guard"
-import Link from "next/link"
 
 export default function HomePage() {
   const { stocksWithDetails, totalPortfolioValue, loading } = usePortfolio()

@@ -271,4 +271,4 @@ describe("Calculator Flow Integration", () => {
     // Restaurar o console.error
     consoleSpy.mockRestore()
   })
-}
+})

@@ -28,6 +28,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ price })
   } 
   catch (error) {
+    console.error("Erro ao buscar preço da ação:", error)
     return NextResponse.json({ error: "Erro ao buscar preço" }, { status: 500 })
   }
 }

@@ -266,7 +266,7 @@ export default function EditarAtivos() {
           <div className="flex justify-between items-center">
             <span className="font-medium">Total META:</span>
             <span
-              class={`font-bold ${Math.abs(totalTargetPercentage - 100) > 0.01 ? "text-red-600" : "text-green-600"}`}
+              className={`font-bold ${Math.abs(totalTargetPercentage - 100) > 0.01 ? "text-red-600" : "text-green-600"}`}
             >
               {totalTargetPercentage.toFixed(2)}%
             </span>

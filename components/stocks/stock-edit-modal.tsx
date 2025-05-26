@@ -9,7 +9,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS, fetchStockPrice } from "@/lib/api"
 import { HelpCircle } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { verifyStockExists, validateUserInput, saveStockToDatabase } from "@/lib/firestore"
 
 interface StockEditModalProps {
   open: boolean
@@ -64,6 +63,7 @@ export function StockEditModal({ open, onClose, onSave, stock, isNew = false }: 
       const fetchPrice = async () => {
         try {
           const price = await fetchStockPrice(formData.ticker)
+          // eslint-disable-next-line no-console
           console.log(`Fetched price for ${formData.ticker}: ${price}`)
         } catch (err) {
           console.error(`Failed to fetch price for ${formData.ticker}:`, err)

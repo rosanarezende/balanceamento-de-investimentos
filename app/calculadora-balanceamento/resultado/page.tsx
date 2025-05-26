@@ -381,7 +381,7 @@ export default function ResultadoCalculadora() {
               <div className="bg-yellow-500/10 p-4 rounded-lg mb-6">
                 <h3 className="font-bold text-center mb-2 text-foreground">Nenhum ativo elegível para aporte</h3>
                 <p className="text-sm text-muted-foreground">
-                  Não há ativos marcados como "Comprar" que estejam abaixo do peso na sua carteira. Considere alterar
+                  Não há ativos marcados como &quot;Comprar&quot; que estejam abaixo do peso na sua carteira. Considere alterar
                   suas recomendações ou ajustar os percentuais META.
                 </p>
                 <Button
@@ -537,7 +537,7 @@ export default function ResultadoCalculadora() {
                   Para investir, é necessário realizar a compra de ações diretamente na sua corretora/ banco.
                 </p>
                 <p className="text-xs text-foreground mb-2">
-                  Ao clicar em "Confirmar Aporte", você reconhece que isto não é uma ordem de investimento e sim uma
+                  Ao clicar em &quot;Confirmar Aporte&quot;, você reconhece que isto não é uma ordem de investimento e sim uma
                   sugestão pessoal. Este aplicativo não realiza aplicações no CPF dos usuários.
                 </p>
                 <p className="text-xs text-foreground mb-2">

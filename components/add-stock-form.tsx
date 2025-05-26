@@ -16,7 +16,7 @@ interface AddStockFormProps {
 }
 
 export function AddStockForm({ onAddStock }: AddStockFormProps) {
-  const { addOrUpdateStock, refreshPortfolio, hasEligibleStocks } = usePortfolio()
+  const { refreshPortfolio, hasEligibleStocks } = usePortfolio()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -130,6 +130,7 @@ export function AddStockForm({ onAddStock }: AddStockFormProps) {
       const fetchPrice = async () => {
         try {
           const price = await fetchStockPrice(newStock.ticker)
+          // eslint-disable-next-line no-console
           console.log(`Preço da ação ${newStock.ticker}: ${price}`)
         } catch (error) {
           console.error("Erro ao buscar preço da ação:", error)
