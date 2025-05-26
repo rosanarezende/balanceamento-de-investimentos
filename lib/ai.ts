@@ -1,7 +1,17 @@
 const HF_API_KEY = process.env.HF_API_KEY || ""; // Opcional para alguns modelos
 
+interface GenerateTextParams {
+  prompt: string;
+  maxTokens?: number;
+  temperature?: number;
+}
+
 // Esta função é usada pelo arquivo de rota para gerar o texto
-export async function generateText({ prompt, maxTokens, temperature }: any) {
+export async function generateText({
+  prompt,
+  maxTokens,
+  temperature,
+}: GenerateTextParams) {
   const response = await fetch(
     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
     {

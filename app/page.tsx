@@ -136,14 +136,6 @@ export default function HomePage() {
         {!loading && <InsightsPanel insights={generateInsights()} />}
 
         <StockList />
-
-        <div className="mt-4">
-          <Link href="/editar-ativos">
-            <Button className="w-full" size="lg">
-              Acessar Edição de Ativos
-            </Button>
-          </Link>
-        </div>
       </AppShell>
     </AuthGuard>
   )

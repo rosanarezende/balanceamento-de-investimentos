@@ -84,9 +84,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true)
       setError(null)
       await signInWithPopup(auth, googleProvider)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao fazer login com Google:", error)
-      setError(`Erro ao fazer login: ${error.message}`)
+      if (error instanceof Error) {
+        setError(`Erro ao fazer login: ${error.message}`)
+      } else {
+        setError("Erro ao fazer login.")
+      }
     } finally {
       setLoading(false)
     }

@@ -6,8 +6,6 @@ import type { StockWithDetails, Portfolio } from "@/lib/types"
 import { getUserPortfolio, updateStock, removeStock, updateUserRecommendation } from "@/lib/firestore"
 import { getPortfolioCache, setPortfolioCache, isPortfolioCacheValid } from "@/lib/client-utils/portfolio-cache"
 import { calculatePortfolioDetails } from "@/lib/client-utils/calculate-portfolio-details"
-import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
-import { fetchStockPrice } from "@/lib/api"
 
 export function usePortfolio() {
   const { user } = useAuth()
