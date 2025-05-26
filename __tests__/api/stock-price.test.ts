@@ -1,7 +1,12 @@
 import { GET } from "@/app/api/stock-price/route"
-import { NextRequest } from "next/server"
 import { fetchStockPriceServer } from "@/lib/server/stock-price"
 import { jest } from "@jest/globals"
+
+// Mock the Request object to avoid the ReferenceError
+global.Request = jest.fn().mockImplementation((input, init) => ({
+  url: input,
+  ...init,
+}))
 
 jest.mock("@/lib/server/stock-price", () => ({
   fetchStockPriceServer: jest.fn(),
@@ -15,19 +20,19 @@ describe("Stock Price API", () => {
   })
 
   it("deve retornar erro se ticker não for fornecido", async () => {
-    const request = new NextRequest("http://localhost:3000/api/stock-price")
+    const request = new Request("http://localhost:3000/api/stock-price")
     const response = await GET(request)
     const data = await response.json()
 
     expect(response.status).toBe(400)
     expect(data).toHaveProperty("error")
-    expect(data.error).toBe("Ticker não fornecido")
+    expect(data.error).toBe("Ticker é obrigatório")
   })
 
   it("deve retornar preço ao buscar com sucesso", async () => {
     mockedFetchStockPriceServer.mockResolvedValueOnce(99.99)
 
-    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=PETR4")
+    const request = new Request("http://localhost:3000/api/stock-price?ticker=PETR4")
     const response = await GET(request)
     const data = await response.json()
 
@@ -40,7 +45,7 @@ describe("Stock Price API", () => {
   it("deve retornar erro ao lançar exceção", async () => {
     mockedFetchStockPriceServer.mockRejectedValueOnce(new Error("Erro ao buscar preço"))
 
-    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=PETR4")
+    const request = new Request("http://localhost:3000/api/stock-price?ticker=PETR4")
     const response = await GET(request)
     const data = await response.json()
 
@@ -50,7 +55,7 @@ describe("Stock Price API", () => {
   })
 
   it("deve retornar erro 400 se não houver ações elegíveis para investimento", async () => {
-    const request = new NextRequest("http://localhost:3000/api/stock-price", {
+    const request = new Request("http://localhost:3000/api/stock-price", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,7 +73,7 @@ describe("Stock Price API", () => {
   })
 
   it("deve retornar erro 400 se o valor de investimento for inválido", async () => {
-    const request = new NextRequest("http://localhost:3000/api/stock-price", {
+    const request = new Request("http://localhost:3000/api/stock-price", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -86,7 +91,7 @@ describe("Stock Price API", () => {
   })
 
   it("deve retornar erro 400 se o valor de investimento for zero", async () => {
-    const request = new NextRequest("http://localhost:3000/api/stock-price", {
+    const request = new Request("http://localhost:3000/api/stock-price", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -104,7 +109,7 @@ describe("Stock Price API", () => {
   })
 
   it("deve retornar erro 400 se o valor de investimento for não numérico", async () => {
-    const request = new NextRequest("http://localhost:3000/api/stock-price", {
+    const request = new Request("http://localhost:3000/api/stock-price", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -124,7 +129,7 @@ describe("Stock Price API", () => {
   it("deve retornar erro 500 se ocorrer um erro ao buscar o preço da ação", async () => {
     mockedFetchStockPriceServer.mockRejectedValueOnce(new Error("Erro ao buscar preço"))
 
-    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=PETR4")
+    const request = new Request("http://localhost:3000/api/stock-price?ticker=PETR4")
     const response = await GET(request)
     const data = await response.json()
 
@@ -134,40 +139,40 @@ describe("Stock Price API", () => {
   })
 
   it("deve retornar erro 400 se o ticker for uma string vazia", async () => {
-    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=")
+    const request = new Request("http://localhost:3000/api/stock-price?ticker=")
     const response = await GET(request)
     const data = await response.json()
 
     expect(response.status).toBe(400)
     expect(data).toHaveProperty("error")
-    expect(data.error).toBe("Ticker não fornecido")
+    expect(data.error).toBe("Ticker é obrigatório")
   })
 
   it("deve retornar erro 400 se o ticker não for uma string", async () => {
-    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=123")
+    const request = new Request("http://localhost:3000/api/stock-price?ticker=123")
     const response = await GET(request)
     const data = await response.json()
 
     expect(response.status).toBe(400)
     expect(data).toHaveProperty("error")
-    expect(data.error).toBe("Ticker não fornecido")
+    expect(data.error).toBe("Ticker é obrigatório")
   })
 
   // New tests for edge cases and error handling
   it("deve retornar erro 400 se o ticker contiver apenas espaços em branco", async () => {
-    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=   ")
+    const request = new Request("http://localhost:3000/api/stock-price?ticker=   ")
     const response = await GET(request)
     const data = await response.json()
 
     expect(response.status).toBe(400)
     expect(data).toHaveProperty("error")
-    expect(data.error).toBe("Ticker não fornecido")
+    expect(data.error).toBe("Ticker é obrigatório")
   })
 
   it("deve retornar erro 500 se o servidor de preços retornar um erro inesperado", async () => {
     mockedFetchStockPriceServer.mockRejectedValueOnce(new Error("Erro inesperado"))
 
-    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=PETR4")
+    const request = new Request("http://localhost:3000/api/stock-price?ticker=PETR4")
     const response = await GET(request)
     const data = await response.json()
 
@@ -179,7 +184,7 @@ describe("Stock Price API", () => {
   it("deve retornar erro 500 se ocorrer um erro de rede ao chamar o servidor de preços", async () => {
     mockedFetchStockPriceServer.mockRejectedValueOnce(new Error("Erro de rede"))
 
-    const request = new NextRequest("http://localhost:3000/api/stock-price?ticker=PETR4")
+    const request = new Request("http://localhost:3000/api/stock-price?ticker=PETR4")
     const response = await GET(request)
     const data = await response.json()
 
