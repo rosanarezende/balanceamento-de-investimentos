@@ -5,6 +5,11 @@ import { useAuth } from "@/contexts/auth-context"
 import { getPortfolio, addStock, removeStock, updateStock } from "@/lib/firestore"
 import { toast } from "sonner"
 
+// Função para verificar se estamos em ambiente de desenvolvimento
+const isDevelopment = () => {
+  return process.env.NODE_ENV === 'development'
+}
+
 export type Stock = {
   ticker: string
   quantity: number
@@ -30,6 +35,8 @@ export function usePortfolio() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [pendingOperations, setPendingOperations] = useState<Set<string>>(new Set())
+  const [stockPrices, setStockPrices] = useState<Record<string, number>>({})
+  const [pricesLoading, setPricesLoading] = useState(false)
 
   // Função para buscar a carteira do usuário
   const fetchPortfolio = useCallback(async () => {
@@ -48,7 +55,7 @@ export function usePortfolio() {
       
       if (portfolio) {
         setStocks(portfolio)
-        // Calcular detalhes será feito em outro useEffect
+        // Preços e detalhes serão calculados em outro useEffect
       } else {
         setStocks({})
         setStocksWithDetails([])
@@ -66,6 +73,98 @@ export function usePortfolio() {
     }
   }, [user])
 
+  // Função para buscar preço de um ativo específico
+  const fetchStockPrice = useCallback(async (ticker: string): Promise<number> => {
+    try {
+      // Em desenvolvimento, retornar preço simulado
+      if (isDevelopment()) {
+        return Math.random() * 90 + 10 // Entre 10 e 100
+      }
+      
+      // Em produção, buscar preço real
+      const response = await fetch(`/api/stock-price?ticker=${ticker}`)
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar preço: ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      
+      if (data && typeof data.price === 'number') {
+        return data.price
+      }
+      
+      throw new Error('Preço não disponível')
+    } catch (error) {
+      console.error(`Erro ao buscar preço para ${ticker}:`, error)
+      return 50 // Valor padrão em caso de erro
+    }
+  }, [])
+
+  // Função para buscar preços dos ativos
+  const fetchStockPrices = useCallback(async (stocksList: Record<string, Stock>) => {
+    const tickers = Object.keys(stocksList)
+    
+    if (tickers.length === 0) {
+      setStockPrices({})
+      return
+    }
+    
+    setPricesLoading(true)
+    
+    try {
+      const prices: Record<string, number> = {}
+      
+      // Em desenvolvimento, usar preços simulados
+      if (isDevelopment()) {
+        console.log("Ambiente de desenvolvimento: usando preços simulados")
+        tickers.forEach(ticker => {
+          prices[ticker] = Math.random() * 90 + 10 // Entre 10 e 100
+        })
+      } else {
+        // Em produção, buscar preços reais
+        console.log("Ambiente de produção: buscando preços reais")
+        
+        // Buscar preços em lotes para evitar muitas requisições simultâneas
+        const batchSize = 5
+        for (let i = 0; i < tickers.length; i += batchSize) {
+          const batch = tickers.slice(i, i + batchSize)
+          
+          // Processar lote em paralelo
+          const batchPromises = batch.map(async (ticker) => {
+            const price = await fetchStockPrice(ticker)
+            prices[ticker] = price
+          })
+          
+          await Promise.all(batchPromises)
+          
+          // Pequeno delay entre lotes para evitar rate limiting
+          if (i + batchSize < tickers.length) {
+            await new Promise(resolve => setTimeout(resolve, 500))
+          }
+        }
+      }
+      
+      setStockPrices(prices)
+    } catch (err) {
+      console.error("Erro ao buscar preços:", err)
+      
+      // Em caso de erro, usar preços padrão como fallback
+      const fallbackPrices: Record<string, number> = {}
+      tickers.forEach(ticker => {
+        fallbackPrices[ticker] = 50 // Valor padrão
+      })
+      
+      setStockPrices(fallbackPrices)
+      
+      toast.error("Erro ao buscar cotações", {
+        description: "Usando valores aproximados. Tente atualizar novamente mais tarde."
+      })
+    } finally {
+      setPricesLoading(false)
+    }
+  }, [fetchStockPrice])
+
   // Função para atualizar manualmente a carteira
   const refreshPortfolio = useCallback(async () => {
     if (isRefreshing) return
@@ -73,6 +172,13 @@ export function usePortfolio() {
     try {
       setIsRefreshing(true)
       await fetchPortfolio()
+      
+      // Forçar atualização dos preços também
+      const currentStocks = { ...stocks }
+      if (Object.keys(currentStocks).length > 0) {
+        await fetchStockPrices(currentStocks)
+      }
+      
       toast.success("Carteira atualizada com sucesso!")
     } catch (err) {
       console.error("Erro ao atualizar carteira:", err)
@@ -82,7 +188,7 @@ export function usePortfolio() {
     } finally {
       setIsRefreshing(false)
     }
-  }, [fetchPortfolio, isRefreshing])
+  }, [fetchPortfolio, fetchStockPrices, isRefreshing, stocks])
 
   // Função para adicionar um ativo à carteira
   const addStockToPortfolio = useCallback(
@@ -111,6 +217,15 @@ export function usePortfolio() {
 
         // Persistir no Firebase
         await addStock(user.uid, ticker, data)
+        
+        // Buscar preço do novo ativo
+        if (!stockPrices[ticker]) {
+          const price = await fetchStockPrice(ticker)
+          setStockPrices(prev => ({
+            ...prev,
+            [ticker]: price
+          }))
+        }
         
         toast.success("Ativo adicionado com sucesso!", {
           description: `${ticker} foi adicionado à sua carteira.`
@@ -141,7 +256,7 @@ export function usePortfolio() {
         })
       }
     },
-    [user]
+    [user, stockPrices, fetchStockPrice]
   )
 
   // Função para remover um ativo da carteira
@@ -270,60 +385,62 @@ export function usePortfolio() {
     fetchPortfolio()
   }, [fetchPortfolio])
 
-  // Calcular detalhes dos ativos quando a carteira mudar
+  // Buscar preços quando a carteira mudar
+  useEffect(() => {
+    if (Object.keys(stocks).length > 0) {
+      fetchStockPrices(stocks)
+    }
+  }, [stocks, fetchStockPrices])
+
+  // Calcular detalhes dos ativos quando a carteira ou preços mudarem
   useEffect(() => {
     if (Object.keys(stocks).length === 0) {
       setStocksWithDetails([])
       return
     }
 
-    // Simulação de preços para desenvolvimento
-    // Em produção, isso seria substituído por chamadas à API de cotações
-    const simulateStockDetails = () => {
-      const stocksArray = Object.values(stocks)
-      const totalQuantity = stocksArray.reduce((sum, stock) => sum + stock.quantity, 0)
-      
-      // Simular preços entre R$10 e R$100
-      const detailedStocks = stocksArray.map(stock => {
-        const currentPrice = Math.random() * 90 + 10 // Entre 10 e 100
-        const currentValue = currentPrice * stock.quantity
-        
-        return {
-          ...stock,
-          currentPrice,
-          currentValue,
-          currentPercentage: 0, // Será calculado depois
-          targetValue: 0, // Será calculado depois
-          targetDifference: 0, // Será calculado depois
-          targetDifferencePercentage: 0 // Será calculado depois
-        }
-      })
-      
-      // Calcular valor total da carteira
-      const totalValue = detailedStocks.reduce((sum, stock) => sum + stock.currentValue, 0)
-      
-      // Calcular percentuais e diferenças
-      return detailedStocks.map(stock => {
-        const currentPercentage = totalValue > 0 ? (stock.currentValue / totalValue) * 100 : 0
-        const targetValue = (stock.targetPercentage / 100) * totalValue
-        const targetDifference = targetValue - stock.currentValue
-        const targetDifferencePercentage = stock.currentValue > 0 
-          ? (targetDifference / stock.currentValue) * 100 
-          : 0
-        
-        return {
-          ...stock,
-          currentPercentage,
-          targetValue,
-          targetDifference,
-          targetDifferencePercentage
-        }
-      })
-    }
+    const stocksArray = Object.values(stocks)
     
-    const detailedStocks = simulateStockDetails()
-    setStocksWithDetails(detailedStocks)
-  }, [stocks])
+    // Calcular detalhes com os preços disponíveis
+    const detailedStocks = stocksArray.map(stock => {
+      // Usar preço da API ou um valor padrão se não disponível
+      const currentPrice = stockPrices[stock.ticker] || 0
+      const currentValue = currentPrice * stock.quantity
+      
+      return {
+        ...stock,
+        currentPrice,
+        currentValue,
+        currentPercentage: 0, // Será calculado depois
+        targetValue: 0, // Será calculado depois
+        targetDifference: 0, // Será calculado depois
+        targetDifferencePercentage: 0 // Será calculado depois
+      }
+    })
+    
+    // Calcular valor total da carteira
+    const totalValue = detailedStocks.reduce((sum, stock) => sum + stock.currentValue, 0)
+    
+    // Calcular percentuais e diferenças
+    const finalDetailedStocks = detailedStocks.map(stock => {
+      const currentPercentage = totalValue > 0 ? (stock.currentValue / totalValue) * 100 : 0
+      const targetValue = (stock.targetPercentage / 100) * totalValue
+      const targetDifference = targetValue - stock.currentValue
+      const targetDifferencePercentage = stock.currentValue > 0 
+        ? (targetDifference / stock.currentValue) * 100 
+        : 0
+      
+      return {
+        ...stock,
+        currentPercentage,
+        targetValue,
+        targetDifference,
+        targetDifferencePercentage
+      }
+    })
+    
+    setStocksWithDetails(finalDetailedStocks)
+  }, [stocks, stockPrices])
 
   // Calcular valor total da carteira
   const totalPortfolioValue = stocksWithDetails.reduce(
@@ -335,7 +452,7 @@ export function usePortfolio() {
     stocks,
     stocksWithDetails,
     totalPortfolioValue,
-    loading,
+    loading: loading || pricesLoading,
     error,
     lastUpdated,
     isRefreshing,
