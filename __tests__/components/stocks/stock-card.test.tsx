@@ -139,4 +139,28 @@ describe("StockCard", () => {
       expect(dailyChange).toBeInTheDocument()
     })
   })
+
+  // New tests for edge cases and error handling
+  it("should handle missing or invalid props", () => {
+    // Verificar se o componente lança erro ao receber currentValue inválido
+    expect(() => render(<StockCard {...defaultProps} currentValue={-100} />)).toThrow(
+      "currentValue must be a number greater than 0"
+    )
+  })
+
+  it("should handle unexpected errors during daily change fetch", async () => {
+    // Configurar fetchDailyChange para lançar um erro inesperado
+    ;(fetchDailyChange as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
+
+    render(<StockCard {...defaultProps} />)
+
+    // Verificar se fetchDailyChange foi chamado
+    expect(fetchDailyChange).toHaveBeenCalledWith("PETR4")
+
+    // Verificar se a variação diária é exibida corretamente
+    await waitFor(() => {
+      const dailyChange = screen.getByText("0.00%")
+      expect(dailyChange).toBeInTheDocument()
+    })
+  })
 })

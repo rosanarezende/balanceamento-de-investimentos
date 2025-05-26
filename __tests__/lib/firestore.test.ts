@@ -87,6 +87,20 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(getUserPortfolio("user123")).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      await expect(getUserPortfolio("")).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      await expect(getUserPortfolio("user123")).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("updateStock", () => {
@@ -126,6 +140,52 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(updateStock("user123", "PETR4", stockData)).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      const stockData = {
+        quantity: 10,
+        targetPercentage: 20,
+        userRecommendation: "Comprar",
+      }
+
+      await expect(updateStock("", "PETR4", stockData)).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid ticker", async () => {
+      const stockData = {
+        quantity: 10,
+        targetPercentage: 20,
+        userRecommendation: "Comprar",
+      }
+
+      await expect(updateStock("user123", "", stockData)).rejects.toThrow("ticker não pode estar vazio")
+    })
+
+    it("should handle invalid stock data", async () => {
+      const stockData = {
+        quantity: -10,
+        targetPercentage: 200,
+        userRecommendation: "Invalid",
+      }
+
+      await expect(updateStock("user123", "PETR4", stockData)).rejects.toThrow("Dados de ação inválidos")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      const stockData = {
+        quantity: 10,
+        targetPercentage: 20,
+        userRecommendation: "Comprar",
+      }
+
+      await expect(updateStock("user123", "PETR4", stockData)).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("removeStock", () => {
@@ -158,6 +218,25 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(removeStock("user123", "PETR4")).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      await expect(removeStock("", "PETR4")).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid ticker", async () => {
+      await expect(removeStock("user123", "")).rejects.toThrow("ticker não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      await expect(removeStock("user123", "PETR4")).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("updateUserRecommendation", () => {
@@ -184,6 +263,28 @@ describe("Firestore", () => {
 
       // Verificar se a função lança um erro
       await expect(updateUserRecommendation("user123", "PETR4", "Vender")).rejects.toThrow("Firestore error")
+    })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      await expect(updateUserRecommendation("", "PETR4", "Vender")).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid ticker", async () => {
+      await expect(updateUserRecommendation("user123", "", "Vender")).rejects.toThrow("ticker não pode estar vazio")
+    })
+
+    it("should handle invalid recommendation", async () => {
+      await expect(updateUserRecommendation("user123", "PETR4", "Invalid")).rejects.toThrow("Recomendação inválida")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      await expect(updateUserRecommendation("user123", "PETR4", "Vender")).rejects.toThrow("Unexpected Error")
     })
   })
 
@@ -242,6 +343,48 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(saveSimulation("user123", simulation)).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      const simulation = {
+        date: new Date(),
+        investmentAmount: 1000,
+        portfolioValueBefore: 5000,
+        portfolioValueAfter: 6000,
+        allocations: [],
+      }
+
+      await expect(saveSimulation("", simulation)).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid simulation data", async () => {
+      const simulation = {
+        date: new Date(),
+        investmentAmount: -1000,
+        portfolioValueBefore: 5000,
+        portfolioValueAfter: 6000,
+        allocations: [],
+      }
+
+      await expect(saveSimulation("user123", simulation)).rejects.toThrow("Dados de simulação inválidos")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+      ;(addDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      const simulation = {
+        date: new Date(),
+        investmentAmount: 1000,
+        portfolioValueBefore: 5000,
+        portfolioValueAfter: 6000,
+        allocations: [],
+      }
+
+      await expect(saveSimulation("user123", simulation)).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("saveManualRecommendation", () => {
@@ -278,6 +421,39 @@ describe("Firestore", () => {
 
       // Verificar se a função lança um erro
       await expect(saveManualRecommendation("user123", recommendationData)).rejects.toThrow("Firestore error")
+    })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      const recommendationData = {
+        ticker: "PETR4",
+        recommendation: "Comprar",
+      }
+
+      await expect(saveManualRecommendation("", recommendationData)).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid recommendation data", async () => {
+      const recommendationData = {
+        ticker: "PETR4",
+        recommendation: "Invalid",
+      }
+
+      await expect(saveManualRecommendation("user123", recommendationData)).rejects.toThrow("Recomendação inválida")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      const recommendationData = {
+        ticker: "PETR4",
+        recommendation: "Comprar",
+      }
+
+      await expect(saveManualRecommendation("user123", recommendationData)).rejects.toThrow("Unexpected Error")
     })
   })
 
@@ -365,6 +541,21 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(getSimulations("user123")).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      await expect(getSimulations("")).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(collection as jest.Mock).mockReturnValueOnce("simulationsRef")
+      ;(query as jest.Mock).mockReturnValueOnce("queryRef")
+      ;(getDocs as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      await expect(getSimulations("user123")).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("getSimulation", () => {
@@ -435,6 +626,24 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(getSimulation("user123", "sim1")).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      await expect(getSimulation("", "sim1")).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid simulationId", async () => {
+      await expect(getSimulation("user123", "")).rejects.toThrow("simulationId não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("simulationRef")
+      ;(getDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      await expect(getSimulation("user123", "sim1")).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("getUserWatchlist", () => {
@@ -498,6 +707,20 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(getUserWatchlist("user123")).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      await expect(getUserWatchlist("")).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      await expect(getUserWatchlist("user123")).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("addToWatchlist", () => {
@@ -540,6 +763,42 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(addToWatchlist("user123", watchlistItem)).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      const watchlistItem = {
+        ticker: "PETR4",
+        targetPrice: 50,
+        notes: "Comprar quando atingir R$ 50",
+      }
+
+      await expect(addToWatchlist("", watchlistItem)).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid watchlist item data", async () => {
+      const watchlistItem = {
+        ticker: "PETR4",
+        targetPrice: -50,
+        notes: "Comprar quando atingir R$ 50",
+      }
+
+      await expect(addToWatchlist("user123", watchlistItem)).rejects.toThrow("Dados de item de watchlist inválidos")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      const watchlistItem = {
+        ticker: "PETR4",
+        targetPrice: 50,
+        notes: "Comprar quando atingir R$ 50",
+      }
+
+      await expect(addToWatchlist("user123", watchlistItem)).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("updateWatchlistItem", () => {
@@ -580,6 +839,48 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(updateWatchlistItem("user123", "PETR4", watchlistItem)).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      const watchlistItem = {
+        targetPrice: 55,
+        notes: "Atualizar preço alvo para R$ 55",
+      }
+
+      await expect(updateWatchlistItem("", "PETR4", watchlistItem)).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid ticker", async () => {
+      const watchlistItem = {
+        targetPrice: 55,
+        notes: "Atualizar preço alvo para R$ 55",
+      }
+
+      await expect(updateWatchlistItem("user123", "", watchlistItem)).rejects.toThrow("ticker não pode estar vazio")
+    })
+
+    it("should handle invalid watchlist item data", async () => {
+      const watchlistItem = {
+        targetPrice: -55,
+        notes: "Atualizar preço alvo para R$ 55",
+      }
+
+      await expect(updateWatchlistItem("user123", "PETR4", watchlistItem)).rejects.toThrow("Dados de item de watchlist inválidos")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      const watchlistItem = {
+        targetPrice: 55,
+        notes: "Atualizar preço alvo para R$ 55",
+      }
+
+      await expect(updateWatchlistItem("user123", "PETR4", watchlistItem)).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("removeFromWatchlist", () => {
@@ -611,6 +912,25 @@ describe("Firestore", () => {
 
       // Verificar se a função lança um erro
       await expect(removeFromWatchlist("user123", "PETR4")).rejects.toThrow("Firestore error")
+    })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      await expect(removeFromWatchlist("", "PETR4")).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid ticker", async () => {
+      await expect(removeFromWatchlist("user123", "")).rejects.toThrow("ticker não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(deleteField as jest.Mock).mockReturnValueOnce("DELETE_FIELD")
+      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      await expect(removeFromWatchlist("user123", "PETR4")).rejects.toThrow("Unexpected Error")
     })
   })
 
@@ -700,6 +1020,39 @@ describe("Firestore", () => {
       // Verificar se a função lança um erro
       await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Firestore error")
     })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      const preferences = {
+        theme: "dark",
+      }
+
+      await expect(saveUserPreferences("", preferences)).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle invalid preferences data", async () => {
+      const preferences = {
+        theme: "invalid",
+      }
+
+      await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Dados de preferências inválidos")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+      })
+      ;(updateDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      const preferences = {
+        theme: "dark",
+      }
+
+      await expect(saveUserPreferences("user123", preferences)).rejects.toThrow("Unexpected Error")
+    })
   })
 
   describe("getUserPreferences", () => {
@@ -760,6 +1113,20 @@ describe("Firestore", () => {
 
       // Verificar se a função lança um erro
       await expect(getUserPreferences("user123")).rejects.toThrow("Firestore error")
+    })
+
+    // New tests for edge cases and error handling
+    it("should handle invalid userId", async () => {
+      await expect(getUserPreferences("")).rejects.toThrow("userId não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      ;(doc as jest.Mock).mockReturnValueOnce("userRef")
+      ;(getDoc as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      await expect(getUserPreferences("user123")).rejects.toThrow("Unexpected Error")
     })
   })
 })

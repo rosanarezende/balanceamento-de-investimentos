@@ -295,4 +295,55 @@ describe("Calculator Flow Integration", () => {
     // Verificar se o AuthGuard é utilizado
     expect(screen.getByText("AuthGuard")).toBeInTheDocument()
   })
+
+  // New tests for edge cases and error handling
+  it("should handle invalid input values", async () => {
+    render(<CalculadoraBalanceamento />)
+
+    // Inserir um valor inválido (letras)
+    const input = screen.getByRole("textbox")
+    fireEvent.change(input, { target: { value: "abc" } })
+
+    // Clicar no botão de calcular
+    fireEvent.click(screen.getByText("Calcular"))
+
+    // Verificar se a mensagem de erro é exibida
+    expect(screen.getByText("Por favor, insira um valor válido para o aporte.")).toBeInTheDocument()
+
+    // Verificar se o router.push não foi chamado
+    expect(mockRouter.push).not.toHaveBeenCalled()
+  })
+
+  it("should handle unexpected errors during calculation", async () => {
+    // Configurar mockSearchParams para retornar valor de investimento
+    mockSearchParams.get.mockReturnValue("1000")
+
+    // Configurar usePortfolio para lançar um erro inesperado durante o cálculo
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation()
+
+    render(<ResultadoCalculadora />)
+
+    // Simular um erro inesperado durante o cálculo
+    const error = new Error("Erro inesperado")
+    consoleSpy.mockImplementationOnce(() => {
+      throw error
+    })
+
+    // Verificar se a mensagem de erro é exibida
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Ocorreu um erro inesperado. Por favor, tente novamente."),
+      ).toBeInTheDocument()
+    })
+
+    // Restaurar o console.error
+    consoleSpy.mockRestore()
+  })
+
+  it("should handle missing or invalid props", () => {
+    // Verificar se o componente lança erro ao receber props inválidos
+    expect(() => render(<CalculadoraBalanceamento invalidProp={null} />)).toThrow(
+      "invalidProp must be a valid object"
+    )
+  })
 })

@@ -349,4 +349,142 @@ describe("usePortfolio hook", () => {
     // Verificar se o estado local não foi alterado
     expect(result.current.stocks).not.toHaveProperty("ITUB4")
   })
+
+  // New tests for edge cases and error handling
+  it("should handle adding a stock with invalid data", async () => {
+    const { result } = renderHook(() => usePortfolio())
+
+    // Aguardar o carregamento dos dados
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Tentar adicionar uma ação com dados inválidos
+    await act(async () => {
+      await result.current.addStockToPortfolio("INVALID", {
+        quantity: -10,
+        targetPercentage: 150,
+        userRecommendation: "Invalid",
+      })
+    })
+
+    // Verificar se addStock não foi chamado
+    expect(addStock).not.toHaveBeenCalled()
+
+    // Verificar se o estado local não foi alterado
+    expect(result.current.stocks).not.toHaveProperty("INVALID")
+  })
+
+  it("should handle removing a stock with invalid ticker", async () => {
+    const { result } = renderHook(() => usePortfolio())
+
+    // Aguardar o carregamento dos dados
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Tentar remover uma ação com ticker inválido
+    await act(async () => {
+      await result.current.removeStockFromPortfolio("")
+    })
+
+    // Verificar se removeStock não foi chamado
+    expect(removeStock).not.toHaveBeenCalled()
+
+    // Verificar se o estado local não foi alterado
+    expect(result.current.stocks).toEqual({
+      PETR4: {
+        ticker: "PETR4",
+        quantity: 10,
+        targetPercentage: 20,
+        userRecommendation: "Comprar",
+      },
+      VALE3: {
+        ticker: "VALE3",
+        quantity: 15,
+        targetPercentage: 30,
+        userRecommendation: "Manter",
+      },
+    })
+  })
+
+  it("should handle updating a stock with invalid data", async () => {
+    const { result } = renderHook(() => usePortfolio())
+
+    // Aguardar o carregamento dos dados
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Tentar atualizar uma ação com dados inválidos
+    await act(async () => {
+      await result.current.updateStockInPortfolio("PETR4", {
+        quantity: -5,
+        targetPercentage: 200,
+      })
+    })
+
+    // Verificar se updateStock não foi chamado
+    expect(updateStock).not.toHaveBeenCalled()
+
+    // Verificar se o estado local não foi alterado
+    expect(result.current.stocks.PETR4).toEqual({
+      ticker: "PETR4",
+      quantity: 10,
+      targetPercentage: 20,
+      userRecommendation: "Comprar",
+    })
+  })
+
+  it("should handle network error when fetching stock prices", async () => {
+    // Configurar fetchStockPrice para lançar um erro de rede
+    ;(fetchStockPrice as jest.Mock).mockImplementation((ticker) => {
+      if (ticker === "PETR4") {
+        return Promise.reject(new Error("Network error"))
+      }
+      return Promise.resolve(68.75) // Preço para VALE3
+    })
+
+    const { result } = renderHook(() => usePortfolio())
+
+    // Aguardar o carregamento dos dados
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Verificar se não há erro geral
+    expect(result.current.error).toBeNull()
+
+    // Verificar se os detalhes das ações foram calculados corretamente
+    expect(result.current.stocksWithDetails).toHaveLength(2)
+
+    // Verificar PETR4 (deve usar um preço simulado)
+    const petr4 = result.current.stocksWithDetails.find((stock) => stock.ticker === "PETR4")
+    expect(petr4).toBeDefined()
+    expect(petr4?.currentPrice).toBe(0) // Preço zero para ação com erro
+
+    // Verificar VALE3
+    const vale3 = result.current.stocksWithDetails.find((stock) => stock.ticker === "VALE3")
+    expect(vale3).toBeDefined()
+    expect(vale3?.currentPrice).toBe(68.75)
+  })
+
+  it("should handle unexpected error when loading portfolio", async () => {
+    // Configurar getPortfolio para lançar um erro inesperado
+    ;(getPortfolio as jest.Mock).mockRejectedValueOnce(new Error("Unexpected error"))
+
+    const { result } = renderHook(() => usePortfolio())
+
+    // Aguardar o carregamento dos dados
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Verificar se o erro foi definido
+    expect(result.current.error).toBe("Não foi possível carregar sua carteira. Tente novamente mais tarde.")
+
+    // Verificar se o portfólio está vazio
+    expect(result.current.stocks).toEqual({})
+    expect(result.current.stocksWithDetails).toEqual([])
+  })
 })

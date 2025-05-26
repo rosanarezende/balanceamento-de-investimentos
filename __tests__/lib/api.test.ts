@@ -78,6 +78,15 @@ describe("API", () => {
       // Verificar se a função lança um erro
       await expect(fetchStockPrice("PETR4")).rejects.toThrow("Network error")
     })
+
+    // New tests for edge cases and error handling
+    it("should return error if ticker is an empty string", async () => {
+      await expect(fetchStockPrice("")).rejects.toThrow("Ticker não pode estar vazio")
+    })
+
+    it("should return error if ticker is not a string", async () => {
+      await expect(fetchStockPrice(123 as any)).rejects.toThrow("Ticker deve ser uma string")
+    })
   })
 
   describe("RECOMMENDATION_TYPES", () => {
@@ -151,6 +160,15 @@ describe("API", () => {
       // Verificar se o preço retornado é null
       expect(price).toBeNull()
     })
+
+    // New tests for edge cases and error handling
+    it("should return error if ticker is an empty string", async () => {
+      await expect(getStockPrice("")).rejects.toThrow("Ticker não pode estar vazio")
+    })
+
+    it("should return error if ticker is not a string", async () => {
+      await expect(getStockPrice(123 as any)).rejects.toThrow("Ticker deve ser uma string")
+    })
   })
 
   describe("getMultipleStockPrices", () => {
@@ -198,6 +216,15 @@ describe("API", () => {
       expect(prices).toEqual({
         PETR4: 42.5,
       })
+    })
+
+    // New tests for edge cases and error handling
+    it("should return error if any ticker is an empty string", async () => {
+      await expect(getMultipleStockPrices(["PETR4", ""])).rejects.toThrow("Ticker não pode estar vazio")
+    })
+
+    it("should return error if any ticker is not a string", async () => {
+      await expect(getMultipleStockPrices(["PETR4", 123 as any])).rejects.toThrow("Ticker deve ser uma string")
     })
   })
 

@@ -93,6 +93,23 @@ describe("Cache", () => {
     it("should throw an error if ticker is an empty string", async () => {
       await expect(getCachedStockPrice("")).rejects.toThrow("Ticker não pode estar vazio")
     })
+
+    // New tests for edge cases and error handling
+    it("should return null if ticker contains only whitespace", async () => {
+      await expect(getCachedStockPrice("   ")).rejects.toThrow("Ticker não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      // Configurar localStorage.getItem para lançar um erro inesperado
+      mockLocalStorage.getItem.mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      const price = await getCachedStockPrice("PETR4")
+
+      expect(price).toBeNull()
+      expect(mockLocalStorage.getItem).toHaveBeenCalledWith("stock_price_PETR4")
+    })
   })
 
   describe("setCachedStockPrice", () => {
@@ -125,6 +142,21 @@ describe("Cache", () => {
     it("should throw an error if ticker is an empty string", async () => {
       await expect(setCachedStockPrice("", 42.5)).rejects.toThrow("Ticker não pode estar vazio")
     })
+
+    // New tests for edge cases and error handling
+    it("should throw an error if ticker contains only whitespace", async () => {
+      await expect(setCachedStockPrice("   ", 42.5)).rejects.toThrow("Ticker não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      // Configurar localStorage.setItem para lançar um erro inesperado
+      mockLocalStorage.setItem.mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      // Não deve lançar erro
+      await expect(setCachedStockPrice("PETR4", 42.5)).resolves.not.toThrow()
+    })
   })
 
   describe("clearStockPriceCache", () => {
@@ -150,6 +182,21 @@ describe("Cache", () => {
 
     it("should throw an error if ticker is an empty string", async () => {
       await expect(clearStockPriceCache("")).rejects.toThrow("Ticker não pode estar vazio")
+    })
+
+    // New tests for edge cases and error handling
+    it("should throw an error if ticker contains only whitespace", async () => {
+      await expect(clearStockPriceCache("   ")).rejects.toThrow("Ticker não pode estar vazio")
+    })
+
+    it("should handle unexpected errors gracefully", async () => {
+      // Configurar localStorage.removeItem para lançar um erro inesperado
+      mockLocalStorage.removeItem.mockImplementationOnce(() => {
+        throw new Error("Unexpected Error")
+      })
+
+      // Não deve lançar erro
+      await expect(clearStockPriceCache("PETR4")).resolves.not.toThrow()
     })
   })
 

@@ -360,4 +360,67 @@ describe("Portfolio Flow Integration", () => {
       expect(mockPortfolioHook.removeStockFromPortfolio).toHaveBeenCalledWith("PETR4")
     })
   })
+
+  // New tests for edge cases and error handling
+  it("should handle unexpected errors during stock operations", async () => {
+    // Configurar removeStockFromPortfolio para lançar um erro inesperado
+    mockPortfolioHook.removeStockFromPortfolio.mockRejectedValueOnce(new Error("Unexpected Error"))
+
+    render(
+      <AuthProvider>
+        <ThemeProvider>
+          <StockList />
+        </ThemeProvider>
+      </AuthProvider>,
+    )
+
+    // Clicar no botão de excluir de uma ação
+    const deleteButtons = screen.getAllByLabelText(/excluir/i)
+    fireEvent.click(deleteButtons[0]) // Excluir PETR4
+
+    // Verificar se o modal de confirmação é exibido
+    await waitFor(() => {
+      expect(screen.getByText("Excluir Ativo")).toBeInTheDocument()
+      expect(screen.getByText(/Tem certeza que deseja excluir PETR4/i)).toBeInTheDocument()
+    })
+
+    // Confirmar a exclusão
+    fireEvent.click(screen.getByText("Excluir"))
+
+    // Verificar se a mensagem de erro é exibida
+    await waitFor(() => {
+      expect(screen.getByText("Erro ao remover PETR4")).toBeInTheDocument()
+    })
+  })
+
+  it("should handle missing or invalid props", async () => {
+    // Configurar usePortfolio para retornar dados inválidos
+    ;(usePortfolio as jest.Mock).mockReturnValue({
+      ...mockPortfolioHook,
+      stocksWithDetails: [
+        {
+          ticker: "INVALID",
+          quantity: -10,
+          targetPercentage: 150,
+          currentPrice: 0,
+          currentValue: -100,
+          currentPercentage: -50,
+          toBuy: -5,
+          excess: -10,
+          userRecommendation: "Invalid",
+        },
+      ],
+    })
+
+    render(
+      <AuthProvider>
+        <ThemeProvider>
+          <StockList />
+        </ThemeProvider>
+      </AuthProvider>,
+    )
+
+    // Verificar se a mensagem de erro é exibida
+    expect(screen.getByText("Erro ao carregar carteira")).toBeInTheDocument()
+  })
 })

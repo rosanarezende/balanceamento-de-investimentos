@@ -172,4 +172,50 @@ describe("AuthGuard", () => {
     // Verificar se o redirecionamento foi chamado
     expect(mockPush).toHaveBeenCalledWith("/login")
   })
+
+  // New tests for edge cases and error handling
+  it("should handle unexpected errors during authentication", async () => {
+    // Configurar useAuth para lançar um erro inesperado
+    const mockError = new Error("Unexpected Error")
+    ;(useAuth as jest.Mock).mockImplementation(() => {
+      throw mockError
+    })
+
+    render(
+      <AuthGuard>
+        <div data-testid="protected-content">Protected Content</div>
+      </AuthGuard>,
+    )
+
+    // Verificar se o conteúdo protegido não foi renderizado
+    expect(screen.queryByTestId("protected-content")).not.toBeInTheDocument()
+
+    // Verificar se o redirecionamento não foi chamado
+    expect(mockPush).not.toHaveBeenCalled()
+
+    // Verificar se a mensagem de erro é exibida
+    await waitFor(() => {
+      expect(screen.getByText(/erro inesperado/i)).toBeInTheDocument()
+    })
+  })
+
+  it("should handle missing user data", async () => {
+    // Configurar useAuth para retornar dados de usuário ausentes
+    ;(useAuth as jest.Mock).mockReturnValue({
+      user: { uid: "123", email: null },
+      loading: false,
+    })
+
+    render(
+      <AuthGuard>
+        <div data-testid="protected-content">Protected Content</div>
+      </AuthGuard>,
+    )
+
+    // Verificar se o conteúdo protegido foi renderizado
+    expect(screen.getByTestId("protected-content")).toBeInTheDocument()
+
+    // Verificar se o redirecionamento não foi chamado
+    expect(mockPush).not.toHaveBeenCalled()
+  })
 })

@@ -305,4 +305,62 @@ describe("AuthContext", () => {
     // Verificar se o erro foi limpo
     expect(screen.getByTestId("error").textContent).toBe("No Error")
   })
+
+  // New tests for edge cases and error handling
+  it("should handle missing or invalid props", () => {
+    // Verificar se o componente lança erro ao receber user inválido
+    expect(() => render(<AuthProvider><TestComponent user={null} /></AuthProvider>)).toThrow(
+      "user must be a valid object"
+    )
+  })
+
+  it("should handle unexpected errors during sign in", async () => {
+    // Configurar signInWithPopup para lançar um erro inesperado
+    ;(signInWithPopup as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("loading").textContent).toBe("Not Loading")
+    })
+
+    // Clicar no botão de login
+    await act(async () => {
+      userEvent.click(screen.getByTestId("login-btn"))
+    })
+
+    // Verificar se o erro foi definido
+    await waitFor(() => {
+      expect(screen.getByTestId("error").textContent).toContain("Erro ao fazer login")
+    })
+  })
+
+  it("should handle unexpected errors during sign out", async () => {
+    // Configurar signOut para lançar um erro inesperado
+    ;(signOut as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("loading").textContent).toBe("Not Loading")
+    })
+
+    // Clicar no botão de logout
+    await act(async () => {
+      userEvent.click(screen.getByTestId("logout-btn"))
+    })
+
+    // Verificar se o erro foi definido
+    await waitFor(() => {
+      expect(screen.getByTestId("error").textContent).toContain("Erro ao fazer logout")
+    })
+  })
 })

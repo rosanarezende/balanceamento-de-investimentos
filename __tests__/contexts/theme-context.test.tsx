@@ -248,4 +248,60 @@ describe("ThemeContext", () => {
     // Verificar se saveUserPreferences foi chamado
     expect(saveUserPreferences).toHaveBeenCalledWith("test-user-id", { theme: "light" })
   })
+
+  // New tests for edge cases and error handling
+  it("should handle missing or invalid props", () => {
+    // Verificar se o componente lança erro ao receber user inválido
+    expect(() => render(<ThemeProvider><TestComponent user={null} /></ThemeProvider>)).toThrow(
+      "user must be a valid object"
+    )
+  })
+
+  it("should handle unexpected errors during theme loading", async () => {
+    // Configurar getUserPreferences para lançar um erro inesperado
+    ;(getUserPreferences as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
+
+    render(
+      <ThemeProvider>
+        <TestComponent />
+      </ThemeProvider>,
+    )
+
+    // Verificar se o tema padrão é "dark"
+    await waitFor(() => {
+      expect(screen.getByTestId("theme").textContent).toBe("dark")
+    })
+
+    // Verificar se a classe "dark" foi adicionada ao documento
+    expect(document.documentElement.classList.contains("dark")).toBe(true)
+  })
+
+  it("should handle unexpected errors during theme saving", async () => {
+    // Configurar saveUserPreferences para lançar um erro inesperado
+    ;(saveUserPreferences as jest.Mock).mockRejectedValueOnce(new Error("Unexpected Error"))
+
+    render(
+      <ThemeProvider>
+        <TestComponent />
+      </ThemeProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("theme").textContent).toBe("dark")
+    })
+
+    // Clicar no botão de alternar tema
+    await act(async () => {
+      userEvent.click(screen.getByTestId("toggle-btn"))
+    })
+
+    // Verificar se o tema foi alterado para "light"
+    expect(screen.getByTestId("theme").textContent).toBe("light")
+
+    // Verificar se a classe "dark" foi removida do documento
+    expect(document.documentElement.classList.contains("dark")).toBe(false)
+
+    // Verificar se o tema foi salvo no localStorage
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith("theme", "light")
+  })
 })
