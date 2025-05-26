@@ -50,9 +50,9 @@ export function usePortfolio() {
     try {
       setLoading(true)
       setError(null)
-      
+
       const portfolio = await getPortfolio(user.uid)
-      
+
       if (portfolio) {
         setStocks(portfolio)
         // Preços e detalhes serão calculados em outro useEffect
@@ -60,7 +60,7 @@ export function usePortfolio() {
         setStocks({})
         setStocksWithDetails([])
       }
-      
+
       setLastUpdated(new Date())
     } catch (err) {
       console.error("Erro ao buscar carteira:", err)
@@ -80,20 +80,20 @@ export function usePortfolio() {
       if (isDevelopment()) {
         return Math.random() * 90 + 10 // Entre 10 e 100
       }
-      
+
       // Em produção, buscar preço real
       const response = await fetch(`/api/stock-price?ticker=${ticker}`)
-      
+
       if (!response.ok) {
         throw new Error(`Erro ao buscar preço: ${response.statusText}`)
       }
-      
+
       const data = await response.json()
-      
+
       if (data && typeof data.price === 'number') {
         return data.price
       }
-      
+
       throw new Error('Preço não disponível')
     } catch (error) {
       console.error(`Erro ao buscar preço para ${ticker}:`, error)
@@ -104,59 +104,61 @@ export function usePortfolio() {
   // Função para buscar preços dos ativos
   const fetchStockPrices = useCallback(async (stocksList: Record<string, Stock>) => {
     const tickers = Object.keys(stocksList)
-    
+
     if (tickers.length === 0) {
       setStockPrices({})
       return
     }
-    
+
     setPricesLoading(true)
-    
+
     try {
       const prices: Record<string, number> = {}
-      
+
       // Em desenvolvimento, usar preços simulados
       if (isDevelopment()) {
+        // eslint-disable-next-line no-console
         console.log("Ambiente de desenvolvimento: usando preços simulados")
         tickers.forEach(ticker => {
           prices[ticker] = Math.random() * 90 + 10 // Entre 10 e 100
         })
       } else {
         // Em produção, buscar preços reais
+        // eslint-disable-next-line no-console
         console.log("Ambiente de produção: buscando preços reais")
-        
+
         // Buscar preços em lotes para evitar muitas requisições simultâneas
         const batchSize = 5
         for (let i = 0; i < tickers.length; i += batchSize) {
           const batch = tickers.slice(i, i + batchSize)
-          
+
           // Processar lote em paralelo
           const batchPromises = batch.map(async (ticker) => {
             const price = await fetchStockPrice(ticker)
             prices[ticker] = price
           })
-          
+
           await Promise.all(batchPromises)
-          
+
           // Pequeno delay entre lotes para evitar rate limiting
           if (i + batchSize < tickers.length) {
             await new Promise(resolve => setTimeout(resolve, 500))
           }
         }
       }
-      
+
       setStockPrices(prices)
     } catch (err) {
       console.error("Erro ao buscar preços:", err)
-      
+
       // Em caso de erro, usar preços padrão como fallback
       const fallbackPrices: Record<string, number> = {}
       tickers.forEach(ticker => {
         fallbackPrices[ticker] = 50 // Valor padrão
       })
-      
+
       setStockPrices(fallbackPrices)
-      
+
       toast.error("Erro ao buscar cotações", {
         description: "Usando valores aproximados. Tente atualizar novamente mais tarde."
       })
@@ -168,17 +170,17 @@ export function usePortfolio() {
   // Função para atualizar manualmente a carteira
   const refreshPortfolio = useCallback(async () => {
     if (isRefreshing) return
-    
+
     try {
       setIsRefreshing(true)
       await fetchPortfolio()
-      
+
       // Forçar atualização dos preços também
       const currentStocks = { ...stocks }
       if (Object.keys(currentStocks).length > 0) {
         await fetchStockPrices(currentStocks)
       }
-      
+
       toast.success("Carteira atualizada com sucesso!")
     } catch (err) {
       console.error("Erro ao atualizar carteira:", err)
@@ -199,11 +201,11 @@ export function usePortfolio() {
       }
 
       const operationId = `add-${ticker}-${Date.now()}`
-      
+
       try {
         // Marcar operação como pendente
         setPendingOperations(prev => new Set(prev).add(operationId))
-        
+
         // Atualizar estado local imediatamente para feedback instantâneo
         setStocks(prev => ({
           ...prev,
@@ -217,7 +219,7 @@ export function usePortfolio() {
 
         // Persistir no Firebase
         await addStock(user.uid, ticker, data)
-        
+
         // Buscar preço do novo ativo
         if (!stockPrices[ticker]) {
           const price = await fetchStockPrice(ticker)
@@ -226,26 +228,26 @@ export function usePortfolio() {
             [ticker]: price
           }))
         }
-        
+
         toast.success("Ativo adicionado com sucesso!", {
           description: `${ticker} foi adicionado à sua carteira.`
         })
-        
+
         return true
       } catch (err) {
         console.error(`Erro ao adicionar ${ticker}:`, err)
-        
+
         // Reverter mudança local em caso de erro
         setStocks(prev => {
           const newStocks = { ...prev }
           delete newStocks[ticker]
           return newStocks
         })
-        
+
         toast.error("Erro ao adicionar ativo", {
           description: `Não foi possível adicionar ${ticker}. Tente novamente.`
         })
-        
+
         return false
       } finally {
         // Remover operação da lista de pendentes
@@ -269,11 +271,11 @@ export function usePortfolio() {
 
       const operationId = `remove-${ticker}-${Date.now()}`
       const previousStock = stocks[ticker]
-      
+
       try {
         // Marcar operação como pendente
         setPendingOperations(prev => new Set(prev).add(operationId))
-        
+
         // Atualizar estado local imediatamente para feedback instantâneo
         setStocks(prev => {
           const newStocks = { ...prev }
@@ -283,15 +285,15 @@ export function usePortfolio() {
 
         // Persistir no Firebase
         await removeStock(user.uid, ticker)
-        
+
         toast.success("Ativo removido com sucesso!", {
           description: `${ticker} foi removido da sua carteira.`
         })
-        
+
         return true
       } catch (err) {
         console.error(`Erro ao remover ${ticker}:`, err)
-        
+
         // Reverter mudança local em caso de erro
         if (previousStock) {
           setStocks(prev => ({
@@ -299,11 +301,11 @@ export function usePortfolio() {
             [ticker]: previousStock
           }))
         }
-        
+
         toast.error("Erro ao remover ativo", {
           description: `Não foi possível remover ${ticker}. Tente novamente.`
         })
-        
+
         return false
       } finally {
         // Remover operação da lista de pendentes
@@ -332,11 +334,11 @@ export function usePortfolio() {
 
       const operationId = `update-${ticker}-${Date.now()}`
       const previousStock = stocks[ticker]
-      
+
       try {
         // Marcar operação como pendente
         setPendingOperations(prev => new Set(prev).add(operationId))
-        
+
         // Atualizar estado local imediatamente para feedback instantâneo
         setStocks(prev => ({
           ...prev,
@@ -348,25 +350,25 @@ export function usePortfolio() {
 
         // Persistir no Firebase
         await updateStock(user.uid, ticker, data)
-        
+
         toast.success("Ativo atualizado com sucesso!", {
           description: `${ticker} foi atualizado na sua carteira.`
         })
-        
+
         return true
       } catch (err) {
         console.error(`Erro ao atualizar ${ticker}:`, err)
-        
+
         // Reverter mudança local em caso de erro
         setStocks(prev => ({
           ...prev,
           [ticker]: previousStock
         }))
-        
+
         toast.error("Erro ao atualizar ativo", {
           description: `Não foi possível atualizar ${ticker}. Tente novamente.`
         })
-        
+
         return false
       } finally {
         // Remover operação da lista de pendentes
@@ -400,13 +402,13 @@ export function usePortfolio() {
     }
 
     const stocksArray = Object.values(stocks)
-    
+
     // Calcular detalhes com os preços disponíveis
     const detailedStocks = stocksArray.map(stock => {
       // Usar preço da API ou um valor padrão se não disponível
       const currentPrice = stockPrices[stock.ticker] || 0
       const currentValue = currentPrice * stock.quantity
-      
+
       return {
         ...stock,
         currentPrice,
@@ -417,19 +419,19 @@ export function usePortfolio() {
         targetDifferencePercentage: 0 // Será calculado depois
       }
     })
-    
+
     // Calcular valor total da carteira
     const totalValue = detailedStocks.reduce((sum, stock) => sum + stock.currentValue, 0)
-    
+
     // Calcular percentuais e diferenças
     const finalDetailedStocks = detailedStocks.map(stock => {
       const currentPercentage = totalValue > 0 ? (stock.currentValue / totalValue) * 100 : 0
       const targetValue = (stock.targetPercentage / 100) * totalValue
       const targetDifference = targetValue - stock.currentValue
-      const targetDifferencePercentage = stock.currentValue > 0 
-        ? (targetDifference / stock.currentValue) * 100 
+      const targetDifferencePercentage = stock.currentValue > 0
+        ? (targetDifference / stock.currentValue) * 100
         : 0
-      
+
       return {
         ...stock,
         currentPercentage,
@@ -438,7 +440,7 @@ export function usePortfolio() {
         targetDifferencePercentage
       }
     })
-    
+
     setStocksWithDetails(finalDetailedStocks)
   }, [stocks, stockPrices])
 
