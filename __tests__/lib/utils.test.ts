@@ -18,6 +18,27 @@ describe("Utils", () => {
       expect(formatCurrency(1234)).toBe("R$ 1.234,00") // Sem casas decimais
       expect(formatCurrency(1234.5)).toBe("R$ 1.234,50") // Uma casa decimal
     })
+
+    // New tests for edge cases and error handling
+    it("should handle very large numbers", () => {
+      expect(formatCurrency(123456789012345)).toBe("R$ 123.456.789.012.345,00")
+    })
+
+    it("should handle very small numbers", () => {
+      expect(formatCurrency(0.0001)).toBe("R$ 0,00")
+    })
+
+    it("should handle NaN", () => {
+      expect(formatCurrency(NaN)).toBe("R$ NaN")
+    })
+
+    it("should handle Infinity", () => {
+      expect(formatCurrency(Infinity)).toBe("R$ Infinity")
+    })
+
+    it("should handle -Infinity", () => {
+      expect(formatCurrency(-Infinity)).toBe("R$ -Infinity")
+    })
   })
 
   describe("cn", () => {
@@ -40,6 +61,25 @@ describe("Utils", () => {
       expect(cn()).toBe("")
       expect(cn("", null, undefined, false, 0)).toBe("")
       expect(cn("class1", "", null)).toBe("class1")
+    })
+
+    // New tests for edge cases and error handling
+    it("should handle arrays of class names", () => {
+      expect(cn(["class1", "class2"])).toBe("class1 class2")
+      expect(cn(["class1", undefined, "class2"])).toBe("class1 class2")
+    })
+
+    it("should handle nested arrays of class names", () => {
+      expect(cn(["class1", ["class2", "class3"]])).toBe("class1 class2 class3")
+    })
+
+    it("should handle objects with conditional class names", () => {
+      expect(cn({ class1: true, class2: false })).toBe("class1")
+      expect(cn({ class1: true, class2: true })).toBe("class1 class2")
+    })
+
+    it("should handle mixed arrays and objects", () => {
+      expect(cn(["class1", { class2: true, class3: false }])).toBe("class1 class2")
     })
   })
 })
