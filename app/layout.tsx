@@ -1,13 +1,15 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { AuthProvider } from "@/contexts/auth-context"
-import { ThemeProvider } from "@/contexts/theme-context"
-import { PreviewAuthProvider } from "@/contexts/preview-auth-context"
-import { ToastContainer } from "@/components/ui/toast-container"
+"use client";
 
-const inter = Inter({ subsets: ["latin"] })
+import type React from "react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { AuthProvider } from "@/src/contexts/auth-context";
+import { ThemeProvider } from "@/src/contexts/theme-context";
+import { PreviewAuthProvider } from "@/contexts/preview-auth-context";
+import { ToastContainer } from "@/components/ui/toast-container";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "EquilibreInvest",
@@ -15,13 +17,13 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-    generator: 'v0.dev'
-}
+  generator: 'v0.dev'
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
@@ -36,5 +38,5 @@ export default function RootLayout({
         </AuthProvider>
       </body>
     </html>
-  )
+  );
 }
