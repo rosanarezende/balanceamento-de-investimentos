@@ -10,7 +10,6 @@ import { InsightsPanel } from "@/components/dashboard/insights-panel"
 import { StockList } from "@/components/stocks/stock-list"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import AuthGuard from "@/components/auth-guard"
-import Link from "next/link"
 
 export default function HomePage() {
   const { stocksWithDetails, totalPortfolioValue, loading } = usePortfolio()
@@ -26,7 +25,12 @@ export default function HomePage() {
   // Simular variação diária
   useEffect(() => {
     try {
-      if (totalPortfolioValue > 0 && !loading) {
+      if (typeof totalPortfolioValue !== "number" || totalPortfolioValue <= 0) {
+        console.error("Invalid totalPortfolioValue:", totalPortfolioValue)
+        return
+      }
+
+      if (!loading) {
         // Simular uma variação entre -3% e +3%
         const changePercentage = Math.random() * 6 - 3
         const change = totalPortfolioValue * (changePercentage / 100)
@@ -131,14 +135,6 @@ export default function HomePage() {
         {!loading && <InsightsPanel insights={generateInsights()} />}
 
         <StockList />
-
-        <div className="mt-4">
-          <Link href="/editar-ativos">
-            <Button className="w-full" size="lg">
-              Acessar Edição de Ativos
-            </Button>
-          </Link>
-        </div>
       </AppShell>
     </AuthGuard>
   )

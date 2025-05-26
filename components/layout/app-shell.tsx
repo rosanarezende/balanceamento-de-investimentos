@@ -30,6 +30,7 @@ export function AppShell({ children }: AppShellProps) {
     { name: "Histórico", href: "/historico", icon: Clock },
     { name: "Watchlist", href: "/watchlist", icon: Eye },
     { name: "Gráficos", href: "/dashboard", icon: BarChart3 },
+    { name: "Editar Ativos", href: "/editar-ativos", icon: Settings },
   ]
 
   const toggleMobileMenu = () => {

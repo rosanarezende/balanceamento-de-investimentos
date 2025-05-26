@@ -42,7 +42,11 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Valor Total</p>
-                  <p className="text-xl font-bold">{formatCurrency(totalPortfolioValue)}</p>
+                  <p className="text-xl font-bold">
+                    {typeof totalPortfolioValue === "number" && totalPortfolioValue > 0
+                      ? formatCurrency(totalPortfolioValue)
+                      : "Valor inválido"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Quantidade de Ativos</p>

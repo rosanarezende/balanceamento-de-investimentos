@@ -36,7 +36,7 @@ export function PortfolioChart({ data, totalValue }: PortfolioChartProps) {
     // Preparar dados para o gráfico
     const labels = data.map((item) => item.ticker)
     const currentValues = data.map((item) => item.currentValue)
-    const targetValues = data.map((item) => (item.targetPercentage / 100) * totalValue)
+    // const targetValues = data.map((item) => (item.targetPercentage / 100) * totalValue)
 
     // Cores para o tema claro e escuro
     const colors = {

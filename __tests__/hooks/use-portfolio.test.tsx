@@ -162,7 +162,7 @@ describe("usePortfolio hook", () => {
     })
 
     // Verificar se toBuy e excess foram calculados corretamente
-    const totalValue = 255.0 + 1031.25 // PETR4 + VALE3
+    // const totalValue = 255.0 + 1031.25 // PETR4 + VALE3
 
     // PETR4: targetPercentage = 20%, currentValue = 255.00
     // targetValue = totalValue * 20% = 1286.25 * 0.2 = 257.25

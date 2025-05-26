@@ -10,7 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Briefcase, Plus, ArrowUpDown, RefreshCw } from "lucide-react"
 import { usePortfolio } from "@/hooks/use-portfolio"
 import { LoadingState } from "@/components/ui/loading-state"
-import type { StockWithDetails } from "@/hooks/use-portfolio"
+import type { StockWithDetails as BaseStockWithDetails } from "@/lib/types.ts"
+
+type StockWithDetails = BaseStockWithDetails & {
+  dailyChange: number
+  dailyChangePercentage: number
+}
 
 type SortOption =
   | "ticker-asc"
@@ -24,7 +29,7 @@ type SortOption =
   | "recommendation"
 
 export function StockList() {
-  const { stocksWithDetails, loading, error, addOrUpdateStock, removeStockFromPortfolio, refreshPortfolio, hasEligibleStocks } = usePortfolio()
+  const { stocksWithDetails, loading, error, addOrUpdateStock, removeStockFromPortfolio, refreshPortfolio } = usePortfolio()
 
   const [sortedStocks, setSortedStocks] = useState<StockWithDetails[]>([])
   const [sortOption, setSortOption] = useState<SortOption>("ticker-asc")
@@ -139,8 +144,6 @@ export function StockList() {
     refreshPortfolio()
   }, [refreshPortfolio])
 
-  console.log({ sortedStocks })
-
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
@@ -208,25 +211,32 @@ export function StockList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {sortedStocks.map((stock) => (
-            <StockCard
-              key={stock.ticker}
-              ticker={stock.ticker}
-              quantity={stock.quantity}
-              currentValue={stock.currentValue}
-              currentPercentage={stock.currentPercentage}
-              targetPercentage={stock.targetPercentage}
-              toBuy={stock.toBuy}
-              excess={stock.excess}
-              currentPrice={stock.currentPrice}
-              dailyChange={(stock as any).dailyChange}
-              dailyChangePercentage={(stock as any).dailyChangePercentage}
-              userRecommendation={stock.userRecommendation}
-              onEdit={() => handleEditStock(stock)}
-              onDelete={() => handleDeleteStock(stock)}
-              loading={loading}
-            />
-          ))}
+          {sortedStocks.map((stock) => {
+            if (typeof stock.currentValue !== "number" || stock.currentValue <= 0) {
+              console.error(`Invalid currentValue for stock ${stock.ticker}: ${stock.currentValue}`)
+              return null
+            }
+
+            return (
+              <StockCard
+                key={stock.ticker}
+                ticker={stock.ticker}
+                quantity={stock.quantity}
+                currentValue={stock.currentValue}
+                currentPercentage={stock.currentPercentage}
+                targetPercentage={stock.targetPercentage}
+                dailyChange={stock.dailyChange}
+                dailyChangePercentage={stock.dailyChangePercentage}
+                toBuy={stock.toBuy}
+                excess={stock.excess}
+                currentPrice={stock.currentPrice}
+                userRecommendation={stock.userRecommendation}
+                onEdit={() => handleEditStock(stock)}
+                onDelete={() => handleDeleteStock(stock)}
+                loading={loading}
+              />
+            )
+          })}
         </div>
       )}
 

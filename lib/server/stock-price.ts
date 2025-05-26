@@ -3,6 +3,13 @@ import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/sto
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo"
 
 async function fetchStockPriceFromAlphaVantage(ticker: string): Promise<number> {
+  if (typeof ticker !== 'string') {
+    throw new Error("Ticker must be a string")
+  }
+  if (ticker.trim() === '') {
+    throw new Error("Ticker cannot be empty")
+  }
+
   const formattedTicker = `${ticker}.SA`
   const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${formattedTicker}&apikey=${ALPHA_VANTAGE_API_KEY}`
 
@@ -31,6 +38,13 @@ async function fetchStockPriceFromAlphaVantage(ticker: string): Promise<number> 
 }
 
 export async function fetchStockPriceServer(ticker: string): Promise<number> {
+  if (typeof ticker !== 'string') {
+    throw new Error("Ticker must be a string")
+  }
+  if (ticker.trim() === '') {
+    throw new Error("Ticker cannot be empty")
+  }
+
   const cached = await getCachedStockPrice(ticker)
   if (cached !== null) return cached
 

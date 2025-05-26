@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event"
 import { AuthProvider, useAuth } from "@/contexts/auth-context"
 import { auth, googleProvider } from "@/lib/firebase"
 import { signInWithPopup, signOut } from "firebase/auth"
-import { doc, getDoc, setDoc } from "firebase/firestore"
+import { getDoc, setDoc } from "firebase/firestore"
 
 // Mock do Firebase Auth
 jest.mock("@/lib/firebase", () => ({

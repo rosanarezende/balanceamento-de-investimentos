@@ -8,6 +8,14 @@ const CACHE_TTL = 5 * 60 * 1000 // 5 minutos em milissegundos
 const isBrowser = typeof window !== "undefined"
 
 export async function getCachedStockPrice(ticker: string): Promise<number | null> {
+  if (typeof ticker !== "string") {
+    throw new Error("Ticker deve ser uma string")
+  }
+
+  if (!ticker.trim()) {
+    throw new Error("Ticker não pode estar vazio")
+  }
+
   if (!isBrowser) return null
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
@@ -33,6 +41,14 @@ export async function getCachedStockPrice(ticker: string): Promise<number | null
 }
 
 export async function setCachedStockPrice(ticker: string, price: number): Promise<void> {
+  if (typeof ticker !== "string") {
+    throw new Error("Ticker deve ser uma string")
+  }
+
+  if (!ticker.trim()) {
+    throw new Error("Ticker não pode estar vazio")
+  }
+
   if (!isBrowser) return
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`
@@ -48,6 +64,14 @@ export async function setCachedStockPrice(ticker: string, price: number): Promis
 }
 
 export async function clearStockPriceCache(ticker: string): Promise<void> {
+  if (typeof ticker !== "string") {
+    throw new Error("Ticker deve ser uma string")
+  }
+
+  if (!ticker.trim()) {
+    throw new Error("Ticker não pode estar vazio")
+  }
+
   if (!isBrowser) return
   try {
     const cacheKey = `${STOCK_PRICE_CACHE_PREFIX}${ticker}`

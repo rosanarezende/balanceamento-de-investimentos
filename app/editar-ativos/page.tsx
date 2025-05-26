@@ -62,7 +62,12 @@ export default function EditarAtivos() {
     if (field === "ticker") {
       updatedStocks[index].ticker = value.toUpperCase()
     } else if (field === "quantity") {
-      updatedStocks[index].quantity = Number.parseInt(value) || 0
+      const quantity = Number.parseInt(value) || 0
+      if (quantity <= 0) {
+        setError("A quantidade deve ser maior que zero.")
+        return
+      }
+      updatedStocks[index].quantity = quantity
     } else if (field === "targetPercentage") {
       updatedStocks[index].targetPercentage = Number.parseFloat(value) || 0
     }
@@ -110,6 +115,11 @@ export default function EditarAtivos() {
 
     if (stocks.some((stock) => stock.ticker === newStock.ticker)) {
       setError("Este ativo já existe na sua carteira.")
+      return
+    }
+
+    if (newStock.quantity <= 0) {
+      setError("A quantidade deve ser maior que zero.")
       return
     }
 
@@ -256,7 +266,7 @@ export default function EditarAtivos() {
           <div className="flex justify-between items-center">
             <span className="font-medium">Total META:</span>
             <span
-              class={`font-bold ${Math.abs(totalTargetPercentage - 100) > 0.01 ? "text-red-600" : "text-green-600"}`}
+              className={`font-bold ${Math.abs(totalTargetPercentage - 100) > 0.01 ? "text-red-600" : "text-green-600"}`}
             >
               {totalTargetPercentage.toFixed(2)}%
             </span>

@@ -7,8 +7,12 @@ export async function GET(request: Request) {
   const eligibleStocks = searchParams.get("eligibleStocks")
   const investmentValue = searchParams.get("investmentValue")
 
-  if (!ticker) {
-    return NextResponse.json({ error: "Ticker não fornecido" }, { status: 400 })
+  if (typeof ticker !== "string") {
+    return NextResponse.json({ error: "Ticker deve ser uma string" }, { status: 400 })
+  }
+
+  if (!ticker.trim()) {
+    return NextResponse.json({ error: "Ticker não pode estar vazio" }, { status: 400 })
   }
 
   if (!eligibleStocks || isNaN(Number(eligibleStocks))) {
@@ -24,6 +28,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ price })
   } 
   catch (error) {
+    console.error("Erro ao buscar preço da ação:", error)
     return NextResponse.json({ error: "Erro ao buscar preço" }, { status: 500 })
   }
 }

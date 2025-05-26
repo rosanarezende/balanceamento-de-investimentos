@@ -116,7 +116,15 @@ export default function Historico() {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onClick={() => simulation.id && handleViewDetails(simulation.id)}
+                      onClick={() => {
+                        if (typeof simulation.investmentAmount !== "number" || simulation.investmentAmount <= 0) {
+                          setError("O valor do aporte deve ser um número maior que zero.")
+                          return
+                        }
+                        if (simulation.id) {
+                          handleViewDetails(simulation.id)
+                        }
+                      }}
                     >
                       <Eye className="mr-2 h-4 w-4" />
                       Ver Detalhes

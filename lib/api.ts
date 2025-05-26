@@ -1,6 +1,16 @@
 import { getCachedStockPrice, setCachedStockPrice } from "@/lib/client-utils/stock-price-cache"
+import type { Portfolio } from "./types"
+
 export async function fetchStockPrice(ticker: string): Promise<number> {
-  let cachedPrice = getCachedStockPrice(ticker)
+  if (typeof ticker !== "string") {
+    throw new Error("Ticker deve ser uma string")
+  }
+
+  if (!ticker.trim()) {
+    throw new Error("Ticker não pode estar vazio")
+  }
+
+  const cachedPrice = getCachedStockPrice(ticker)
   if (cachedPrice !== null) {
     return cachedPrice
   }
@@ -33,6 +43,7 @@ export const RECOMMENDATION_DESCRIPTIONS = {
 export async function saveManualRecommendation(ticker: string, recommendation: string): Promise<void> {
   // This is a placeholder function. In a real application, this function would
   // save the user's manual recommendation to a database or other persistent storage.
+  // eslint-disable-next-line no-console
   console.log(`Salvando recomendação manual para ${ticker}: ${recommendation}`)
   return Promise.resolve()
 }
@@ -94,6 +105,7 @@ export async function saveStockToDatabase(stock: {
   targetPercentage: number
 }): Promise<void> {
   // Placeholder function to simulate saving stock to database
+  // eslint-disable-next-line no-console
   console.log(`Saving stock to database: ${JSON.stringify(stock)}`)
   return Promise.resolve()
 }
@@ -118,11 +130,11 @@ export function validateUserInput(data: {
 
 export function clearAllStockPriceCache(): void {
   // Placeholder function to simulate clearing stock price cache
-  console.log("Clearing all stock price cache")
+  // console.log("Clearing all stock price cache")
 }
 
 export const useMemoizedPortfolioDetails = (portfolio: Portfolio) => {
   // Placeholder function to simulate memoized portfolio details
-  console.log(`Memoizing portfolio details for: ${JSON.stringify(portfolio)}`)
+  // console.log(`Memoizing portfolio details for: ${JSON.stringify(portfolio)}`)
   return portfolio
 }
