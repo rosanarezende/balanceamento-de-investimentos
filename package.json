@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "test": "jest",
     "test:watch": "jest --watch",
-    "clean": "rm -rf node_modules dist",
+    "clean": "rm -rf node_modules dist"
   },
   "dependencies": {
     "@ai-sdk/openai": "1.0.0",
