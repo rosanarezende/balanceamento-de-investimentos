@@ -1,4 +1,4 @@
-# Relatório de Integração UI e Limpeza de Arquivos
+# Relatório de Integração UI e Limpeza de Arquivos.
 
 ## Resumo das Alterações
 
