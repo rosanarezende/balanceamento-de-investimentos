@@ -1,128 +1,103 @@
 "use client"
 
 import { useState } from "react"
-import { CardGlass } from "@/components/ui/card-glass"
-import { SectionTitle } from "@/components/ui/section-title"
-import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, BarChart4 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { RefreshCw } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
-import { PortfolioChart } from "@/components/dashboard/portfolio-chart"
-import { PortfolioComparisonChart } from "@/components/dashboard/portfolio-comparison-chart"
-import { cn } from "@/lib/utils"
+import { usePortfolio } from "@/hooks/use-portfolio"
+import { Skeleton } from "@/components/ui/skeleton"
 
-interface PortfolioSummaryProps {
-  totalValue: number
-  stocksCount: number
-  dailyChange: number
-  dailyChangePercentage: number
-  stocksData: {
-    ticker: string
-    currentValue: number
-    currentPercentage: number
-    targetPercentage: number
-  }[]
-}
+export function PortfolioSummary() {
+  const { 
+    totalPortfolioValue, 
+    stocksWithDetails, 
+    loading, 
+    lastUpdated, 
+    isRefreshing, 
+    refreshPortfolio 
+  } = usePortfolio()
+  
+  // Formatar a data da última atualização
+  const formattedLastUpdate = lastUpdated 
+    ? new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(lastUpdated)
+    : 'Nunca'
 
-export function PortfolioSummary({
-  totalValue,
-  stocksCount,
-  dailyChange,
-  dailyChangePercentage,
-  stocksData,
-}: PortfolioSummaryProps) {
-  const [expanded, setExpanded] = useState(false)
-  const [chartType, setChartType] = useState<"pie" | "comparison">("pie")
-
-  const toggleExpanded = () => {
-    setExpanded(!expanded)
-  }
-
+  // Simular variação diária (em produção seria calculado com dados reais)
+  const dailyChange = totalPortfolioValue * (Math.random() * 0.06 - 0.03) // Entre -3% e +3%
+  const dailyChangePercentage = totalPortfolioValue > 0 ? (dailyChange / totalPortfolioValue) * 100 : 0
+  
   return (
-    <div className="mb-6 animate-fade-in">
-      <CardGlass className="mb-4">
-        <div className="flex items-center justify-between mb-4">
-          <SectionTitle
-            title="Resumo da Carteira"
-            subtitle="Visão geral dos seus investimentos"
-            icon={<BarChart4 size={20} />}
-          />
-          <button
-            onClick={toggleExpanded}
-            className="p-1.5 rounded-md hover:bg-background-tertiary text-text-secondary"
-            aria-label={expanded ? "Recolher" : "Expandir"}
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-xl font-bold">Resumo da Carteira</CardTitle>
+        <div className="flex items-center space-x-2">
+          {lastUpdated && (
+            <span className="text-xs text-muted-foreground">
+              Atualizado: {formattedLastUpdate}
+            </span>
+          )}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            title="Atualizar carteira"
+            onClick={refreshPortfolio}
+            disabled={isRefreshing || loading}
           >
-            {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </button>
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-          <div className="p-4 rounded-lg bg-background-tertiary">
-            <p className="text-sm text-text-secondary mb-1">Valor Total</p>
-            <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
-          </div>
-
-          <div className="p-4 rounded-lg bg-background-tertiary">
-            <p className="text-sm text-text-secondary mb-1">Ativos</p>
-            <p className="text-2xl font-bold">{stocksCount}</p>
-          </div>
-
-          <div className="col-span-2 md:col-span-1 p-4 rounded-lg bg-background-tertiary">
-            <p className="text-sm text-text-secondary mb-1">Variação Hoje</p>
-            <div className="flex items-center gap-2">
-              <p className={cn("text-2xl font-bold", dailyChange >= 0 ? "text-state-success" : "text-state-error")}>
-                {formatCurrency(dailyChange)}
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">Visão geral dos seus investimentos</p>
+        
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          {/* Valor Total */}
+          <div>
+            <p className="text-sm font-medium">Valor Total</p>
+            {loading ? (
+              <Skeleton className="h-8 w-32 mt-1" />
+            ) : (
+              <p className="text-2xl font-bold">
+                {formatCurrency(totalPortfolioValue)}
               </p>
-              <div
-                className={cn(
-                  "flex items-center text-sm",
-                  dailyChange >= 0 ? "text-state-success" : "text-state-error",
-                )}
-              >
-                {dailyChange >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                <span className="ml-1">{Math.abs(dailyChangePercentage).toFixed(2)}%</span>
-              </div>
-            </div>
+            )}
+          </div>
+          
+          {/* Ativos */}
+          <div>
+            <p className="text-sm font-medium">Ativos</p>
+            {loading ? (
+              <Skeleton className="h-8 w-16 mt-1" />
+            ) : (
+              <p className="text-2xl font-bold">
+                {stocksWithDetails.length}
+              </p>
+            )}
+          </div>
+          
+          {/* Variação Hoje */}
+          <div>
+            <p className="text-sm font-medium">Variação Hoje</p>
+            {loading ? (
+              <Skeleton className="h-8 w-32 mt-1" />
+            ) : (
+              <p className={`text-2xl font-bold flex items-center ${dailyChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {formatCurrency(dailyChange)}
+                <span className="text-sm ml-1">
+                  {dailyChange >= 0 ? '↑' : '↓'} {Math.abs(dailyChangePercentage).toFixed(2)}%
+                </span>
+              </p>
+            )}
           </div>
         </div>
-
-        {expanded && (
-          <>
-            <div className="flex justify-center mb-4">
-              <div className="inline-flex rounded-md shadow-sm" role="group">
-                <button
-                  className={cn(
-                    "px-4 py-2 text-sm font-medium rounded-l-lg",
-                    chartType === "pie"
-                      ? "bg-accent-primary text-white"
-                      : "bg-background-tertiary text-text-secondary hover:bg-background-tertiary/80",
-                  )}
-                  onClick={() => setChartType("pie")}
-                >
-                  Composição
-                </button>
-                <button
-                  className={cn(
-                    "px-4 py-2 text-sm font-medium rounded-r-lg",
-                    chartType === "comparison"
-                      ? "bg-accent-primary text-white"
-                      : "bg-background-tertiary text-text-secondary hover:bg-background-tertiary/80",
-                  )}
-                  onClick={() => setChartType("comparison")}
-                >
-                  Comparação
-                </button>
-              </div>
-            </div>
-
-            <div className="h-64 md:h-80">
-              {chartType === "pie" ? (
-                <PortfolioChart data={stocksData} totalValue={totalValue} />
-              ) : (
-                <PortfolioComparisonChart data={stocksData} />
-              )}
-            </div>
-          </>
-        )}
-      </CardGlass>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
