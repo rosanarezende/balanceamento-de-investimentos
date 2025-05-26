@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, AlertTriangle, RefreshCw, CheckCircle } from "lucide-react"
 import AuthGuard from "@/components/auth-guard"
-import { usePortfolio } from "@/hooks/use-portfolio"
+import { usePortfolio } from "@/src/hooks/use-portfolio"
 import { Alert } from "@/components/ui/alert"
 import { AppShell } from "@/components/layout/app-shell"
-import { useTheme } from "@/contexts/theme-context"
+import { useTheme } from "@/src/contexts/theme-context"
 
 export default function CalculadoraBalanceamento() {
   const [investmentValue, setInvestmentValue] = useState("")
