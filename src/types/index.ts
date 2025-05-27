@@ -56,3 +56,8 @@ export interface WatchlistItem {
 export interface UserPreferences {
   theme: "light" | "dark"
 }
+
+export type CacheItem<T> = {
+  value: T;
+  timestamp: number;
+};

@@ -13,28 +13,38 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-export async function saveStockToDatabase(stock) {
+export interface Stock {
+  id: string;
+  [key: string]: unknown;
+}
+
+export async function saveStockToDatabase(stock: Stock) {
   try {
     await setDoc(doc(db, 'stocks', stock.id), stock);
+    // eslint-disable-next-line no-console
     console.log('Stock saved successfully');
   } catch (error) {
     console.error('Error saving stock: ', error);
   }
 }
 
-export function validateUserInput(input) {
+export function validateUserInput(input: string) {
   if (!input || typeof input !== 'string') {
     throw new Error('Invalid input');
   }
   return input.trim();
 }
 
-export async function verifyStockExists(stockId) {
+export interface VerifyStockExistsResult {
+  [key: string]: unknown;
+}
+
+export async function verifyStockExists(stockId: string): Promise<VerifyStockExistsResult> {
   const docRef = doc(db, 'stocks', stockId);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    return docSnap.data();
+    return docSnap.data() as VerifyStockExistsResult;
   } else {
     throw new Error('No such stock!');
   }

@@ -15,7 +15,7 @@ const ICON_URL = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/icon-o
 export function Logo({ icon, size = "md", withText = false }: LogoProps) {
   const { theme } = useTheme()
 
-  const logoSrc = "/logo.svg"
+  const logoSrc = theme === "dark" ? LOGO_DARK_URL : LOGO_LIGHT_URL
   const src = icon ? ICON_URL : logoSrc
 
   const sizeClasses = {

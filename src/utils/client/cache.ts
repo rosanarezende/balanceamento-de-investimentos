@@ -1,5 +1,7 @@
 "use client";
 
+import { CacheItem } from "@/types";
+
 /**
  * Utilitário de cache para preços de ações
  * 
@@ -7,11 +9,11 @@
  * reduzindo a necessidade de chamadas repetidas à API.
  */
 
-import { CacheItem } from "@/types";
 
 const STOCK_PRICE_CACHE_PREFIX = "stock_price_";
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos em milissegundos
 const isBrowser = typeof window !== "undefined";
+
 
 /**
  * Obtém o preço de uma ação do cache

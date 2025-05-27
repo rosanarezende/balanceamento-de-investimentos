@@ -1,6 +1,6 @@
 "use server";
 
-import { HfInference } from "@huggingface/inference";
+// import { HfInference } from "@huggingface/inference";
 
 /**
  * Serviço para geração de texto usando modelos de IA
@@ -11,7 +11,7 @@ import { HfInference } from "@huggingface/inference";
 
 // Inicializar o cliente HuggingFace apenas no servidor
 const HF_API_KEY = process.env.HF_API_KEY || "";
-const hf = new HfInference(HF_API_KEY);
+// const hf = new HfInference(HF_API_KEY);
 
 interface GenerateTextParams {
   prompt: string;

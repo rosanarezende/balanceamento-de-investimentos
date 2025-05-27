@@ -16,7 +16,6 @@ import { db } from "./config";
 import type { 
   Portfolio, 
   Simulation, 
-  SimulationAllocation, 
   WatchlistItem,
   UserPreferences
 } from "@/types";
