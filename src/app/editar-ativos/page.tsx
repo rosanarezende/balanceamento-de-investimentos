@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
-import { AppShell } from "@/components/layout/app-shell"
+import Layout from "./layout"
 import { saveStockToDatabase, validateUserInput, verifyStockExists } from "@/lib/firestore"
 
 // Tipo para representar uma ação na carteira
@@ -148,7 +148,7 @@ export default function EditarAtivos() {
   const totalTargetPercentage = stocks.reduce((sum, stock) => sum + stock.targetPercentage, 0)
 
   return (
-    <AppShell>
+    <Layout>
       <div className="container max-w-md mx-auto px-4 py-6">
         <Button variant="ghost" size="icon" className="mb-4" onClick={handleBack} aria-label="Voltar">
           <ArrowLeft className="h-6 w-6" />
@@ -292,6 +292,6 @@ export default function EditarAtivos() {
           </Button>
         </div>
       </div>
-    </AppShell>
+    </Layout>
   )
 }
