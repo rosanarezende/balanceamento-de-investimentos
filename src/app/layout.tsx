@@ -4,8 +4,8 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/src/contexts/auth-context";
-import { ThemeProvider } from "@/src/contexts/theme-context";
+import { AuthProvider } from "@/contexts/auth-context";
+import { ThemeProvider } from "@/contexts/theme-context";
 import { PreviewAuthProvider } from "@/contexts/preview-auth-context";
 import { ToastContainer } from "@/components/ui/toast-container";
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "EquilibreInvest",
   description: "Gerencie e equilibre sua carteira de investimentos de forma inteligente",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.svg",
   },
   generator: 'v0.dev'
 };

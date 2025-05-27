@@ -7,10 +7,7 @@
  * reduzindo a necessidade de chamadas repetidas à API.
  */
 
-interface CacheItem<T> {
-  value: T;
-  timestamp: number;
-}
+import { CacheItem } from "@/types";
 
 const STOCK_PRICE_CACHE_PREFIX = "stock_price_";
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos em milissegundos

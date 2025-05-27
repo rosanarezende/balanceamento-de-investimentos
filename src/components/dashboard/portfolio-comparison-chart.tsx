@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { Chart, registerables } from "chart.js"
-import { theme } from "@/styles/theme"
+import { useTheme } from "@/contexts/theme-context"
 
 // Registrar os componentes necessários do Chart.js
 Chart.register(...registerables)
@@ -19,6 +19,7 @@ interface PortfolioComparisonChartProps {
 export function PortfolioComparisonChart({ data }: PortfolioComparisonChartProps) {
   const chartRef = useRef<HTMLCanvasElement>(null)
   const chartInstance = useRef<Chart | null>(null)
+  const { theme } = useTheme()
 
   useEffect(() => {
     if (!chartRef.current || data.length === 0) return
@@ -36,6 +37,25 @@ export function PortfolioComparisonChart({ data }: PortfolioComparisonChartProps
     const currentPercentages = data.map((item) => item.currentPercentage)
     const targetPercentages = data.map((item) => item.targetPercentage)
 
+    // Cores para o tema claro e escuro
+    const colors = {
+      light: {
+        current: "rgba(59, 130, 246, 0.6)",
+        target: "rgba(16, 185, 129, 0.6)",
+        text: "#1f2937",
+        grid: "rgba(0, 0, 0, 0.1)",
+      },
+      dark: {
+        current: "rgba(96, 165, 250, 0.6)",
+        target: "rgba(52, 211, 153, 0.6)",
+        text: "#f3f4f6",
+        grid: "rgba(255, 255, 255, 0.1)",
+      },
+    }
+
+    // Selecionar cores com base no tema
+    const themeColors = theme === "dark" ? colors.dark : colors.light
+
     // Criar o gráfico
     chartInstance.current = new Chart(ctx, {
       type: "bar",
@@ -45,41 +65,38 @@ export function PortfolioComparisonChart({ data }: PortfolioComparisonChartProps
           {
             label: "Composição Atual (%)",
             data: currentPercentages,
-            backgroundColor: theme.colors.accent.primary,
-            borderColor: theme.colors.accent.primary,
+            backgroundColor: themeColors.current,
+            borderColor: themeColors.current,
             borderWidth: 1,
-            borderRadius: 4,
           },
           {
             label: "Meta (%)",
             data: targetPercentages,
-            backgroundColor: theme.colors.accent.secondary,
-            borderColor: theme.colors.accent.secondary,
+            backgroundColor: themeColors.target,
+            borderColor: themeColors.target,
             borderWidth: 1,
-            borderRadius: 4,
           },
         ],
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
         scales: {
           y: {
             beginAtZero: true,
-            grid: {
-              color: theme.colors.border.secondary,
-            },
             ticks: {
-              color: theme.colors.text.secondary,
+              color: themeColors.text,
               callback: (value) => `${value}%`,
+            },
+            grid: {
+              color: themeColors.grid,
             },
           },
           x: {
-            grid: {
-              display: false,
-            },
             ticks: {
-              color: theme.colors.text.secondary,
+              color: themeColors.text,
+            },
+            grid: {
+              color: themeColors.grid,
             },
           },
         },
@@ -87,23 +104,13 @@ export function PortfolioComparisonChart({ data }: PortfolioComparisonChartProps
           legend: {
             position: "bottom",
             labels: {
-              color: theme.colors.text.primary,
+              color: themeColors.text,
               font: {
                 size: 12,
               },
-              padding: 20,
-              usePointStyle: true,
-              pointStyle: "circle",
             },
           },
           tooltip: {
-            backgroundColor: theme.colors.background.tertiary,
-            titleColor: theme.colors.text.primary,
-            bodyColor: theme.colors.text.secondary,
-            borderColor: theme.colors.border.primary,
-            borderWidth: 1,
-            padding: 12,
-            cornerRadius: 8,
             callbacks: {
               label: (context) => {
                 const label = context.dataset.label || ""
@@ -112,9 +119,6 @@ export function PortfolioComparisonChart({ data }: PortfolioComparisonChartProps
               },
             },
           },
-        },
-        animation: {
-          duration: 1000,
         },
       },
     })
@@ -125,11 +129,14 @@ export function PortfolioComparisonChart({ data }: PortfolioComparisonChartProps
         chartInstance.current.destroy()
       }
     }
-  }, [data])
+  }, [data, theme])
 
   return (
-    <div className="h-full w-full">
-      <canvas ref={chartRef} />
+    <div className="bg-card p-4 rounded-lg shadow-sm">
+      <h3 className="text-lg font-medium mb-4 text-card-foreground">Comparação: Atual vs. Meta</h3>
+      <div className="h-80">
+        <canvas ref={chartRef} />
+      </div>
     </div>
   )
 }

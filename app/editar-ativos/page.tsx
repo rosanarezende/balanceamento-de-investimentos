@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +33,10 @@ export default function EditarAtivos() {
   const [newStock, setNewStock] = useState<Stock>({ ticker: "", quantity: 0, targetPercentage: 0 })
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    // Any client-side only logic can be placed here
+  }, [])
 
   const handleBack = () => {
     router.back()

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { fetchStockPrice, saveManualRecommendation, RECOMMENDATION_TYPES } from "src/lib/api"
-import { getCachedStockPrice, setCachedStockPrice } from "src/lib/client-utils/stock-price-cache"
+import { fetchStockPrice, saveManualRecommendation, RECOMMENDATION_TYPES } from "@/services/api/stockPrice"
+import { getCachedStockPrice, setCachedStockPrice } from "@/utils/client/cache"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 // Tipo para representar uma ação na carteira

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { Chart, registerables } from "chart.js"
-import { theme } from "@/styles/theme"
+import { useTheme } from "@/contexts/theme-context"
 
 // Registrar os componentes necessários do Chart.js
 Chart.register(...registerables)
@@ -10,9 +10,7 @@ Chart.register(...registerables)
 interface PortfolioChartProps {
   data: {
     ticker: string
-    currentValue: number
     currentPercentage: number
-    targetPercentage: number
   }[]
   totalValue: number
 }
@@ -20,6 +18,7 @@ interface PortfolioChartProps {
 export function PortfolioChart({ data, totalValue }: PortfolioChartProps) {
   const chartRef = useRef<HTMLCanvasElement>(null)
   const chartInstance = useRef<Chart | null>(null)
+  const { theme } = useTheme()
 
   useEffect(() => {
     if (!chartRef.current || data.length === 0) return
@@ -34,7 +33,34 @@ export function PortfolioChart({ data, totalValue }: PortfolioChartProps) {
 
     // Preparar dados para o gráfico
     const labels = data.map((item) => item.ticker)
-    const currentValues = data.map((item) => item.currentValue)
+    const percentages = data.map((item) => item.currentPercentage)
+
+    // Cores para o tema claro e escuro
+    const colors = {
+      light: [
+        "rgba(59, 130, 246, 0.6)",
+        "rgba(16, 185, 129, 0.6)",
+        "rgba(139, 92, 246, 0.6)",
+        "rgba(245, 158, 11, 0.6)",
+        "rgba(236, 72, 153, 0.6)",
+        "rgba(6, 182, 212, 0.6)",
+        "rgba(239, 68, 68, 0.6)",
+        "rgba(167, 139, 250, 0.6)",
+      ],
+      dark: [
+        "rgba(96, 165, 250, 0.6)",
+        "rgba(52, 211, 153, 0.6)",
+        "rgba(165, 105, 246, 0.6)",
+        "rgba(245, 158, 11, 0.6)",
+        "rgba(236, 72, 153, 0.6)",
+        "rgba(6, 182, 212, 0.6)",
+        "rgba(239, 68, 68, 0.6)",
+        "rgba(167, 139, 250, 0.6)",
+      ],
+    }
+
+    // Selecionar cores com base no tema
+    const themeColors = theme === "dark" ? colors.dark : colors.light
 
     // Criar o gráfico
     chartInstance.current = new Chart(ctx, {
@@ -43,54 +69,35 @@ export function PortfolioChart({ data, totalValue }: PortfolioChartProps) {
         labels,
         datasets: [
           {
-            label: "Composição Atual",
-            data: currentValues,
-            backgroundColor: theme.colors.chart,
-            borderColor: "rgba(31, 41, 55, 0.8)",
+            data: percentages,
+            backgroundColor: themeColors,
+            borderColor: themeColors,
             borderWidth: 1,
-            hoverOffset: 15,
           },
         ],
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
-        cutout: "65%",
         plugins: {
           legend: {
             position: "bottom",
             labels: {
-              color: theme.colors.text.primary,
+              color: theme === "dark" ? "#f3f4f6" : "#1f2937",
               font: {
                 size: 12,
               },
-              padding: 20,
-              usePointStyle: true,
-              pointStyle: "circle",
             },
           },
           tooltip: {
-            backgroundColor: theme.colors.background.tertiary,
-            titleColor: theme.colors.text.primary,
-            bodyColor: theme.colors.text.secondary,
-            borderColor: theme.colors.border.primary,
-            borderWidth: 1,
-            padding: 12,
-            cornerRadius: 8,
             callbacks: {
               label: (context) => {
                 const label = context.label || ""
                 const value = context.raw as number
                 const percentage = ((value / totalValue) * 100).toFixed(2)
-                return `${label}: R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} (${percentage}%)`
+                return `${label}: ${percentage}%`
               },
             },
           },
-        },
-        animation: {
-          animateScale: true,
-          animateRotate: true,
-          duration: 1000,
         },
       },
     })
@@ -101,11 +108,14 @@ export function PortfolioChart({ data, totalValue }: PortfolioChartProps) {
         chartInstance.current.destroy()
       }
     }
-  }, [data, totalValue])
+  }, [data, theme, totalValue])
 
   return (
-    <div className="h-full w-full">
-      <canvas ref={chartRef} />
+    <div className="bg-card p-4 rounded-lg shadow-sm">
+      <h3 className="text-lg font-medium mb-4 text-card-foreground">Composição da Carteira</h3>
+      <div className="h-80">
+        <canvas ref={chartRef} />
+      </div>
     </div>
   )
 }
