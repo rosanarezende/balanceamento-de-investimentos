@@ -140,7 +140,11 @@ export default function EditarAtivos() {
       setError(null)
     } catch (validationError) {
       console.error("Erro ao adicionar novo ativo:", validationError)
-      setError(validationError.message)
+      if (validationError instanceof Error) {
+        setError(validationError.message)
+      } else {
+        setError("Ocorreu um erro ao adicionar o ativo.")
+      }
     }
   }
 
