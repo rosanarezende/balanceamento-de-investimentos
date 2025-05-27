@@ -15,6 +15,7 @@ import { PortfolioComparisonChart } from "@/components/portfolio-comparison-char
 import AuthGuard from "@/components/auth-guard"
 import { AppShell } from "@/components/layout/app-shell"
 import DashboardLayout from "./layout"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Dashboard() {
   const router = useRouter()
@@ -85,7 +86,10 @@ export default function Dashboard() {
 
             {loading ? (
               <div className="py-8 text-center">
-                <p className="text-muted-foreground">Carregando dados...</p>
+                <Skeleton className="h-8 w-3/4 mx-auto" />
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-8 w-1/2 mx-auto" />
               </div>
             ) : error ? (
               <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
