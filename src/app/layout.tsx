@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "EquilibreInvest",
   description: "Gerencie e equilibre sua carteira de investimentos de forma inteligente",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.svg",
   },
   generator: 'v0.dev'
 };
