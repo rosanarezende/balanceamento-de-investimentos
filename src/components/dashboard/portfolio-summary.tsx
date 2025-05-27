@@ -5,13 +5,21 @@ import { formatCurrency } from "@/lib/utils";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { Skeleton } from "@/components/ui/skeleton";
 
+type PortfolioSummaryProps = {
+  totalValue: number;
+  stocksCount: number;
+  dailyChange: number;
+  dailyChangePercentage: number;
+  stocksData: { ticker: string; currentValue: number }[];
+};
+
 export function PortfolioSummary({
   totalValue,
   stocksCount,
   dailyChange,
   dailyChangePercentage,
   stocksData,
-}) {
+}: PortfolioSummaryProps) {
   const { refreshPortfolio, isRefreshing } = usePortfolio();
 
   return (

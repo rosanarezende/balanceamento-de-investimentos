@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { Chart, registerables } from "chart.js"
-import { theme } from "@/styles/theme"
+// import { theme } from "@/styles/theme"
 
 // Registrar os componentes necessários do Chart.js
 Chart.register(...registerables)
