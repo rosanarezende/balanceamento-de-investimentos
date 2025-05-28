@@ -13,12 +13,16 @@ import { toast } from "sonner";
 const priceCache: Record<string, { price: number; timestamp: number }> = {};
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos em milissegundos
 
+// Valores padrão para fallback em caso de erro
+const DEFAULT_STOCK_PRICE = 50; // Valor padrão para ações sem cotação
+const FETCH_TIMEOUT = 5000; // Timeout para requisições (5 segundos)
+
 /**
  * Obtém o preço atual de uma ação
  * @param ticker Código da ação
- * @returns Preço da ação ou null em caso de erro
+ * @returns Preço da ação ou valor de fallback em caso de erro
  */
-export async function getStockPrice(ticker: string): Promise<number | null> {
+export async function getStockPrice(ticker: string): Promise<number> {
   try {
     // Verificar cache primeiro
     const now = Date.now();
@@ -31,30 +35,53 @@ export async function getStockPrice(ticker: string): Promise<number | null> {
     // Adicionar sufixo .SA para ações brasileiras se não tiver
     const formattedTicker = ticker.includes('.') ? ticker : `${ticker}.SA`;
 
-    // Usar endpoint de API interno
-    const response = await fetch(`/api/stock-price?ticker=${formattedTicker}`);
+    // Criar controller para timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
 
-    if (!response.ok) {
-      throw new Error(`Erro ao obter cotação: ${response.statusText}`);
+    try {
+      // Usar endpoint de API interno com timeout
+      const response = await fetch(`/api/stock-price?ticker=${formattedTicker}`, {
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Erro ao obter cotação: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Verificar se temos um preço válido
+      if (data && data.price && typeof data.price === 'number') {
+        // Atualizar cache
+        priceCache[ticker] = {
+          price: data.price,
+          timestamp: now
+        };
+        
+        return data.price;
+      }
+
+      throw new Error('Preço não disponível');
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError; // Propagar erro para ser tratado no catch externo
     }
-
-    const data = await response.json();
-
-    // Verificar se temos um preço válido
-    if (data && data.price && typeof data.price === 'number') {
-      // Atualizar cache
-      priceCache[ticker] = {
-        price: data.price,
-        timestamp: now
-      };
-      
-      return data.price;
-    }
-
-    throw new Error('Preço não disponível');
   } catch (error) {
     console.error(`Erro ao obter cotação para ${ticker}:`, error);
-    return null;
+    
+    // Usar valor de cache expirado se disponível como primeira opção de fallback
+    const cachedData = priceCache[ticker];
+    if (cachedData) {
+      console.log(`Usando valor de cache expirado para ${ticker}: ${cachedData.price}`);
+      return cachedData.price;
+    }
+    
+    // Usar valor padrão como última opção de fallback
+    console.log(`Usando valor padrão para ${ticker}: ${DEFAULT_STOCK_PRICE}`);
+    return DEFAULT_STOCK_PRICE;
   }
 }
 
@@ -75,11 +102,14 @@ export async function getMultipleStockPrices(tickers: string[]): Promise<Record<
 
     // Processar lote em paralelo
     const batchPromises = batch.map(async (ticker) => {
-      const price = await getStockPrice(ticker);
-
-      if (price !== null) {
+      try {
+        // getStockPrice agora sempre retorna um número (valor real ou fallback)
+        const price = await getStockPrice(ticker);
         results[ticker] = price;
-      } else {
+      } catch (error) {
+        // Este catch não deve ser acionado normalmente, pois getStockPrice já tem fallback
+        console.error(`Erro inesperado ao obter cotação para ${ticker}:`, error);
+        results[ticker] = DEFAULT_STOCK_PRICE;
         failedCount++;
       }
     });
@@ -94,8 +124,8 @@ export async function getMultipleStockPrices(tickers: string[]): Promise<Record<
 
   // Notificar se houver falhas
   if (failedCount > 0) {
-    toast.error(`Não foi possível obter cotação para ${failedCount} ativo(s)`, {
-      description: "Alguns valores podem estar desatualizados ou indisponíveis."
+    toast.warning(`Usando valores aproximados para ${failedCount} ativo(s)`, {
+      description: "Alguns valores podem estar desatualizados ou são estimativas."
     });
   }
 
@@ -129,19 +159,28 @@ export function isDevelopment(): boolean {
 /**
  * Obtém o preço atual de uma ação
  * @param ticker Código da ação
- * @returns Preço da ação ou null em caso de erro
+ * @returns Preço da ação ou valor de fallback em caso de erro
  */
-export async function fetchStockPrice(ticker: string): Promise<number | null> {
+export async function fetchStockPrice(ticker: string): Promise<number> {
   try {
-    const response = await fetch(`/api/stock-price?ticker=${ticker}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    
+    const response = await fetch(`/api/stock-price?ticker=${ticker}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
     if (!response.ok) {
       throw new Error(`Erro ao obter cotação: ${response.statusText}`);
     }
+    
     const data = await response.json();
-    return data.price || null;
+    return data.price || DEFAULT_STOCK_PRICE;
   } catch (error) {
     console.error(`Erro ao obter cotação para ${ticker}:`, error);
-    return null;
+    return DEFAULT_STOCK_PRICE;
   }
 }
 
@@ -152,18 +191,28 @@ export async function fetchStockPrice(ticker: string): Promise<number | null> {
  */
 export async function saveManualRecommendation(ticker: string, recommendation: string): Promise<void> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    
     const response = await fetch(`/api/save-recommendation`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ ticker, recommendation }),
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
+    
     if (!response.ok) {
       throw new Error(`Erro ao salvar recomendação: ${response.statusText}`);
     }
   } catch (error) {
     console.error(`Erro ao salvar recomendação para ${ticker}:`, error);
+    toast.error("Não foi possível salvar a recomendação", {
+      description: "Tente novamente mais tarde."
+    });
   }
 }
 

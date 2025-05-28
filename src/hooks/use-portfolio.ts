@@ -429,7 +429,7 @@ export function usePortfolio() {
   return {
     stocks,
     stocksWithDetails,
-    totalPortfolioValue,
+    totalPortfolioValue: isNaN(totalPortfolioValue) ? 0 : totalPortfolioValue,
     loading: loading || pricesLoading,
     error,
     lastUpdated,

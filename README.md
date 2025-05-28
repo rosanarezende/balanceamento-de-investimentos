@@ -1,4 +1,4 @@
-# Investir para o futuro
+# EquilibreInvest 
 
 *Automatically synced with your [v0.dev](https://v0.dev) deployments*
 
@@ -21,6 +21,41 @@ Your project is live at:
 Continue building your app on:
 
 **[https://v0.dev/chat/projects/QNdp8n2hReh](https://v0.dev/chat/projects/QNdp8n2hReh)**
+
+## Environment Variables
+
+Para executar este projeto corretamente, você precisa configurar as seguintes variáveis de ambiente:
+
+### Firebase (obrigatórias)
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=seu_valor_aqui
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_valor_aqui
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_valor_aqui
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_valor_aqui
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_valor_aqui
+NEXT_PUBLIC_FIREBASE_APP_ID=seu_valor_aqui
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=seu_valor_aqui
+```
+
+### APIs Externas (obrigatórias)
+```
+ALPHA_VANTAGE_API_KEY=seu_valor_aqui
+HF_API_KEY=seu_valor_aqui
+```
+
+### Configurações Opcionais
+```
+NEXT_PUBLIC_OFFLINE_MODE=false  # Defina como 'true' para testes sem dependências externas
+```
+
+### Como configurar
+
+1. Crie um arquivo `.env.local` na raiz do projeto
+2. Adicione as variáveis acima com seus respectivos valores
+3. Para ambiente de desenvolvimento, você pode usar o arquivo `.env.development`
+4. Para produção na Vercel, configure as variáveis no painel de configurações do projeto
+
+**Importante**: Certifique-se de que todas as variáveis estejam corretamente configuradas antes de fazer o deploy. Erros nas variáveis de ambiente podem causar falhas na autenticação e no carregamento de dados.
 
 ## How It Works
 
@@ -123,4 +158,3 @@ A arquitetura do projeto foi projetada para ser modular e escalável. Abaixo est
 - **Button**: `<Button variant="primary" size="lg">Clique Aqui</Button>`
 - **usePortfolio**: `const { stocks, addStock } = usePortfolio()`
 - **AuthContext**: `<AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>`
-
