@@ -125,3 +125,49 @@ export function simulateStockPrices(tickers: string[]): Record<string, number> {
 export function isDevelopment(): boolean {
   return process.env.NODE_ENV === 'development';
 }
+
+/**
+ * Obtém o preço atual de uma ação
+ * @param ticker Código da ação
+ * @returns Preço da ação ou null em caso de erro
+ */
+export async function fetchStockPrice(ticker: string): Promise<number | null> {
+  try {
+    const response = await fetch(`/api/stock-price?ticker=${ticker}`);
+    if (!response.ok) {
+      throw new Error(`Erro ao obter cotação: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.price || null;
+  } catch (error) {
+    console.error(`Erro ao obter cotação para ${ticker}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Salva uma recomendação manual
+ * @param ticker Código da ação
+ * @param recommendation Recomendação manual
+ */
+export async function saveManualRecommendation(ticker: string, recommendation: string): Promise<void> {
+  try {
+    const response = await fetch(`/api/save-recommendation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ticker, recommendation }),
+    });
+    if (!response.ok) {
+      throw new Error(`Erro ao salvar recomendação: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error(`Erro ao salvar recomendação para ${ticker}:`, error);
+  }
+}
+
+/**
+ * Tipos de recomendação
+ */
+export const RECOMMENDATION_TYPES = ['COMPRAR', 'VENDER', 'AGUARDAR'];

@@ -182,7 +182,7 @@ export default function ResultadoCalculadora() {
             // Ordenar por diferença entre percentual atual e meta (decrescente)
             eligibleAllocations.sort((a, b) => {
               const diffA = a.targetPercentage - a.currentPercentage
-              const diffB = b.targetPercentage - b.currentPercentage
+              const diffB = b.targetPercentage - a.currentPercentage
               return diffB - diffA
             })
 

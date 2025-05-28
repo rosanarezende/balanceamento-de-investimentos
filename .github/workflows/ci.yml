@@ -3,37 +3,55 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - main # Dispara o workflow em pushes para a branch main
   pull_request:
     branches:
-      - main
+      - main # Dispara o workflow em pull requests para a branch main
 
 jobs:
-  build:
+  build_and_test: # Nome do job pode ser mais descritivo
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '18' # Ou a versão especificada no seu package.json engines
+          cache: 'npm' # Habilita o caching para npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci # Usa npm ci para instalações mais rápidas e consistentes
 
       - name: Run lint
         run: npm run lint
+        # Se o lint precisar das env vars do Firebase, adicione a seção 'env' aqui.
+        # No entanto, para a maioria dos linters, isso não é necessário.
 
       - name: Run tests
         run: npm test
+        # Se os testes precisarem das env vars do Firebase, adicione a seção 'env' aqui.
+        # Exemplo:
+        # env:
+        #   NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+        #   # ... outras chaves do Firebase
 
       - name: Build project
         run: npm run build
-
-      - name: Deploy to Vercel
-        run: npm run deploy
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # Variáveis de ambiente do Firebase injetadas apenas para a etapa de build no CI
+          # A Vercel usará as variáveis configuradas no dashboard dela para o deploy e runtime.
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+
+      # A etapa de deploy foi removida.
+      # A Vercel irá detectar o push para a branch 'main' (se configurado)
+      # e iniciará seu próprio processo de build e deploy usando as
+      # configurações e variáveis de ambiente definidas no dashboard da Vercel.
