@@ -14,26 +14,41 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4 # Versão atualizada
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4 # Versão atualizada
         with:
-          node-version: '18'
+          node-version: '18' # Ou a versão especificada no seu package.json engines
+          cache: 'npm' # Habilita o caching para npm gerenciado pelo setup-node
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci # Usa npm ci para instalações mais rápidas e consistentes
 
       - name: Run lint
         run: npm run lint
 
       - name: Run tests
         run: npm test
+        # Se os testes precisarem das env vars, adicione-as aqui.
 
       - name: Build project
         run: npm run build
+        env:
+          # Variáveis de ambiente do Firebase injetadas apenas para a etapa de build
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
 
       - name: Deploy to Vercel
-        run: npm run deploy
+        # Este passo assume que as variáveis de ambiente do Firebase para runtime
+        # estão configuradas diretamente no dashboard da Vercel.
+        # O VERCEL_TOKEN é para autenticação da CLI da Vercel.
+        run: npm run deploy # Verifique se este é o comando correto (ex: vercel --prod)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
