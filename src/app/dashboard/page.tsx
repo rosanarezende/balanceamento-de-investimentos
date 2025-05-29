@@ -111,9 +111,9 @@ export default function Dashboard() {
                       <div>
                         <p className="text-sm text-muted-foreground">Valor Total</p>
                         <p className="text-xl font-bold">
-                          {typeof totalPortfolioValue === "number" && totalPortfolioValue > 0
+                          {typeof totalPortfolioValue === "number" && !isNaN(totalPortfolioValue)
                             ? formatCurrency(totalPortfolioValue)
-                            : "Valor inválido"}
+                            : "R$ 0,00"}
                         </p>
                       </div>
                       <div>
@@ -172,9 +172,16 @@ export default function Dashboard() {
                     </Button>
                   </div>
                 ) : chartType === "pie" ? (
-                  <PortfolioChart data={stocksWithDetails} totalValue={totalPortfolioValue} />
+                  <ErrorBoundary fallback={<div className="text-center py-8">Não foi possível carregar o gráfico</div>}>
+                    <PortfolioChart 
+                      data={stocksWithDetails} 
+                      totalValue={typeof totalPortfolioValue === 'number' && !isNaN(totalPortfolioValue) ? totalPortfolioValue : 0} 
+                    />
+                  </ErrorBoundary>
                 ) : (
-                  <PortfolioComparisonChart data={stocksWithDetails} />
+                  <ErrorBoundary fallback={<div className="text-center py-8">Não foi possível carregar o gráfico</div>}>
+                    <PortfolioComparisonChart data={stocksWithDetails} />
+                  </ErrorBoundary>
                 )}
               </>
             )}
@@ -183,4 +190,28 @@ export default function Dashboard() {
       </AppShell>
     </AuthGuard>
   )
+}
+
+// Componente ErrorBoundary para capturar erros em componentes filhos
+class ErrorBoundary extends React.Component<{
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Erro em componente filho:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
 }
