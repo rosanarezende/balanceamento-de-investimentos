@@ -211,7 +211,6 @@ class ErrorBoundary extends React.Component<{
     if (this.state.hasError) {
       return this.props.fallback;
     }
-
     return this.props.children;
   }
 }
