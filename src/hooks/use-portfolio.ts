@@ -66,7 +66,23 @@ export function usePortfolio() {
 
       const portfolio = await getUserPortfolio(user.uid);
 
+      // Validar estrutura do portfólio
       if (portfolio) {
+        // Verificar se cada ativo tem os campos necessários
+        const isValid = Object.values(portfolio).every(stock => 
+          typeof stock.ticker === 'string' &&
+          typeof stock.quantity === 'number' &&
+          typeof stock.targetPercentage === 'number'
+        );
+        
+        if (!isValid) {
+          console.error("Dados de portfólio inválidos:", portfolio);
+          setError("Dados de portfólio inválidos. Entre em contato com o suporte.");
+          setStocks({});
+          setStocksWithDetails([]);
+          return;
+        }
+        
         setStocks(portfolio);
         // Preços e detalhes serão calculados em outro useEffect
       } else {
@@ -366,57 +382,76 @@ export function usePortfolio() {
 
   // Calcular detalhes dos ativos quando a carteira ou preços mudarem
   useEffect(() => {
-    if (Object.keys(stocks).length === 0) {
+    try {
+      if (Object.keys(stocks).length === 0) {
+        setStocksWithDetails([]);
+        return;
+      }
+
+      const stocksArray = Object.values(stocks);
+
+      // Calcular detalhes com os preços disponíveis
+      const detailedStocks = stocksArray.map(stock => {
+        // Garantir que preço e quantidade sejam números válidos
+        const currentPrice = typeof stockPrices[stock.ticker] === 'number' && !isNaN(stockPrices[stock.ticker]) 
+          ? stockPrices[stock.ticker] 
+          : 0;
+        const quantity = typeof stock.quantity === 'number' && !isNaN(stock.quantity) 
+          ? stock.quantity 
+          : 0;
+        const currentValue = currentPrice * quantity;
+
+        return {
+          ...stock,
+          currentPrice,
+          currentValue,
+          currentPercentage: 0, // Será calculado depois
+          targetValue: 0, // Será calculado depois
+          targetDifference: 0, // Será calculado depois
+          targetDifferencePercentage: 0 // Será calculado depois
+        };
+      });
+
+      // Calcular valor total da carteira com validação
+      const totalValue = detailedStocks.reduce((sum, stock) => {
+        return sum + (isNaN(stock.currentValue) ? 0 : stock.currentValue);
+      }, 0);
+
+      // Calcular percentuais e diferenças
+      const finalDetailedStocks = detailedStocks.map(stock => {
+        const currentPercentage = totalValue > 0 ? (stock.currentValue / totalValue) * 100 : 0;
+        const targetValue = (stock.targetPercentage / 100) * totalValue;
+        const targetDifference = targetValue - stock.currentValue;
+        const targetDifferencePercentage = stock.currentValue > 0
+          ? (targetDifference / stock.currentValue) * 100
+          : 0;
+
+        return {
+          ...stock,
+          currentPercentage,
+          targetValue,
+          targetDifference,
+          targetDifferencePercentage
+        };
+      });
+
+      setStocksWithDetails(finalDetailedStocks);
+    } catch (error) {
+      console.error("Erro ao calcular detalhes dos ativos:", error);
       setStocksWithDetails([]);
-      return;
+      setError("Erro ao calcular detalhes da carteira. Tente novamente mais tarde.");
     }
-
-    const stocksArray = Object.values(stocks);
-
-    // Calcular detalhes com os preços disponíveis
-    const detailedStocks = stocksArray.map(stock => {
-      // Usar preço da API ou um valor padrão se não disponível
-      const currentPrice = stockPrices[stock.ticker] || 0;
-      const currentValue = currentPrice * stock.quantity;
-
-      return {
-        ...stock,
-        currentPrice,
-        currentValue,
-        currentPercentage: 0, // Será calculado depois
-        targetValue: 0, // Será calculado depois
-        targetDifference: 0, // Será calculado depois
-        targetDifferencePercentage: 0 // Será calculado depois
-      };
-    });
-
-    // Calcular valor total da carteira
-    const totalValue = detailedStocks.reduce((sum, stock) => sum + stock.currentValue, 0);
-
-    // Calcular percentuais e diferenças
-    const finalDetailedStocks = detailedStocks.map(stock => {
-      const currentPercentage = totalValue > 0 ? (stock.currentValue / totalValue) * 100 : 0;
-      const targetValue = (stock.targetPercentage / 100) * totalValue;
-      const targetDifference = targetValue - stock.currentValue;
-      const targetDifferencePercentage = stock.currentValue > 0
-        ? (targetDifference / stock.currentValue) * 100
-        : 0;
-
-      return {
-        ...stock,
-        currentPercentage,
-        targetValue,
-        targetDifference,
-        targetDifferencePercentage
-      };
-    });
-
-    setStocksWithDetails(finalDetailedStocks);
   }, [stocks, stockPrices]);
 
-  // Calcular valor total da carteira
+  // Calcular valor total da carteira com validação robusta
   const totalPortfolioValue = stocksWithDetails.reduce(
-    (sum, stock) => sum + stock.currentValue,
+    (sum, stock) => {
+      // Garantir que currentValue seja um número válido
+      const value = typeof stock.currentValue === 'number' && !isNaN(stock.currentValue) 
+        ? stock.currentValue 
+        : 0;
+      return sum + value;
+    },
     0
   );
 
