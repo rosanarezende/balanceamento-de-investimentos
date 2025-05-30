@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { usePortfolio } from "@/hooks/use-portfolio"
 import { toast } from "sonner"
 
-export function AddStockForm({ isOpen, onClose }: { isOpen: boolean; onClose: () void }) {
+export function AddStockForm({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { addStockToPortfolio, hasPendingOperations } = usePortfolio()
   const [ticker, setTicker] = useState("")
   const [quantity, setQuantity] = useState("")
