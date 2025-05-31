@@ -2,12 +2,13 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
+import { useAuth } from "@/core/state/auth-context"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorDisplay } from "@/core/state/error-handling"
 
 // Componente para proteger rotas que exigem autenticação
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, loading, error } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -16,6 +17,20 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       router.push("/login")
     }
   }, [user, loading, router])
+
+  // Mostrar mensagem de erro se houver algum problema de autenticação
+  if (error) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <ErrorDisplay 
+            message={error} 
+            onRetry={() => router.push("/login")} 
+          />
+        </div>
+      </div>
+    )
+  }
 
   // Mostrar esqueleto de carregamento enquanto verifica autenticação
   if (loading) {

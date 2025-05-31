@@ -1,4 +1,6 @@
-import { cn } from "@/lib/utils"
+"use client"
+
+import { cn } from "@/core/utils/styling"
 
 type StatusType = "success" | "warning" | "error" | "info" | "neutral"
 
