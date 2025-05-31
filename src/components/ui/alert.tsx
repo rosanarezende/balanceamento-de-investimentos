@@ -1,6 +1,8 @@
+"use client"
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
+import { cn } from "@/core/utils/styling"
 import { AlertTriangle, CheckCircle, Info, XCircle } from "lucide-react"
 
 const alertVariants = cva(

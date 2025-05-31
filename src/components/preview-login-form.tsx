@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { usePreviewAuth } from "@/contexts/preview-auth-context"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ErrorDisplay } from "@/core/state/error-handling"
 
 export function PreviewLoginForm() {
   const [email, setEmail] = useState("")
@@ -32,10 +33,10 @@ export function PreviewLoginForm() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <ErrorDisplay 
+              message={error} 
+              onRetry={() => clearError()} 
+            />
           )}
           <div className="space-y-2">
             <Label htmlFor="preview-name">Nome</Label>
