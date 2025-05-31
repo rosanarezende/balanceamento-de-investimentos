@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { usePortfolio } from "@/core/state/portfolio-context"
-import { toast } from "sonner"
 import { ErrorBoundary, ErrorDisplay } from "@/core/state/error-handling"
 import { isValidNumber } from "@/core/utils"
 

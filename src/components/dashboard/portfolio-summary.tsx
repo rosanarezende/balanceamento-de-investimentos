@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { formatCurrency } from "@/core/utils";
 import { usePortfolio } from "@/core/state/portfolio-context";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary, ErrorDisplay } from "@/core/state/error-handling";
 
 type PortfolioSummaryProps = {

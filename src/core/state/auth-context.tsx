@@ -10,7 +10,7 @@ import {
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/services/firebase/config";
 import { AuthContextType, UserData } from "@/core/types";
-import { createError, handleError } from "@/core/utils";
+import { handleError } from "@/core/utils";
 
 /**
  * Contexto de autenticação
@@ -26,22 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Função para buscar dados do usuário no Firestore
-  const fetchUserData = useCallback(async (userId: string) => {
-    try {
-      const userRef = doc(db, "users", userId);
-      const userSnap = await getDoc(userRef);
-      
-      if (userSnap.exists()) {
-        return userSnap.data() as UserData;
-      }
-      return null;
-    } catch (err) {
-      console.error("Erro ao buscar dados do usuário:", err);
-      throw handleError(err);
-    }
-  }, []);
 
   // Função para criar ou atualizar dados do usuário no Firestore
   const createOrUpdateUserData = useCallback(async (currentUser: User) => {

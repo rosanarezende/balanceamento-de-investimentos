@@ -17,11 +17,10 @@ import {
 } from "@/services/api/stockPrice";
 import { 
   Stock, 
-  StockWithDetails, 
-  Portfolio, 
+  StockWithDetails,
   PortfolioSummary 
 } from "@/core/types";
-import { handleError, isValidNumber } from "@/core/utils";
+import { isValidNumber } from "@/core/utils";
 
 /**
  * Interface para o contexto de portfólio
@@ -464,7 +463,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
   );
 
   // Verificar se há ativos na carteira
-  const hasStocks = Object.keys(stocks).length > 0;
+  // const hasStocks = Object.keys(stocks).length > 0;
   
   // Verificar se há ativos elegíveis para investimento (marcados como "Comprar")
   const hasEligibleStocks = stocksWithDetails.some(stock => stock.userRecommendation === "Comprar");
