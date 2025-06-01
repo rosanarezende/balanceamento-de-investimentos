@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
-import { cn } from "@/lib/utils"
+import { cn } from "@/core/utils"
 
 interface NavItem {
   name: string

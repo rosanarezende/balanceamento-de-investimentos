@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StockSchema } from '../lib/schemas/stock';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency } from '@/core/utils';
 import { 
   getCachedStockPrice, 
   setCachedStockPrice, 

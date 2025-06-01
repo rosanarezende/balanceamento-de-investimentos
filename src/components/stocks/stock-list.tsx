@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Plus, RefreshCw, Trash2 } from "lucide-react"
 import { AddStockForm } from "@/components/add-stock-form"
 import { usePortfolio } from "@/hooks/use-portfolio"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/core/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 

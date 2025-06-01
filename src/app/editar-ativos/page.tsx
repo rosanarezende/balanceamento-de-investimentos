@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
 import Layout from "./layout"
-import { saveStockToDatabase, validateUserInput, verifyStockExists } from "@/lib/firestore"
+import { updateStock, validateUserInput } from "@/services/firebase/firestore"
+import { getStockPrice } from "@/services/api/stockPrice"
+import { useAuth } from "@/contexts/auth-context"
 import AuthGuard from "@/components/auth-guard"
 import { Stock } from "@/lib/schemas/stock"
 
@@ -28,6 +30,7 @@ export default function EditarAtivos() {
   const [newStock, setNewStock] = useState<Stock>({ ticker: "", quantity: 0, targetPercentage: 0 })
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { user } = useAuth()
 
   useEffect(() => {
     // Any client-side only logic can be placed here
@@ -38,6 +41,11 @@ export default function EditarAtivos() {
   }
 
   const handleSave = async () => {
+    if (!user) {
+      setError("Você precisa estar logado para salvar as ações.")
+      return
+    }
+
     // Verificar se a soma dos percentuais é 100%
     const totalPercentage = stocks.reduce((sum, stock) => sum + stock.targetPercentage, 0)
 
@@ -47,7 +55,13 @@ export default function EditarAtivos() {
     }
 
     try {
-      await Promise.all(stocks.map(stock => saveStockToDatabase(stock)))
+      await Promise.all(stocks.map(stock => 
+        updateStock(user.uid, stock.ticker, {
+          quantity: stock.quantity,
+          targetPercentage: stock.targetPercentage,
+          userRecommendation: stock.userRecommendation || "Aguardar"
+        })
+      ))
       router.push("/")
     } catch (err) {
       console.error("Erro ao salvar ações no banco de dados:", err)
@@ -56,6 +70,11 @@ export default function EditarAtivos() {
   }
 
   const handleStockChange = async (index: number, field: keyof Stock, value: string) => {
+    if (!user) {
+      setError("Você precisa estar logado para modificar as ações.")
+      return
+    }
+
     const updatedStocks = [...stocks]
 
     if (field === "ticker") {
@@ -74,7 +93,11 @@ export default function EditarAtivos() {
     setStocks(updatedStocks)
 
     try {
-      await saveStockToDatabase(updatedStocks[index])
+      await updateStock(user.uid, updatedStocks[index].ticker, {
+        quantity: updatedStocks[index].quantity,
+        targetPercentage: updatedStocks[index].targetPercentage,
+        userRecommendation: updatedStocks[index].userRecommendation || "Aguardar"
+      })
     } catch (err) {
       console.error("Erro ao salvar ação no banco de dados:", err)
       setError("Ocorreu um erro ao salvar a ação. Por favor, tente novamente.")
@@ -123,14 +146,21 @@ export default function EditarAtivos() {
     }
 
     try {
-      const stockExists = await verifyStockExists(newStock.ticker)
-      if (!stockExists) {
-        setError("O ativo não existe.")
+      // Verificar se a ação existe tentando obter o preço
+      const stockPrice = await getStockPrice(newStock.ticker)
+      if (!stockPrice || stockPrice === 50) { // 50 é o valor padrão para ações inexistentes
+        setError("O ativo não foi encontrado ou pode não existir.")
         return
       }
 
-      validateUserInput(newStock)
-      setStocks([...stocks, newStock])
+      // Validar usando a nova função de validação
+      validateUserInput({
+        quantity: newStock.quantity,
+        targetPercentage: newStock.targetPercentage,
+        userRecommendation: newStock.userRecommendation || "Aguardar"
+      })
+
+      setStocks([...stocks, { ...newStock, userRecommendation: newStock.userRecommendation || "Aguardar" }])
       setNewStock({ ticker: "", quantity: 0, targetPercentage: 0 })
       setError(null)
     } catch (validationError) {

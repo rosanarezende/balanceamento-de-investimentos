@@ -1,8 +1,8 @@
 "use client";
 
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
+import { getFirestore, Firestore } from "firebase/firestore";
 
 /**
  * Configuração do Firebase
@@ -20,7 +20,7 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-};
+} as const;
 
 // Verificar se as variáveis de ambiente estão definidas em tempo de desenvolvimento
 if (process.env.NODE_ENV === 'development' && !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
@@ -28,16 +28,16 @@ if (process.env.NODE_ENV === 'development' && !process.env.NEXT_PUBLIC_FIREBASE_
 }
 
 // Inicializar o Firebase apenas no lado do cliente
-let app;
-let auth;
-let db;
-let googleProvider;
+let app: FirebaseApp | undefined;
+let auth: Auth | undefined;
+let db: Firestore | undefined;
+let googleProvider: GoogleAuthProvider | undefined;
 
 // Verificar se estamos no ambiente do navegador antes de inicializar
 if (typeof window !== 'undefined') {
   try {
     // Verificar se o objeto firebaseConfig possui as propriedades necessárias
-    const requiredProperties = [
+    const requiredProperties: (keyof typeof firebaseConfig)[] = [
       "apiKey",
       "authDomain",
       "projectId",

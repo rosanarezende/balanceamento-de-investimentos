@@ -12,12 +12,15 @@ import 'whatwg-fetch'
 global.fetch = jest.fn()
 
 // Mock do localStorage
+const localStorageData = {}
 Object.defineProperty(window, 'localStorage', {
   value: {
-    getItem: jest.fn(),
-    setItem: jest.fn(),
-    removeItem: jest.fn(),
-    clear: jest.fn(),
+    getItem: jest.fn((key) => localStorageData[key] || null),
+    setItem: jest.fn((key, value) => { localStorageData[key] = value }),
+    removeItem: jest.fn((key) => { delete localStorageData[key] }),
+    clear: jest.fn(() => { Object.keys(localStorageData).forEach(key => delete localStorageData[key]) }),
+    get length() { return Object.keys(localStorageData).length },
+    key: jest.fn((index) => Object.keys(localStorageData)[index] || null),
   },
   writable: true,
 })

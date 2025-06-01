@@ -30,6 +30,7 @@ interface PortfolioContextType {
   stocks: Record<string, Stock>;
   stocksWithDetails: StockWithDetails[];
   portfolioSummary: PortfolioSummary;
+  totalPortfolioValue: number;
   
   // Estado
   loading: boolean;
@@ -37,6 +38,8 @@ interface PortfolioContextType {
   lastUpdated: Date | null;
   isRefreshing: boolean;
   hasPendingOperations: boolean;
+  hasStocks: boolean;
+  hasEligibleStocks: boolean;
   
   // Ações
   refreshPortfolio: () => Promise<void>;

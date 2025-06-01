@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/core/utils";
 import { UserRecommendationSelector } from "@/components/user-recommendation-selector";
 import { type Stock } from "@/lib/schemas/stock";
 

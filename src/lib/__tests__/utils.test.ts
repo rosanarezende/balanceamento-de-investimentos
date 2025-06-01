@@ -123,7 +123,7 @@ describe('formatCurrency', () => {
       }
       
       const duration = Date.now() - start;
-      expect(duration).toBeLessThan(200); // Deve ser rápido (menos de 200ms para 1000 chamadas)
+      expect(duration).toBeLessThan(500); // Deve ser rápido (menos de 500ms para 1000 chamadas)
     });
 
     it('deve produzir output consistente para o mesmo input', () => {

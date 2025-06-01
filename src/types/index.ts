@@ -29,4 +29,4 @@ export type CacheItem<T> = {
   timestamp: number;
 };
 
-// Removida a reexportação de formatCurrency de @/lib/utils para evitar problemas de SSR
+// Removida a reexportação de formatCurrency de @/core/utils para evitar problemas de SSR
