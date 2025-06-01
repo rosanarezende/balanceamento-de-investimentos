@@ -8,15 +8,13 @@ import { Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { fetchDailyChange } from "@/lib/api"
+import { fetchDailyChange } from "@/services/api/stockPrice"
+import { type StockWithDetails } from "@/lib/schemas/stock"
 
 interface StockCardProps {
-  stock: {
+  stock: StockWithDetails & {
     id: string
-    ticker: string
     name: string
-    currentValue: number
-    targetValue: number
     dailyChange: number
     status: "up" | "down" | "neutral"
   }

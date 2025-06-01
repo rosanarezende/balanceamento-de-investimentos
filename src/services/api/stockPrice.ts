@@ -219,4 +219,23 @@ export async function saveManualRecommendation(ticker: string, recommendation: s
 /**
  * Tipos de recomendação
  */
-export const RECOMMENDATION_TYPES = ['COMPRAR', 'VENDER', 'AGUARDAR'];
+export const RECOMMENDATION_TYPES = ['Comprar', 'Vender', 'Aguardar'] as const;
+
+/**
+ * Descrições dos tipos de recomendação
+ */
+export const RECOMMENDATION_DESCRIPTIONS = {
+  Comprar: 'Recomendado para compra com base na análise técnica e fundamentalista',
+  Vender: 'Recomendado para venda devido a riscos ou sobrevalorização',
+  Aguardar: 'Aguardar melhores oportunidades ou mais informações antes de decidir'
+};
+
+/**
+ * Simula variação diária de uma ação
+ * @param ticker Código da ação
+ * @returns Percentual de variação diária
+ */
+export async function fetchDailyChange(ticker: string): Promise<number> {
+  // Simular uma variação entre -5% e +5%
+  return (Math.random() - 0.5) * 10;
+}

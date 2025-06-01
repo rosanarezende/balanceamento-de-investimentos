@@ -11,27 +11,14 @@ import { usePortfolio } from "@/hooks/use-portfolio"
 import { saveSimulation } from "@/services/firebase/firestore"
 import AuthGuard from "@/components/auth-guard"
 import { LoadingState } from "@/components/ui/loading-state"
-
-interface StockAllocation {
-  ticker: string
-  currentValue: number
-  currentPercentage: number
-  targetPercentage: number
-  currentQuantity: number
-  investmentAmount: number
-  newQuantity: number
-  quantityToAcquire: number
-  currentPrice: number
-  userRecommendation: string
-  isEligibleForInvestment: boolean
-}
+import { type SimulationAllocation } from "@/lib/schemas/stock"
 
 export default function ResultadoCalculadora() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
   const { stocksWithDetails, loading: portfolioLoading, refreshPortfolio } = usePortfolio()
-  const [allocations, setAllocations] = useState<StockAllocation[]>([])
+  const [allocations, setAllocations] = useState<SimulationAllocation[]>([])
   const [totalInvestment, setTotalInvestment] = useState(0)
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0)
   const [newTotalPortfolioValue, setNewTotalPortfolioValue] = useState(0)

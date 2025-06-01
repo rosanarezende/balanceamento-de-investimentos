@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Edit } from "lucide-react"
-import { RECOMMENDATION_TYPES, saveManualRecommendation } from "@/lib/api"
+import { RECOMMENDATION_TYPES, saveManualRecommendation } from "@/services/api/stockPrice"
 
 interface RecommendationEditorProps {
   ticker: string

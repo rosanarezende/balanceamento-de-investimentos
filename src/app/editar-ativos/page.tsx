@@ -9,13 +9,7 @@ import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
 import Layout from "./layout"
 import { saveStockToDatabase, validateUserInput, verifyStockExists } from "@/lib/firestore"
 import AuthGuard from "@/components/auth-guard"
-
-// Tipo para representar uma ação na carteira
-interface Stock {
-  ticker: string
-  quantity: number
-  targetPercentage: number
-}
+import { Stock } from "@/lib/schemas/stock"
 
 // Dados iniciais da carteira
 const initialStocks: Stock[] = [

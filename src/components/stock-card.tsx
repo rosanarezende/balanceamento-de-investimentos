@@ -1,11 +1,11 @@
 import { formatCurrency } from "@/lib/utils";
 import { UserRecommendationSelector } from "@/components/user-recommendation-selector";
+import { type Stock } from "@/lib/schemas/stock";
 
 interface StockCardProps {
-  stock: {
+  stock: Stock & {
     name: string;
     price: number;
-    ticker: string;
     currentRecommendation: string;
     onUpdate: (recommendation: string) => void
   };

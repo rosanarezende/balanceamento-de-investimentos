@@ -1,5 +1,6 @@
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
+import { Stock } from '@/lib/schemas/stock';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,12 +14,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-export interface Stock {
+export interface FirestoreStock extends Stock {
   id: string;
   [key: string]: unknown;
 }
 
-export async function saveStockToDatabase(stock: Stock) {
+export async function saveStockToDatabase(stock: FirestoreStock) {
   try {
     await setDoc(doc(db, 'stocks', stock.id), stock);
     // eslint-disable-next-line no-console

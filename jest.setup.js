@@ -6,6 +6,55 @@
 // Used for __tests__/testing-library.js
 // Learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom"
+import 'whatwg-fetch'
 
 // Mock do fetch para testes
 global.fetch = jest.fn()
+
+// Mock do localStorage
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+  },
+  writable: true,
+})
+
+// Mock do Headers
+global.Headers = jest.fn().mockImplementation((init) => {
+  const headers = {}
+  if (init) {
+    Object.entries(init).forEach(([key, value]) => {
+      headers[key.toLowerCase()] = value
+    })
+  }
+  return {
+    get: (key) => headers[key.toLowerCase()],
+    set: (key, value) => { headers[key.toLowerCase()] = value },
+    has: (key) => Object.prototype.hasOwnProperty.call(headers, key.toLowerCase()),
+    forEach: (callback) => Object.entries(headers).forEach(([key, value]) => callback(value, key)),
+  }
+})
+
+// Mock do Request e Response apenas se não existirem
+if (typeof global.Request === 'undefined') {
+  global.Request = jest.fn().mockImplementation((input, init) => ({
+    url: typeof input === 'string' ? input : input.url,
+    method: init?.method || 'GET',
+    headers: new Headers(init?.headers),
+    body: init?.body,
+  }))
+}
+
+if (typeof global.Response === 'undefined') {
+  global.Response = jest.fn().mockImplementation((body, init) => ({
+    ok: init?.status ? init.status >= 200 && init.status < 300 : true,
+    status: init?.status || 200,
+    statusText: init?.statusText || 'OK',
+    headers: new Headers(init?.headers),
+    json: jest.fn().mockResolvedValue(typeof body === 'string' ? JSON.parse(body) : body),
+    text: jest.fn().mockResolvedValue(typeof body === 'string' ? body : JSON.stringify(body)),
+  }))
+}

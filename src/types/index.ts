@@ -1,52 +1,19 @@
 /**
  * Definições de tipos para o sistema de balanceamento de investimentos
+ * DEPRECADO: Use os tipos derivados do Zod em /src/lib/schemas/stock.ts
  */
 
-export interface Stock {
-  ticker: string
-  quantity: number
-  targetPercentage: number
-  userRecommendation: string
-}
+// Re-exportar tipos do schema Zod para manter compatibilidade
+export {
+  type Stock,
+  type StockWithDetails,
+  type Portfolio,
+  type SimulationAllocation,
+  type Simulation,
+  type PortfolioSummary
+} from '@/lib/schemas/stock';
 
-export interface StockWithDetails extends Stock {
-  currentPrice: number
-  currentValue: number
-  currentPercentage: number
-  toBuy: number
-  excess: number
-}
-
-export interface Portfolio {
-  [ticker: string]: {
-    quantity: number
-    targetPercentage: number
-    userRecommendation: string
-  }
-}
-
-export interface SimulationAllocation {
-  ticker: string
-  currentValue: number
-  currentPercentage: number
-  targetPercentage: number
-  currentQuantity: number
-  investmentAmount: number
-  newQuantity: number
-  quantityToAcquire: number
-  currentPrice: number
-  userRecommendation: string
-}
-
-export interface Simulation {
-  id?: string
-  date: Date
-  investmentAmount: number
-  portfolioValueBefore: number
-  portfolioValueAfter: number
-  allocations: SimulationAllocation[]
-}
-
+// Interfaces específicas que não foram migradas
 export interface WatchlistItem {
   ticker: string
   targetPrice: number | null
