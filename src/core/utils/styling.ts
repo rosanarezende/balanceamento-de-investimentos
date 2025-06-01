@@ -25,7 +25,7 @@ export function randomColor(): string {
  * @param isDarkMode - Se true, gera cores mais claras para tema escuro
  * @returns Array de strings com cores em formato hexadecimal
  */
-export function generateChartColors(count: number, isDarkMode: boolean = false): string[] {
+export function generateChartColors(count: number, isDarkMode = false): string[] {
   // Cores base para temas claro e escuro
   const baseColors = {
     light: [

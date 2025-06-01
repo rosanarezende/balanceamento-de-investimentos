@@ -31,7 +31,7 @@ export function formatCurrency(value: number): string {
  * @param precision - Número de casas decimais (padrão: 2)
  * @returns String formatada como percentual (ex: 12.34%)
  */
-export function formatPercentage(value: number, precision: number = 2): string {
+export function formatPercentage(value: number, precision = 2): string {
   if (typeof value !== 'number' || isNaN(value)) {
     return '0%';
   }
@@ -50,7 +50,7 @@ export function formatPercentage(value: number, precision: number = 2): string {
  * @param precision - Número de casas decimais (padrão: 2)
  * @returns String formatada com separadores de milhar
  */
-export function formatNumber(value: number, precision: number = 2): string {
+export function formatNumber(value: number, precision = 2): string {
   if (typeof value !== 'number' || isNaN(value)) {
     return '0';
   }

@@ -16,7 +16,8 @@
       "jsx": true
     },
     "ecmaVersion": "latest",
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
   "plugins": [
     "react",
@@ -26,6 +27,9 @@
     "react/react-in-jsx-scope": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-non-null-assertion": "warn",
+    "@typescript-eslint/no-empty-function": "warn",
+    "@typescript-eslint/no-inferrable-types": "warn",
     "no-console": "off"
   },
   "settings": {
