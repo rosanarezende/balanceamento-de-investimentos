@@ -194,7 +194,10 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
 
       try {
         // Validar dados antes de salvar
-        validateUserInput(data);
+        validateUserInput({
+          ...data,
+          userRecommendation: data.userRecommendation ?? "Aguardar"
+        });
 
         // Marcar operação como pendente
         setPendingOperations(prev => new Set(prev).add(operationId));
@@ -211,7 +214,11 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
         }));
 
         // Persistir no Firebase
-        await updateStock(user.uid, ticker, data);
+        await updateStock(user.uid, ticker, {
+          quantity: data.quantity,
+          targetPercentage: data.targetPercentage,
+          userRecommendation: data.userRecommendation ?? "Aguardar"
+        });
 
         // Buscar preço do novo ativo
         if (!stockPrices[ticker]) {
@@ -344,7 +351,11 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
         }));
 
         // Persistir no Firebase
-        await updateStock(user.uid, ticker, data);
+        await updateStock(user.uid, ticker, {
+          quantity: data.quantity ?? previousStock.quantity,
+          targetPercentage: data.targetPercentage ?? previousStock.targetPercentage,
+          userRecommendation: data.userRecommendation ?? previousStock.userRecommendation ?? "Aguardar"
+        });
 
         toast.success("Ativo atualizado com sucesso!", {
           description: `${ticker} foi atualizado na sua carteira.`

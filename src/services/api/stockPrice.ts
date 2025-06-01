@@ -237,5 +237,6 @@ export const RECOMMENDATION_DESCRIPTIONS = {
  */
 export async function fetchDailyChange(ticker: string): Promise<number> {
   // Simular uma variação entre -5% e +5%
+  console.log(`Simulando variação diária para ${ticker}`);
   return (Math.random() - 0.5) * 10;
 }
