@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prepare": "bash scripts/check-node-version.sh",
+    "postinstall": "node -e \"process.env.CI || require('child_process').spawnSync('bash', ['scripts/check-node-version.sh'], {stdio: 'inherit'})\"",
     "predev": "bash scripts/check-node-version.sh",
     "dev": "next dev",
     "prebuild": "bash scripts/check-node-version.sh",
