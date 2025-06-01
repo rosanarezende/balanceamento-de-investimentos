@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from "react"
 import { Chart, registerables } from "chart.js"
+
 import { ErrorBoundary, ErrorDisplay } from "@/core/state/error-handling"
-import { useTheme } from "@/contexts/theme-context"
+import { useTheme } from "@/core/state/theme-context"
 
 // Registrar os componentes necessários do Chart.js
 Chart.register(...registerables)

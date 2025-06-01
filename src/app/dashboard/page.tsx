@@ -4,19 +4,22 @@
 export const dynamic = "force-dynamic"
 
 import React, { useState, useEffect } from "react"
+import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, BarChart2, PieChart, RefreshCw } from "lucide-react"
-import { formatCurrency } from "@/core/utils"
-import { usePortfolio } from "@/hooks/use-portfolio"
-import { PortfolioChart } from "@/components/dashboard/portfolio-chart"
-import { PortfolioComparisonChart } from "@/components/dashboard/portfolio-comparison-chart"
+
 import AuthGuard from "@/components/auth-guard"
 import { AppShell } from "@/components/layout/app-shell"
-import DashboardLayout from "./layout"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { toast } from "sonner"
+
+import DashboardLayout from "./layout"
+import { PortfolioChart } from "@/components/dashboard/portfolio-chart"
+import { PortfolioComparisonChart } from "@/components/dashboard/portfolio-comparison-chart"
+
+import { formatCurrency } from "@/core/utils/formatting"
+import { usePortfolio } from "@/core/state/portfolio-context"
 
 export default function Dashboard() {
   const router = useRouter()

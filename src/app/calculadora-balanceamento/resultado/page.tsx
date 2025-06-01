@@ -1,17 +1,20 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { ArrowLeft, Info, RefreshCw } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+
+import AuthGuard from "@/components/auth-guard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Info, RefreshCw } from "lucide-react"
-import { formatCurrency } from "@/core/utils/formatting"
-import { useAuth } from "@/contexts/auth-context"
-import { usePortfolio } from "@/hooks/use-portfolio"
-import { saveSimulation } from "@/services/firebase/firestore"
-import AuthGuard from "@/components/auth-guard"
 import { LoadingState } from "@/components/ui/loading-state"
+
+import { formatCurrency } from "@/core/utils/formatting"
+import { useAuth } from "@/core/state/auth-context"
+import { usePortfolio } from "@/core/state/portfolio-context"
 import { type SimulationAllocation } from "@/core/schemas/stock"
+
+import { saveSimulation } from "@/services/firebase/firestore"
 
 // Definição do tipo StockAllocation (ajuste conforme necessário)
 type StockAllocation = {

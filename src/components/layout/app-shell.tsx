@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Logo } from "@/components/ui/logo"
 import {
   LayoutDashboard,
   BarChart3,
@@ -15,8 +14,11 @@ import {
   X,
 } from "lucide-react"
 import Link from "next/link"
-import { useAuth } from "@/contexts/auth-context"
-import { cn } from "@/core/utils"
+
+import { Logo } from "@/components/ui/logo"
+
+import { useAuth } from "@/core/state/auth-context"
+import { cn } from "@/core/utils/styling"
 
 interface NavItem {
   name: string
@@ -99,7 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span className="text-lg font-bold">EquilibreInvest</span>
           </div>
           <div className="flex items-center space-x-4">
-            <span>{user?.name}</span>
+            <span>{user?.email}</span>
             <button
               onClick={handleSignOut}
               className="flex items-center space-x-2 text-foreground hover:text-primary"

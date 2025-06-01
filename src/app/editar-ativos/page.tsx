@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
+
+import Layout from "./layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Plus, Save, Trash } from "lucide-react"
-import Layout from "./layout"
-import { updateStock, validateUserInput } from "@/services/firebase/firestore"
-import { getStockPrice } from "@/services/api/stockPrice"
-import { useAuth } from "@/contexts/auth-context"
 import AuthGuard from "@/components/auth-guard"
+
+import { useAuth } from "@/core/state/auth-context"
 import { Stock } from "@/core/schemas/stock"
+
+import { getStockPrice } from "@/services/api/stockPrice"
+import { updateStock, validateUserInput } from "@/services/firebase/firestore"
 
 // Dados iniciais da carteira
 const initialStocks: Stock[] = [

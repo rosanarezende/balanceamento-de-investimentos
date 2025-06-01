@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
 import { Alert } from "@/components/ui/alert"
+import { Card, CardContent } from "@/components/ui/card"
+
+import { useAuth } from "@/core/state/auth-context"
 
 export default function LoginPage() {
   const router = useRouter()

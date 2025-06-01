@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Plus, RefreshCw, Trash2 } from "lucide-react"
-import { AddStockForm } from "@/components/add-stock-form"
-import { usePortfolio } from "@/hooks/use-portfolio"
-import { formatCurrency } from "@/core/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
+
+import { Button } from "@/components/ui/button"
+import { AddStockForm } from "@/components/add-stock-form"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+import { usePortfolio } from "@/core/state/portfolio-context"
+import { formatCurrency } from "@/core/utils/formatting"
 
 export function StockList() {
   const { 
