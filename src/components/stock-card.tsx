@@ -1,6 +1,6 @@
 import { formatCurrency } from "@/core/utils";
 import { UserRecommendationSelector } from "@/components/user-recommendation-selector";
-import { type Stock } from "@/lib/schemas/stock";
+import { type Stock } from "@/core/schemas/stock";
 
 interface StockCardProps {
   stock: Stock & {

@@ -13,9 +13,9 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "./config";
-import type { 
-  Portfolio, 
-  Simulation, 
+import type {
+  Portfolio,
+  Simulation,
   WatchlistItem,
   UserPreferences
 } from "@/types";
@@ -33,6 +33,14 @@ import type {
  * Obtém a carteira do usuário
  */
 export async function getUserPortfolio(userId: string): Promise<Portfolio> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
@@ -60,10 +68,18 @@ export async function updateStock(
     userRecommendation: string;
   }
 ): Promise<void> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     // Validar dados antes de salvar
     validateUserInput(data);
-    
+
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       [`portfolio.${ticker}`]: data,
@@ -78,6 +94,10 @@ export async function updateStock(
  * Remove uma ação da carteira
  */
 export async function removeStock(userId: string, ticker: string): Promise<void> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
@@ -93,10 +113,14 @@ export async function removeStock(userId: string, ticker: string): Promise<void>
  * Atualiza a recomendação do usuário para uma ação
  */
 export async function updateUserRecommendation(
-  userId: string, 
-  ticker: string, 
+  userId: string,
+  ticker: string,
   recommendation: string
 ): Promise<void> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
@@ -112,10 +136,14 @@ export async function updateUserRecommendation(
  * Salva uma recomendação manual
  */
 export async function saveManualRecommendation(
-  userId: string, 
-  ticker: string, 
+  userId: string,
+  ticker: string,
   recommendation: string
 ): Promise<void> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
@@ -133,6 +161,10 @@ export async function saveManualRecommendation(
  * Salva uma simulação no histórico
  */
 export async function saveSimulation(userId: string, simulation: Simulation): Promise<string> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const simulationsRef = collection(db, "users", userId, "simulations");
     const docRef = await addDoc(simulationsRef, {
@@ -154,6 +186,10 @@ export async function saveSimulation(userId: string, simulation: Simulation): Pr
  * Obtém o histórico de simulações
  */
 export async function getSimulations(userId: string): Promise<Simulation[]> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const simulationsRef = collection(db, "users", userId, "simulations");
     const q = query(simulationsRef, orderBy("date", "desc"));
@@ -183,6 +219,10 @@ export async function getSimulations(userId: string): Promise<Simulation[]> {
  * Obtém uma simulação específica
  */
 export async function getSimulation(userId: string, simulationId: string): Promise<Simulation | null> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const simulationRef = doc(db, "users", userId, "simulations", simulationId);
     const simulationDoc = await getDoc(simulationRef);
@@ -212,6 +252,10 @@ export async function getSimulation(userId: string, simulationId: string): Promi
  * Obtém a watchlist do usuário
  */
 export async function getUserWatchlist(userId: string): Promise<WatchlistItem[]> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
@@ -241,6 +285,10 @@ export async function addToWatchlist(
     notes: string;
   }
 ): Promise<void> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
@@ -266,6 +314,10 @@ export async function updateWatchlistItem(
     notes: string;
   }
 ): Promise<void> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
@@ -284,6 +336,10 @@ export async function updateWatchlistItem(
  * Remove item da watchlist
  */
 export async function removeFromWatchlist(userId: string, ticker: string): Promise<void> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
@@ -304,6 +360,10 @@ export async function saveUserPreferences(
   userId: string,
   preferences: UserPreferences
 ): Promise<void> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
@@ -331,6 +391,10 @@ export async function saveUserPreferences(
  * Obtém preferências do usuário
  */
 export async function getUserPreferences(userId: string): Promise<UserPreferences | null> {
+  if (!db) {
+    throw new Error("Database not initialized");
+  }
+
   try {
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);

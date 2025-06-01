@@ -3,22 +3,22 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/core/state/auth-context";
-import { 
-  getUserPortfolio, 
-  updateStock, 
+import {
+  getUserPortfolio,
+  updateStock,
   removeStock as removeStockFromFirestore,
   validateUserInput
 } from "@/services/firebase/firestore";
-import { 
-  getStockPrice, 
-  getMultipleStockPrices, 
-  simulateStockPrices, 
-  isDevelopment 
+import {
+  getStockPrice,
+  getMultipleStockPrices,
+  simulateStockPrices,
+  isDevelopment
 } from "@/services/api/stockPrice";
-import { 
-  Stock, 
+import {
+  Stock,
   StockWithDetails,
-  PortfolioSummary 
+  PortfolioSummary
 } from "@/core/types";
 import { isValidNumber } from "@/core/utils";
 
@@ -31,7 +31,7 @@ interface PortfolioContextType {
   stocksWithDetails: StockWithDetails[];
   portfolioSummary: PortfolioSummary;
   totalPortfolioValue: number;
-  
+
   // Estado
   loading: boolean;
   error: string | null;
@@ -40,7 +40,7 @@ interface PortfolioContextType {
   hasPendingOperations: boolean;
   hasStocks: boolean;
   hasEligibleStocks: boolean;
-  
+
   // Ações
   refreshPortfolio: () => Promise<void>;
   addStockToPortfolio: (ticker: string, data: Omit<Stock, "ticker">) => Promise<boolean>;
@@ -83,22 +83,19 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
 
       // Validar estrutura do portfólio
       if (portfolio) {
-        // Verificar se cada ativo tem os campos necessários
-        const isValid = Object.values(portfolio).every(stock => 
-          typeof stock.ticker === 'string' &&
-          typeof stock.quantity === 'number' &&
-          typeof stock.targetPercentage === 'number'
-        );
-        
-        if (!isValid) {
-          console.error("Dados de portfólio inválidos:", portfolio);
-          setError("Dados de portfólio inválidos. Entre em contato com o suporte.");
-          setStocks({});
-          setStocksWithDetails([]);
-          return;
+        // Transformar portfólio para adicionar ticker como chave se necessário
+        const validatedPortfolio: Record<string, { ticker: string; quantity: number; targetPercentage: number; userRecommendation?: "Comprar" | "Vender" | "Aguardar"; }> = {};
+
+        for (const [ticker, stockData] of Object.entries(portfolio)) {
+          validatedPortfolio[ticker] = {
+            ticker,
+            quantity: stockData.quantity,
+            targetPercentage: stockData.targetPercentage,
+            userRecommendation: stockData.userRecommendation
+          };
         }
-        
-        setStocks(portfolio);
+
+        setStocks(validatedPortfolio);
         // Preços e detalhes serão calculados em outro useEffect
       } else {
         setStocks({});
@@ -198,7 +195,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
       try {
         // Validar dados antes de salvar
         validateUserInput(data);
-        
+
         // Marcar operação como pendente
         setPendingOperations(prev => new Set(prev).add(operationId));
 
@@ -405,11 +402,11 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
       // Calcular detalhes com os preços disponíveis
       const detailedStocks = stocksArray.map(stock => {
         // Garantir que preço e quantidade sejam números válidos
-        const currentPrice = isValidNumber(stockPrices[stock.ticker]) 
-          ? stockPrices[stock.ticker] 
+        const currentPrice = isValidNumber(stockPrices[stock.ticker])
+          ? stockPrices[stock.ticker]
           : 0;
-        const quantity = isValidNumber(stock.quantity) 
-          ? stock.quantity 
+        const quantity = isValidNumber(stock.quantity)
+          ? stock.quantity
           : 0;
         const currentValue = currentPrice * quantity;
 
@@ -467,7 +464,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
 
   // Verificar se há ativos na carteira
   // const hasStocks = Object.keys(stocks).length > 0;
-  
+
   // Verificar se há ativos elegíveis para investimento (marcados como "Comprar")
   const hasEligibleStocks = stocksWithDetails.some(stock => stock.userRecommendation === "Comprar");
 
@@ -484,14 +481,17 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     stocks,
     stocksWithDetails,
     portfolioSummary,
-    
+    totalPortfolioValue: portfolioSummary.totalValue,
+    hasStocks: Object.keys(stocks).length > 0,
+    hasEligibleStocks: stocksWithDetails.some(stock => stock.quantity > 0),
+
     // Estado
     loading: loading || pricesLoading,
     error,
     lastUpdated,
     isRefreshing,
     hasPendingOperations: pendingOperations.size > 0,
-    
+
     // Ações
     refreshPortfolio,
     addStockToPortfolio,

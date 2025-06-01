@@ -11,7 +11,7 @@ import { updateStock, validateUserInput } from "@/services/firebase/firestore"
 import { getStockPrice } from "@/services/api/stockPrice"
 import { useAuth } from "@/contexts/auth-context"
 import AuthGuard from "@/components/auth-guard"
-import { Stock } from "@/lib/schemas/stock"
+import { Stock } from "@/core/schemas/stock"
 
 // Dados iniciais da carteira
 const initialStocks: Stock[] = [

@@ -6,7 +6,7 @@ import { getFirestore, Firestore } from "firebase/firestore";
 
 /**
  * Configuração do Firebase
- * 
+ *
  * Este arquivo configura a conexão com o Firebase e exporta as instâncias
  * necessárias para autenticação e acesso ao Firestore.
  */
@@ -45,17 +45,17 @@ if (typeof window !== 'undefined') {
       "messagingSenderId",
       "appId",
     ];
-    
+
     const missingProperties = requiredProperties.filter(
       (property) => !firebaseConfig[property]
     );
-    
+
     if (missingProperties.length > 0) {
       throw new Error(
         `Propriedades ${missingProperties.join(", ")} estão faltando na configuração do Firebase`
       );
     }
-    
+
     // Inicializar o Firebase
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);

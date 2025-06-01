@@ -11,7 +11,22 @@ import { usePortfolio } from "@/hooks/use-portfolio"
 import { saveSimulation } from "@/services/firebase/firestore"
 import AuthGuard from "@/components/auth-guard"
 import { LoadingState } from "@/components/ui/loading-state"
-import { type SimulationAllocation } from "@/lib/schemas/stock"
+import { type SimulationAllocation } from "@/core/schemas/stock"
+
+// Definição do tipo StockAllocation (ajuste conforme necessário)
+type StockAllocation = {
+  ticker: string
+  currentValue: number
+  currentPercentage: number
+  targetPercentage: number
+  currentQuantity: number
+  investmentAmount: number
+  newQuantity: number
+  quantityToAcquire: number
+  currentPrice: number
+  userRecommendation: string
+  isEligibleForInvestment: boolean
+}
 
 export default function ResultadoCalculadora() {
   const router = useRouter()
@@ -152,7 +167,7 @@ export default function ResultadoCalculadora() {
             newQuantity: stock.quantity + quantityToAcquire,
             quantityToAcquire,
             currentPrice: stock.currentPrice,
-            userRecommendation: stock.userRecommendation,
+            userRecommendation: stock.userRecommendation ?? "Aguardar",
             isEligibleForInvestment: stock.isEligibleForInvestment,
           }
         })
@@ -301,6 +316,7 @@ export default function ResultadoCalculadora() {
           quantityToAcquire: allocation.quantityToAcquire,
           currentPrice: allocation.currentPrice,
           userRecommendation: allocation.userRecommendation,
+          isEligibleForInvestment: allocation.isEligibleForInvestment,
         })),
       })
 

@@ -1,11 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
-import { 
-  type User, 
-  signInWithPopup, 
-  signOut as firebaseSignOut, 
-  onAuthStateChanged 
+import {
+  type User,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  onAuthStateChanged
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/services/firebase/config";
@@ -14,7 +14,7 @@ import { handleError } from "@/core/utils";
 
 /**
  * Contexto de autenticação
- * 
+ *
  * Este contexto gerencia o estado de autenticação do usuário,
  * fornecendo funções para login, logout e acesso aos dados do usuário.
  */
@@ -29,6 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Função para criar ou atualizar dados do usuário no Firestore
   const createOrUpdateUserData = useCallback(async (currentUser: User) => {
+    if (!db) {
+      throw new Error("Database not initialized");
+    }
+
     try {
       const userRef = doc(db, "users", currentUser.uid);
       const userSnap = await getDoc(userRef);
@@ -44,11 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             theme: "dark",
           },
         };
-        
+
         await setDoc(userRef, newUserData);
         return newUserData;
       }
-      
+
       return userSnap.data() as UserData;
     } catch (err) {
       console.error("Erro ao criar/atualizar dados do usuário:", err);
@@ -61,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Usar uma variável para controlar se o componente ainda está montado
     let isMounted = true;
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth!, async (currentUser) => {
       try {
         if (!isMounted) return;
 
@@ -104,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError(null);
-      await signInWithPopup(auth, googleProvider);
+      await signInWithPopup(auth!, googleProvider!);
     } catch (error: unknown) {
       console.error("Erro ao fazer login com Google:", error);
       if (error instanceof Error) {
@@ -119,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
-      await firebaseSignOut(auth);
+      await firebaseSignOut(auth!);
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       setError("Erro ao fazer logout. Por favor, tente novamente.");

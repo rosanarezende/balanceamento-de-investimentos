@@ -36,7 +36,7 @@ export function BadgeStatus({ status, label, className, size = "md" }: BadgeStat
         "inline-flex items-center rounded-full border font-medium",
         statusStyles[status],
         sizeStyles[size],
-        className,
+        className ?? "",
       )}
     >
       {displayLabel}

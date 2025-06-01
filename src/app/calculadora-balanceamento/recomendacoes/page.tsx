@@ -10,7 +10,7 @@ import { fetchStockPrice, saveManualRecommendation, RECOMMENDATION_TYPES } from 
 import { getCachedStockPrice, setCachedStockPrice } from "@/utils/client/cache"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import AuthGuard from "@/components/auth-guard"
-import { Stock } from "@/lib/schemas/stock"
+import { Stock } from "@/core/schemas/stock"
 
 // Interface para ações com preço
 interface StockWithPrice extends Stock {

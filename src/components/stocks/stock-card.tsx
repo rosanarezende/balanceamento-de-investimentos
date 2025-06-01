@@ -9,7 +9,7 @@ import { cn } from "@/core/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { fetchDailyChange } from "@/services/api/stockPrice"
-import { type StockWithDetails } from "@/lib/schemas/stock"
+import { type StockWithDetails } from "@/core/schemas/stock"
 
 interface StockCardProps {
   stock: StockWithDetails & {
