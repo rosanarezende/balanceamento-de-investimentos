@@ -1,19 +1,15 @@
 /**
  * Mocks do Firebase Auth e outras funcionalidades para testes
+ * 
+ * Este arquivo complementa os mocks globais definidos no jest.setup.js
+ * fornecendo helpers específicos e configurações personalizadas
  */
 
-// Mock do Firebase Auth
-export const mockAuth = {
-  signInWithEmailAndPassword: jest.fn(),
-  signInWithPopup: jest.fn(),
-  signOut: jest.fn(),
-  onAuthStateChanged: jest.fn(),
-  getAuth: jest.fn(() => ({ currentUser: null, app: {} })),
-  GoogleAuthProvider: jest.fn().mockImplementation(() => ({})),
-  createUserWithEmailAndPassword: jest.fn(),
-  sendPasswordResetEmail: jest.fn(),
-  updateProfile: jest.fn(),
-}
+// Obter os mocks globais
+const mockFirebaseConfig = jest.requireMock('@/services/firebase/config');
+
+// Exportar o mock auth para uso nos testes
+export const mockAuth = mockFirebaseConfig.auth;
 
 // Mock do usuário autenticado
 export const mockUser = {
@@ -21,39 +17,67 @@ export const mockUser = {
   email: 'test@example.com',
   displayName: 'Test User',
   photoURL: null,
-}
+};
 
 // Helper para configurar mock de usuário logado
 export const mockAuthenticatedUser = () => {
-  mockAuth.getAuth.mockReturnValue({
-    currentUser: mockUser,
-    app: {},
-  })
+  mockAuth.currentUser = mockUser;
   
-  mockAuth.onAuthStateChanged.mockImplementation((callback) => {
-    callback(mockUser)
-    return jest.fn() // unsubscribe function
-  })
-}
+  // Configurar o onAuthStateChanged para chamar imediatamente com o usuário
+  mockAuth.onAuthStateChanged.mockImplementation((callback: (user: any) => void) => {
+    if (typeof callback === 'function') {
+      setTimeout(() => callback(mockUser), 0);
+    }
+    return jest.fn(); // unsubscribe function
+  });
+};
 
 // Helper para configurar mock de usuário não logado
 export const mockUnauthenticatedUser = () => {
-  mockAuth.getAuth.mockReturnValue({
-    currentUser: null,
-    app: {},
-  })
+  mockAuth.currentUser = null;
   
-  mockAuth.onAuthStateChanged.mockImplementation((callback) => {
-    callback(null)
-    return jest.fn() // unsubscribe function
-  })
-}
-
-// Helper para resetar todos os mocks
-export const resetAllMocks = () => {
-  Object.values(mockAuth).forEach(mock => {
-    if (jest.isMockFunction(mock)) {
-      mock.mockReset()
+  // Configurar o onAuthStateChanged para chamar imediatamente com null
+  mockAuth.onAuthStateChanged.mockImplementation((callback: (user: any) => void) => {
+    if (typeof callback === 'function') {
+      setTimeout(() => callback(null), 0);
     }
-  })
-}
+    return jest.fn(); // unsubscribe function
+  });
+};
+
+// Helper para resetar todos os mocks do Firebase Auth
+export const resetAllMocks = () => {
+  // Resetar mocks das funções
+  mockAuth.signInWithPopup.mockReset();
+  mockAuth.signInWithEmailAndPassword.mockReset();
+  mockAuth.createUserWithEmailAndPassword.mockReset();
+  mockAuth.signOut.mockReset();
+  mockAuth.onAuthStateChanged.mockReset();
+  
+  // Resetar estado do usuário
+  mockAuth.currentUser = null;
+};
+
+// Helper para configurar respostas de sucesso padrão
+export const setupSuccessfulAuth = () => {
+  mockAuth.signInWithEmailAndPassword.mockResolvedValue({
+    user: mockUser
+  });
+
+  mockAuth.signInWithPopup.mockResolvedValue({
+    user: mockUser
+  });
+
+  mockAuth.createUserWithEmailAndPassword.mockResolvedValue({
+    user: mockUser
+  });
+
+  mockAuth.signOut.mockResolvedValue(undefined);
+};
+
+// Helper para configurar erros de autenticação
+export const setupAuthErrors = () => {
+  mockAuth.signInWithEmailAndPassword.mockRejectedValue(new Error('Invalid credentials'));
+  mockAuth.signInWithPopup.mockRejectedValue(new Error('Popup closed'));
+  mockAuth.createUserWithEmailAndPassword.mockRejectedValue(new Error('Email already in use'));
+};
