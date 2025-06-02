@@ -20,10 +20,12 @@ import { Logo } from "@/components/ui/logo"
 import { useAuth } from "@/core/state/auth-context"
 import { cn } from "@/core/utils/styling"
 
+import { LucideProps } from "lucide-react"
+
 interface NavItem {
   name: string
   href: string
-  icon: React.ComponentType<{ size?: number }>
+  icon: React.ComponentType<LucideProps>
 }
 
 const navItems: NavItem[] = [

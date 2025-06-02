@@ -66,9 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     if (!auth) {
-      setError("Firebase Auth não inicializado.");
+      console.error("Firebase Auth não inicializado.");
+      setError("Erro de configuração de autenticação.");
       setLoading(false);
-      return undefined;
+      return;
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
