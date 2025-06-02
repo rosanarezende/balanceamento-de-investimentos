@@ -17,8 +17,8 @@ Todas as funcionalidades originais foram preservadas, mas agora com uma arquitet
 - O hook `use-portfolio` foi migrado para `/src/hooks/use-portfolio.ts`
 - Todas as chamadas foram atualizadas para usar os novos serviços:
   - `getPortfolio` → `getUserPortfolio` de `/src/services/firebase/firestore`
-  - `fetchStockPrice` → `getStockPrice` de `/src/services/api/stockPrice`
-  - `fetchStockPrices` → `getMultipleStockPrices` de `/src/services/api/stockPrice`
+  - `fetchStockPrice` → `getStockPrice` de `/src/services/api/stock-price`
+  - `fetchStockPrices` → `getMultipleStockPrices` de `/src/services/api/stock-price`
 
 ### 2. Migração de Contextos
 
@@ -37,7 +37,7 @@ Todas as funcionalidades originais foram preservadas, mas agora com uma arquitet
 
 ### 1. Diretório `/lib/`
 
-- `/lib/api.ts` - Substituído por `/src/services/api/stockPrice.ts`
+- `/lib/api.ts` - Substituído por `/src/services/api/stock-price.ts`
 - `/lib/firebase.ts` - Substituído por `/src/services/firebase/config.ts`
 - `/lib/firestore.ts` - Substituído por `/src/services/firebase/firestore.ts`
 - `/lib/ai.ts` - Substituído por `/src/services/ai/textGeneration.ts`

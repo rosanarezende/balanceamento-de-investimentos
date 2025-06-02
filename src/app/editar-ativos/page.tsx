@@ -13,7 +13,7 @@ import AuthGuard from "@/components/auth-guard"
 import { useAuth } from "@/core/state/auth-context"
 import { Stock } from "@/core/schemas/stock"
 
-import { getStockPrice } from "@/services/api/stockPrice"
+import { getStockPrice } from "@/services/api/stock-price"
 import { updateStock, validateUserInput } from "@/services/firebase/firestore"
 
 // Dados iniciais da carteira

@@ -14,7 +14,7 @@ import {
   getMultipleStockPrices,
   simulateStockPrices,
   isDevelopment
-} from "@/services/api/stockPrice";
+} from "@/services/api/stock-price";
 import {
   Stock,
   StockWithDetails,

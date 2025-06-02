@@ -88,7 +88,7 @@ O tratamento de erros foi padronizado em toda a aplicação:
 1. **lib/types.ts** → Migrado para **src/types/index.ts** com tipos adicionais
 2. **lib/firebase.ts** → Refatorado para **src/services/firebase/config.ts** com melhor tratamento de SSR
 3. **lib/firestore.ts** → Reorganizado em **src/services/firebase/firestore.ts** com funções agrupadas por domínio
-4. **lib/api.ts** → Refatorado para **src/services/api/stockPrice.ts** com implementação de cache
+4. **lib/api.ts** → Refatorado para **src/services/api/stock-price.ts** com implementação de cache
 5. **lib/ai.ts** → Migrado para **src/services/ai/textGeneration.ts** com funcionalidades expandidas
 6. **lib/cache.ts** → Refatorado para **src/utils/client/cache.ts** com funções adicionais
 7. **contexts/auth-context.tsx** → Migrado para **src/contexts/auth-context.tsx** com melhor documentação

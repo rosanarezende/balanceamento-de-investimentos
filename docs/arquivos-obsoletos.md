@@ -4,7 +4,7 @@ Este documento lista os arquivos que se tornaram obsoletos após a refatoração
 
 ## Arquivos em `/lib/`
 
-- `/lib/api.ts` - Substituído por `/src/services/api/stockPrice.ts`
+- `/lib/api.ts` - Substituído por `/src/services/api/stock-price.ts`
 - `/lib/firebase.ts` - Substituído por `/src/services/firebase/config.ts`
 - `/lib/firestore.ts` - Substituído por `/src/services/firebase/firestore.ts`
 - `/lib/ai.ts` - Substituído por `/src/services/ai/textGeneration.ts`

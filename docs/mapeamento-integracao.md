@@ -10,13 +10,13 @@ Este documento mapeia os pontos onde a UI precisa ser integrada com os novos ser
 - **Status**: Precisa ser migrado para `/src/hooks/use-portfolio.ts`
 - **Integrações necessárias**:
   - Substituir importação de `@/lib/firestore` por `@/services/firebase/firestore`
-  - Substituir chamada direta à API por `@/services/api/stockPrice`
+  - Substituir chamada direta à API por `@/services/api/stock-price`
   - Implementar cache usando `@/utils/client/cache`
 - **Funções a serem atualizadas**:
   - `getPortfolio` → `getUserPortfolio`
-  - `fetchStockPrice` → usar `getStockPrice` de `@/services/api/stockPrice`
-  - `fetchStockPrices` → usar `getMultipleStockPrices` de `@/services/api/stockPrice`
-  - `isDevelopment` → usar função de `@/services/api/stockPrice`
+  - `fetchStockPrice` → usar `getStockPrice` de `@/services/api/stock-price`
+  - `fetchStockPrices` → usar `getMultipleStockPrices` de `@/services/api/stock-price`
+  - `isDevelopment` → usar função de `@/services/api/stock-price`
 
 ### 2. Contextos
 
@@ -57,7 +57,7 @@ Este documento mapeia os pontos onde a UI precisa ser integrada com os novos ser
 ## Arquivos Potencialmente Obsoletos
 
 ### 1. Diretório `/lib/`
-- `/lib/api.ts` - Substituído por `/src/services/api/stockPrice.ts`
+- `/lib/api.ts` - Substituído por `/src/services/api/stock-price.ts`
 - `/lib/firebase.ts` - Substituído por `/src/services/firebase/config.ts`
 - `/lib/firestore.ts` - Substituído por `/src/services/firebase/firestore.ts`
 - `/lib/ai.ts` - Substituído por `/src/services/ai/textGeneration.ts`

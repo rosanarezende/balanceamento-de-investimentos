@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Edit, HelpCircle } from "lucide-react"
-import { RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS } from "@/services/api/stockPrice"
+import { RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS } from "@/services/api/stock-price"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface UserRecommendationSelectorProps {

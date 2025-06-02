@@ -91,6 +91,7 @@ jest.mock('firebase/firestore', () => ({
   addDoc: jest.fn(),
   getDoc: jest.fn(),
   getDocs: jest.fn(),
+  setDoc: jest.fn(),
   updateDoc: jest.fn(),
   deleteDoc: jest.fn(),
   query: jest.fn(),
@@ -108,5 +109,6 @@ jest.mock('./src/services/firebase/config', () => ({
     storageBucket: 'mockStorageBucket',
     messagingSenderId: 'mockMessagingSenderId',
     appId: 'mockAppId',
+    measurementId: 'mockMeasurementId',
   },
 }));
