@@ -20,7 +20,7 @@ const isBrowser = typeof window !== "undefined";
  * @param ticker Código da ação
  * @returns Preço da ação ou null se não estiver em cache ou expirado
  */
-export async function getCachedStockPrice(ticker: string): Promise<number | null> {
+export function getCachedStockPrice(ticker: string): number | null {
   if (typeof ticker !== "string") {
     throw new Error("Ticker deve ser uma string");
   }
@@ -59,7 +59,7 @@ export async function getCachedStockPrice(ticker: string): Promise<number | null
  * @param ticker Código da ação
  * @param price Preço da ação
  */
-export async function setCachedStockPrice(ticker: string, price: number): Promise<void> {
+export function setCachedStockPrice(ticker: string, price: number): void {
   if (typeof ticker !== "string") {
     throw new Error("Ticker deve ser uma string");
   }
@@ -87,7 +87,7 @@ export async function setCachedStockPrice(ticker: string, price: number): Promis
  * Limpa o cache de preço de uma ação específica
  * @param ticker Código da ação
  */
-export async function clearStockPriceCache(ticker: string): Promise<void> {
+export function clearStockPriceCache(ticker: string): void {
   if (typeof ticker !== "string") {
     throw new Error("Ticker deve ser uma string");
   }
@@ -109,7 +109,7 @@ export async function clearStockPriceCache(ticker: string): Promise<void> {
 /**
  * Limpa todo o cache de preços de ações
  */
-export async function clearAllStockPriceCache(): Promise<void> {
+export function clearAllStockPriceCache(): void {
   if (!isBrowser) return;
   
   try {

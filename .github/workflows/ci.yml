@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # Ou a versão especificada no seu package.json engines
+          node-version-file: '.nvmrc' # Usa o arquivo .nvmrc para definir a versão do Node.js
           cache: 'npm' # Habilita o caching para npm
 
       - name: Install dependencies

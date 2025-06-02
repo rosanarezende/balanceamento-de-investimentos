@@ -6,16 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { fetchStockPrice, saveManualRecommendation, RECOMMENDATION_TYPES } from "@/services/api/stockPrice"
+import { fetchStockPrice, saveManualRecommendation, RECOMMENDATION_TYPES } from "@/services/api/stock-price"
 import { getCachedStockPrice, setCachedStockPrice } from "@/utils/client/cache"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import AuthGuard from "@/components/auth-guard"
+import { Stock } from "@/core/schemas/stock"
 
-// Tipo para representar uma ação na carteira
-interface Stock {
-  ticker: string
-  quantity: number
-  targetPercentage: number
+// Interface para ações com preço
+interface StockWithPrice extends Stock {
+  currentPrice: number
+  recommendation: string
 }
 
 // Dados iniciais da carteira
@@ -30,11 +30,6 @@ const initialStocks: Stock[] = [
   { ticker: "NEOE3", quantity: 7, targetPercentage: 11.0 },
   { ticker: "AGRO3", quantity: 9, targetPercentage: 11.0 },
 ]
-
-interface StockWithPrice extends Stock {
-  currentPrice: number
-  recommendation: string
-}
 
 export default function RecomendacoesBTG() {
   const router = useRouter()
@@ -79,7 +74,7 @@ export default function RecomendacoesBTG() {
             stocksWithPrices.push({
               ...stock,
               currentPrice,
-              recommendation: "COMPRAR", // Valor padrão
+              recommendation: "Comprar", // Valor padrão
             })
           } catch (err) {
             console.error(`Erro ao processar ação ${stock.ticker}:`, err)
@@ -87,7 +82,7 @@ export default function RecomendacoesBTG() {
             stocksWithPrices.push({
               ...stock,
               currentPrice: 0, // Valor temporário
-              recommendation: "COMPRAR",
+              recommendation: "Comprar",
             })
           }
         }
@@ -220,9 +215,9 @@ export default function RecomendacoesBTG() {
                             <Label
                               htmlFor={`${stock.ticker}-${type}`}
                               className={`text-xs font-normal ${
-                                type === "COMPRAR"
+                                type === "Comprar"
                                   ? "text-green-600"
-                                  : type === "AGUARDAR"
+                                  : type === "Aguardar"
                                     ? "text-yellow-600"
                                     : "text-red-600"
                               }`}

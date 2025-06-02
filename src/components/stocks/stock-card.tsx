@@ -3,20 +3,18 @@
 import { useState, useEffect } from "react"
 import { CardGlass } from "@/components/ui/card-glass"
 import { BadgeStatus } from "@/components/ui/badge-status"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/core/utils"
 import { Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/core/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { fetchDailyChange } from "@/lib/api"
+import { fetchDailyChange } from "@/services/api/stock-price"
+import { type StockWithDetails } from "@/core/schemas/stock"
 
 interface StockCardProps {
-  stock: {
+  stock: StockWithDetails & {
     id: string
-    ticker: string
     name: string
-    currentValue: number
-    targetValue: number
     dailyChange: number
     status: "up" | "down" | "neutral"
   }

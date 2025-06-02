@@ -1,17 +1,18 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
+import { ArrowLeft, AlertTriangle, RefreshCw, CheckCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+
+import { AppShell } from "@/components/layout/app-shell"
+
+import AuthGuard from "@/components/auth-guard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, AlertTriangle, RefreshCw, CheckCircle } from "lucide-react"
-import AuthGuard from "@/components/auth-guard"
-import { usePortfolio } from "@/hooks/use-portfolio"
 import { Alert } from "@/components/ui/alert"
-import { AppShell } from "@/components/layout/app-shell"
-import { useTheme } from "@/contexts/theme-context"
+
+import { usePortfolio } from "@/core/state/portfolio-context"
+import { useTheme } from "@/core/state/theme-context"
 
 export default function CalculadoraBalanceamento() {
   const [investmentValue, setInvestmentValue] = useState("")

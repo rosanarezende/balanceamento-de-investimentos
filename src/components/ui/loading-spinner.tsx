@@ -1,4 +1,6 @@
-import { cn } from "@/lib/utils"
+"use client"
+
+import { cn } from "@/core/utils/styling"
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg"
@@ -11,7 +13,6 @@ export function LoadingSpinner({ size = "md", className }: LoadingSpinnerProps) 
     md: "h-8 w-8 border-3",
     lg: "h-12 w-12 border-4",
   }
-
   return (
     <div
       className={cn("animate-spin rounded-full border-t-transparent border-primary", sizeClasses[size], className)}

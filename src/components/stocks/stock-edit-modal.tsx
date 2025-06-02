@@ -6,29 +6,20 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS, fetchStockPrice } from "@/lib/api"
+import { RECOMMENDATION_TYPES, RECOMMENDATION_DESCRIPTIONS, fetchStockPrice } from "@/services/api/stock-price"
 import { HelpCircle } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { type Stock } from "@/core/schemas/stock"
 
 interface StockEditModalProps {
   open: boolean
   onClose: () => void
   onSave: (data: StockEditData) => Promise<void>
-  stock: {
-    ticker: string
-    quantity: number
-    targetPercentage: number
-    userRecommendation: string
-  } | null
+  stock: Pick<Stock, "ticker" | "quantity" | "targetPercentage" | "userRecommendation"> | null
   isNew?: boolean
 }
 
-export interface StockEditData {
-  ticker: string
-  quantity: number
-  targetPercentage: number
-  userRecommendation: string
-}
+export type StockEditData = Pick<Stock, "ticker" | "quantity" | "targetPercentage" | "userRecommendation">
 
 export function StockEditModal({ open, onClose, onSave, stock, isNew = false }: StockEditModalProps) {
   const [formData, setFormData] = useState<StockEditData>({

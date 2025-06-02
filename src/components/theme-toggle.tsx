@@ -1,16 +1,19 @@
 "use client"
 
-import { useTheme } from "@/contexts/theme-context"
-import { Button } from "@/components/ui/button"
-import { Moon, Sun } from "lucide-react"
 import { useEffect } from 'react'
+import { Moon, Sun } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+
+import { useTheme } from "@/core/state/theme-context"
 
 export function ThemeToggle() {
-  const { theme, toggleTheme, fetchUserPreferences } = useTheme()
+  const { theme, toggleTheme } = useTheme()
 
+  // O ThemeProvider agora carrega as preferências automaticamente
   useEffect(() => {
-    fetchUserPreferences()
-  }, [fetchUserPreferences])
+    // efeito de montagem apenas
+  }, [])
 
   return (
     <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Alternar tema">

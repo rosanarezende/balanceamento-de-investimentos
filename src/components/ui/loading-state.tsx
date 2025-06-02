@@ -1,5 +1,7 @@
+"use client"
+
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { cn } from "@/lib/utils"
+import { cn } from "@/core/utils/styling"
 
 interface LoadingStateProps {
   message?: string

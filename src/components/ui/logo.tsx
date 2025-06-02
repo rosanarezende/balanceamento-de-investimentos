@@ -1,6 +1,7 @@
-import { useTheme } from "@/contexts/theme-context"
 import Image from "next/image"
 import Link from "next/link"
+
+import { useTheme } from "@/core/state/theme-context"
 
 interface LogoProps {
   icon?: boolean

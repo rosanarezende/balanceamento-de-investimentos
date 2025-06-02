@@ -2,11 +2,11 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { saveUserPreferences, getUserPreferences } from "@/services/firebase/firestore";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "./auth-context";
 
 /**
  * Contexto de tema
- * 
+ *
  * Este contexto gerencia o tema da aplicação (claro/escuro),
  * sincronizando as preferências entre localStorage e Firestore.
  */
@@ -21,7 +21,10 @@ interface ThemeContextType {
 // Criamos o contexto com um valor padrão para evitar erros durante a renderização no servidor
 const ThemeContext = createContext<ThemeContextType>({
   theme: "dark",
-  toggleTheme: () => {},
+  toggleTheme: () => {
+    // Default implementation does nothing
+    // This will be overwritten by the provider
+  },
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

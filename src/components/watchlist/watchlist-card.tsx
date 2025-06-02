@@ -2,9 +2,9 @@
 
 import { CardGlass } from "@/components/ui/card-glass"
 import { BadgeStatus } from "@/components/ui/badge-status"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/core/utils"
 import { Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/core/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface WatchlistCardProps {

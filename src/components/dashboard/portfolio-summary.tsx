@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
-import { usePortfolio } from "@/hooks/use-portfolio";
-import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "@/core/utils";
+import { usePortfolio } from "@/core/state/portfolio-context";
+import { ErrorBoundary, ErrorDisplay } from "@/core/state/error-handling";
 
 type PortfolioSummaryProps = {
   totalValue: number;
@@ -13,7 +13,7 @@ type PortfolioSummaryProps = {
   stocksData: { ticker: string; currentValue: number }[];
 };
 
-export function PortfolioSummary({
+function PortfolioSummaryContent({
   totalValue,
   stocksCount,
   dailyChange,
@@ -23,7 +23,7 @@ export function PortfolioSummary({
   const { refreshPortfolio, isRefreshing } = usePortfolio();
 
   return (
-    <Card className="mb-6">
+    <>
       <CardHeader className="flex justify-between items-center">
         <CardTitle>Resumo da Carteira</CardTitle>
         <Button
@@ -41,9 +41,7 @@ export function PortfolioSummary({
           <div>
             <p className="text-sm text-muted-foreground">Valor Total</p>
             <p className="text-xl font-bold">
-              {typeof totalValue === "number" && totalValue > 0
-                ? formatCurrency(totalValue)
-                : "Valor inválido"}
+              {formatCurrency(totalValue)}
             </p>
           </div>
           <div>
@@ -74,10 +72,27 @@ export function PortfolioSummary({
               ))}
             </ul>
           ) : (
-            <Skeleton className="h-6 w-full" />
+            <p className="text-sm text-muted-foreground py-2">Nenhum ativo encontrado</p>
           )}
         </div>
       </CardContent>
+    </>
+  );
+}
+
+export function PortfolioSummary(props: PortfolioSummaryProps) {
+  return (
+    <Card className="mb-6">
+      <ErrorBoundary
+        fallback={
+          <ErrorDisplay 
+            message="Não foi possível carregar o resumo da carteira" 
+            onRetry={() => window.location.reload()}
+          />
+        }
+      >
+        <PortfolioSummaryContent {...props} />
+      </ErrorBoundary>
     </Card>
   );
 }

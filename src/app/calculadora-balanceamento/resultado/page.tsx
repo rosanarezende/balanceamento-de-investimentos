@@ -1,18 +1,23 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { ArrowLeft, Info, RefreshCw } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+
+import AuthGuard from "@/components/auth-guard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Info, AlertTriangle, RefreshCw } from "lucide-react"
-import { formatCurrency } from "@/types/index"
-import { useAuth } from "@/contexts/auth-context"
-import { usePortfolio } from "@/hooks/use-portfolio"
-import { saveSimulation } from "@/services/firebase/firestore"
-import AuthGuard from "@/components/auth-guard"
 import { LoadingState } from "@/components/ui/loading-state"
 
-interface StockAllocation {
+import { formatCurrency } from "@/core/utils/formatting"
+import { useAuth } from "@/core/state/auth-context"
+import { usePortfolio } from "@/core/state/portfolio-context"
+import { type SimulationAllocation } from "@/core/schemas/stock"
+
+import { saveSimulation } from "@/services/firebase/firestore"
+
+// Definição do tipo StockAllocation (ajuste conforme necessário)
+type StockAllocation = {
   ticker: string
   currentValue: number
   currentPercentage: number
@@ -31,7 +36,7 @@ export default function ResultadoCalculadora() {
   const searchParams = useSearchParams()
   const { user } = useAuth()
   const { stocksWithDetails, loading: portfolioLoading, refreshPortfolio } = usePortfolio()
-  const [allocations, setAllocations] = useState<StockAllocation[]>([])
+  const [allocations, setAllocations] = useState<SimulationAllocation[]>([])
   const [totalInvestment, setTotalInvestment] = useState(0)
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0)
   const [newTotalPortfolioValue, setNewTotalPortfolioValue] = useState(0)
@@ -165,7 +170,7 @@ export default function ResultadoCalculadora() {
             newQuantity: stock.quantity + quantityToAcquire,
             quantityToAcquire,
             currentPrice: stock.currentPrice,
-            userRecommendation: stock.userRecommendation,
+            userRecommendation: stock.userRecommendation ?? "Aguardar",
             isEligibleForInvestment: stock.isEligibleForInvestment,
           }
         })
@@ -314,6 +319,7 @@ export default function ResultadoCalculadora() {
           quantityToAcquire: allocation.quantityToAcquire,
           currentPrice: allocation.currentPrice,
           userRecommendation: allocation.userRecommendation,
+          isEligibleForInvestment: allocation.isEligibleForInvestment,
         })),
       })
 
@@ -389,15 +395,16 @@ export default function ResultadoCalculadora() {
                   size="sm"
                   onClick={handleRefreshPortfolio}
                   disabled={isRefreshing}
+                  className="w-full mt-4"
                 >
                   {isRefreshing ? (
                     <>
-                      <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                       Atualizando...
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="h-4 w-4 mr-1" />
+                      <RefreshCw className="mr-2 h-4 w-4" />
                       Atualizar Carteira
                     </>
                   )}
@@ -405,195 +412,131 @@ export default function ResultadoCalculadora() {
               </div>
             ) : (
               <>
-                {aiRecommendation && (
-                  <Card className="bg-primary/10 mb-4 border-primary/20">
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-2">
-                        <div className="mt-1 shrink-0">
-                          <div className="bg-primary/20 rounded-full p-1">
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="text-primary"
-                            >
-                              <path
-                                d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M12 16V12"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M12 8H12.01"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div>
+                <div className="space-y-4">
+                  <div className="bg-card border rounded-lg p-4">
+                    <h3 className="font-medium mb-2">Resumo do Investimento</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Valor do Aporte</p>
+                        <p className="font-medium">{formatCurrency(totalInvestment)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Carteira Atual</p>
+                        <p className="font-medium">{formatCurrency(totalPortfolioValue)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Carteira Após Aporte</p>
+                        <p className="font-medium">{formatCurrency(newTotalPortfolioValue)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Ativos Elegíveis</p>
+                        <p className="font-medium">
+                          {allocations.filter((a) => a.isEligibleForInvestment && a.investmentAmount > 0).length} de{" "}
+                          {allocations.length}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {aiRecommendation && (
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                      <div className="flex items-start">
+                        <Info className="text-blue-500 mr-2 mt-0.5 h-5 w-5 shrink-0" />
                         <div>
-                          <h3 className="text-xs font-medium text-primary mb-1">ANÁLISE INTELIGENTE</h3>
-                          <p className="text-sm text-foreground">{aiRecommendation}</p>
+                          <h3 className="font-medium text-blue-500 mb-1">Análise do Consultor</h3>
+                          <p className="text-sm text-muted-foreground">{aiRecommendation}</p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                    </div>
+                  )}
 
-                {aiLoading && (
-                  <div className="bg-primary/5 p-3 rounded-lg mb-4 flex items-center justify-center">
-                    <div className="animate-pulse flex items-center gap-2">
-                      <div className="h-4 w-4 bg-primary/30 rounded-full"></div>
-                      <p className="text-xs text-primary/70">Gerando análise inteligente...</p>
+                  {aiLoading && (
+                    <div className="bg-card border rounded-lg p-4">
+                      <div className="flex items-center justify-center">
+                        <RefreshCw className="h-5 w-5 animate-spin mr-2" />
+                        <p className="text-sm">Gerando análise personalizada...</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-card border rounded-lg overflow-hidden">
+                    <div className="p-4 border-b">
+                      <h3 className="font-medium">Recomendações de Compra</h3>
+                    </div>
+                    <div className="divide-y">
+                      {allocations
+                        .filter((allocation) => allocation.quantityToAcquire > 0)
+                        .sort((a, b) => b.investmentAmount - a.investmentAmount)
+                        .map((allocation) => (
+                          <div key={allocation.ticker} className="p-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <div className="font-medium">{allocation.ticker}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {allocation.currentPercentage.toFixed(1)}% → {allocation.targetPercentage.toFixed(1)}%
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div>
+                                <span className="text-muted-foreground">Comprar: </span>
+                                <span className="font-medium">{allocation.quantityToAcquire} ações</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Investir: </span>
+                                <span className="font-medium">{formatCurrency(allocation.investmentAmount)}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Preço atual: </span>
+                                <span>{formatCurrency(allocation.currentPrice)}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Novo total: </span>
+                                <span>{allocation.newQuantity} ações</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                      {allocations.filter((allocation) => allocation.quantityToAcquire > 0).length === 0 && (
+                        <div className="p-4 text-center">
+                          <p className="text-sm text-muted-foreground">
+                            Não há recomendações de compra para o valor informado.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col space-y-2">
+                    <Button onClick={() => setShowTerms(true)}>Salvar Simulação</Button>
+                    <Button variant="outline" onClick={handleBack}>
+                      Voltar
+                    </Button>
+                  </div>
+                </div>
+
+                {showTerms && (
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-card rounded-lg max-w-md w-full p-6">
+                      <h3 className="font-bold text-lg mb-2">Salvar Simulação</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Esta simulação será salva no seu histórico para consulta futura. Você poderá acessá-la a qualquer
+                        momento na seção de histórico.
+                      </p>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => setShowTerms(false)}>
+                          Cancelar
+                        </Button>
+                        <Button onClick={handleAgreeTerms} disabled={savingSimulation}>
+                          {savingSimulation ? "Salvando..." : "Salvar"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
-
-                <div className="space-y-4 mb-6">
-                  {allocations
-                    .filter((allocation) => allocation.investmentAmount > 0)
-                    .map((allocation) => (
-                      <Card
-                        key={allocation.ticker}
-                        className={`border border-border overflow-hidden ${
-                          !allocation.isEligibleForInvestment ? "opacity-50" : ""
-                        }`}
-                      >
-                        <CardContent className="p-3">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center">
-                              <div className="bg-muted rounded-full p-1 mr-2">
-                                <Info size={20} className="text-muted-foreground" />
-                              </div>
-                              <div>
-                                <div className="text-xs text-muted-foreground">CÓDIGO</div>
-                                <div className="font-bold text-foreground">{allocation.ticker}</div>
-                              </div>
-                            </div>
-                            <div className="flex items-center">
-                              <div
-                                className={`text-xs font-medium px-2 py-1 rounded-full mr-1 ${
-                                  allocation.userRecommendation === "Comprar"
-                                    ? "bg-green-500/20 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                                    : allocation.userRecommendation === "Aguardar"
-                                      ? "bg-yellow-500/20 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
-                                      : "bg-red-500/20 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                                }`}
-                              >
-                                {allocation.userRecommendation}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
-                            <div className="text-muted-foreground">VALOR ATUAL DOS ATIVOS</div>
-                            <div className="text-muted-foreground">ALOCAÇÃO ATUAL</div>
-                            <div className="font-bold text-foreground">{formatCurrency(allocation.currentValue)}</div>
-                            <div className="font-bold text-foreground">{allocation.currentPercentage.toFixed(2)}%</div>
-
-                            <div className="text-muted-foreground">VALOR A INVESTIR</div>
-                            <div className="text-muted-foreground">ALOCAÇÃO RECOMENDADA/META</div>
-                            <div className="font-bold text-green-600 dark:text-green-400">
-                              {formatCurrency(allocation.investmentAmount)}
-                            </div>
-                            <div className="font-bold text-foreground">{allocation.targetPercentage.toFixed(2)}%</div>
-
-                            <div className="text-muted-foreground">QTD ATUAL</div>
-                            <div className="text-muted-foreground">QTD A ADQUIRIR</div>
-                            <div className="font-bold text-foreground">{allocation.currentQuantity}</div>
-                            <div className="font-bold text-foreground">{allocation.quantityToAcquire}</div>
-
-                            <div className="text-muted-foreground">PREÇO DO PAPEL NO MOMENTO DA CONSULTA</div>
-                            <div className="text-muted-foreground"></div>
-                            <div className="font-bold text-foreground">{formatCurrency(allocation.currentPrice)}</div>
-                            <div className="font-bold text-foreground"></div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                </div>
               </>
             )}
-
-            <Card className="bg-destructive/10 mb-6 border-destructive/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-center mb-2">
-                  <AlertTriangle className="text-destructive mr-2" size={18} />
-                  <h3 className="text-destructive font-bold text-center">ATENÇÃO!</h3>
-                </div>
-                <p className="text-xs text-foreground mb-2">
-                  Para investir, é necessário realizar a compra de ações diretamente na sua corretora/ banco.
-                </p>
-                <p className="text-xs text-foreground mb-2">
-                  Ao clicar em &quot;Confirmar Aporte&quot;, você reconhece que isto não é uma ordem de investimento e sim uma
-                  sugestão pessoal. Este aplicativo não realiza aplicações no CPF dos usuários.
-                </p>
-                <p className="text-xs text-foreground mb-2">
-                  1. Algumas corretoras/bancos de investimentos cobram taxas de corretagem para compra e venda de ações.
-                </p>
-                <p className="text-xs text-foreground mb-2">
-                  2. Antes de investir, transfira o dinheiro para a sua corretora/ banco.
-                </p>
-                <p className="text-xs text-foreground mb-2">
-                  3. O prazo de liquidação na Bolsa de Valores, que é de D+2, significa que o dinheiro da compra ou
-                  venda de ações é debitado ou creditado 2 dias úteis após a negociação.
-                </p>
-                <p className="text-xs text-foreground mb-2">
-                  4. Os preços dos ativos sofrem um atraso de até 15 minutos em relação ao mercado. Portanto, podem
-                  existir diferenças de valores entre o preço exibido e o preço real de mercado.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Button
-              variant="destructive"
-              className="w-full py-3"
-              onClick={() => setShowTerms(true)}
-              disabled={savingSimulation || loading || portfolioLoading}
-            >
-              {savingSimulation ? "PROCESSANDO..." : "CONFIRME O TERMO ACIMA"}
-            </Button>
           </CardContent>
         </Card>
-
-        {showTerms && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <Card className="max-w-sm w-full">
-              <CardContent className="p-6">
-                <h3 className="font-bold mb-4 text-foreground">Confirmar Simulação</h3>
-                <p className="text-sm mb-6 text-muted-foreground">
-                  Você confirma que entende que esta é apenas uma simulação e que a execução das ordens deve ser feita
-                  diretamente na sua corretora?
-                </p>
-                <div className="flex space-x-4">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setShowTerms(false)}
-                    disabled={savingSimulation}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button className="flex-1" onClick={handleAgreeTerms} disabled={savingSimulation}>
-                    {savingSimulation ? "Salvando..." : "Confirmar"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </div>
     </AuthGuard>
   )

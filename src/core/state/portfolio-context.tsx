@@ -1,45 +1,60 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/contexts/auth-context";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { 
-  getUserPortfolio, 
-  updateStock, 
+import { useAuth } from "@/core/state/auth-context";
+import {
+  getUserPortfolio,
+  updateStock,
   removeStock as removeStockFromFirestore,
   validateUserInput
 } from "@/services/firebase/firestore";
-import { 
-  getStockPrice, 
-  getMultipleStockPrices, 
-  simulateStockPrices, 
-  isDevelopment 
-} from "@/services/api/stockPrice";
+import {
+  getStockPrice,
+  getMultipleStockPrices,
+  simulateStockPrices,
+  isDevelopment
+} from "@/services/api/stock-price";
+import {
+  Stock,
+  StockWithDetails,
+  PortfolioSummary
+} from "@/core/types";
+import { isValidNumber } from "@/core/utils";
 
 /**
- * Hook para gerenciar o portfólio de investimentos do usuário
- * 
- * Este hook fornece funções para carregar, adicionar, atualizar e remover
- * ativos da carteira, além de calcular valores e percentuais.
+ * Interface para o contexto de portfólio
  */
+interface PortfolioContextType {
+  // Dados
+  stocks: Record<string, Stock>;
+  stocksWithDetails: StockWithDetails[];
+  portfolioSummary: PortfolioSummary;
+  totalPortfolioValue: number;
 
-export type Stock = {
-  ticker: string;
-  quantity: number;
-  targetPercentage: number;
-  userRecommendation?: "Comprar" | "Vender" | "Aguardar";
+  // Estado
+  loading: boolean;
+  error: string | null;
+  lastUpdated: Date | null;
+  isRefreshing: boolean;
+  hasPendingOperations: boolean;
+  hasStocks: boolean;
+  hasEligibleStocks: boolean;
+
+  // Ações
+  refreshPortfolio: () => Promise<void>;
+  addStockToPortfolio: (ticker: string, data: Omit<Stock, "ticker">) => Promise<boolean>;
+  removeStockFromPortfolio: (ticker: string) => Promise<boolean>;
+  updateStockInPortfolio: (ticker: string, data: Partial<Omit<Stock, "ticker">>) => Promise<boolean>;
 }
 
-export type StockWithDetails = Stock & {
-  currentPrice: number;
-  currentValue: number;
-  currentPercentage: number;
-  targetValue: number;
-  targetDifference: number;
-  targetDifferencePercentage: number;
-}
+// Criar contexto
+const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined);
 
-export function usePortfolio() {
+/**
+ * Provider para o contexto de portfólio
+ */
+export function PortfolioProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [stocks, setStocks] = useState<Record<string, Stock>>({});
   const [stocksWithDetails, setStocksWithDetails] = useState<StockWithDetails[]>([]);
@@ -68,22 +83,19 @@ export function usePortfolio() {
 
       // Validar estrutura do portfólio
       if (portfolio) {
-        // Verificar se cada ativo tem os campos necessários
-        const isValid = Object.values(portfolio).every(stock => 
-          typeof stock.ticker === 'string' &&
-          typeof stock.quantity === 'number' &&
-          typeof stock.targetPercentage === 'number'
-        );
-        
-        if (!isValid) {
-          console.error("Dados de portfólio inválidos:", portfolio);
-          setError("Dados de portfólio inválidos. Entre em contato com o suporte.");
-          setStocks({});
-          setStocksWithDetails([]);
-          return;
+        // Transformar portfólio para adicionar ticker como chave se necessário
+        const validatedPortfolio: Record<string, { ticker: string; quantity: number; targetPercentage: number; userRecommendation?: "Comprar" | "Vender" | "Aguardar"; }> = {};
+
+        for (const [ticker, stockData] of Object.entries(portfolio)) {
+          validatedPortfolio[ticker] = {
+            ticker,
+            quantity: stockData.quantity,
+            targetPercentage: stockData.targetPercentage,
+            userRecommendation: stockData.userRecommendation
+          };
         }
-        
-        setStocks(portfolio);
+
+        setStocks(validatedPortfolio);
         // Preços e detalhes serão calculados em outro useEffect
       } else {
         setStocks({});
@@ -118,12 +130,9 @@ export function usePortfolio() {
 
       // Em desenvolvimento, usar preços simulados
       if (isDevelopment()) {
-        // eslint-disable-next-line no-console
         console.log("Ambiente de desenvolvimento: usando preços simulados");
         prices = simulateStockPrices(tickers);
       } else {
-        // Em produção, buscar preços reais
-        // eslint-disable-next-line no-console
         console.log("Ambiente de produção: buscando preços reais");
         prices = await getMultipleStockPrices(tickers);
       }
@@ -185,8 +194,11 @@ export function usePortfolio() {
 
       try {
         // Validar dados antes de salvar
-        validateUserInput(data);
-        
+        validateUserInput({
+          ...data,
+          userRecommendation: data.userRecommendation ?? "Aguardar"
+        });
+
         // Marcar operação como pendente
         setPendingOperations(prev => new Set(prev).add(operationId));
 
@@ -202,7 +214,11 @@ export function usePortfolio() {
         }));
 
         // Persistir no Firebase
-        await updateStock(user.uid, ticker, data);
+        await updateStock(user.uid, ticker, {
+          quantity: data.quantity,
+          targetPercentage: data.targetPercentage,
+          userRecommendation: data.userRecommendation ?? "Aguardar"
+        });
 
         // Buscar preço do novo ativo
         if (!stockPrices[ticker]) {
@@ -335,7 +351,11 @@ export function usePortfolio() {
         }));
 
         // Persistir no Firebase
-        await updateStock(user.uid, ticker, data);
+        await updateStock(user.uid, ticker, {
+          quantity: data.quantity ?? previousStock.quantity,
+          targetPercentage: data.targetPercentage ?? previousStock.targetPercentage,
+          userRecommendation: data.userRecommendation ?? previousStock.userRecommendation ?? "Aguardar"
+        });
 
         toast.success("Ativo atualizado com sucesso!", {
           description: `${ticker} foi atualizado na sua carteira.`
@@ -393,11 +413,11 @@ export function usePortfolio() {
       // Calcular detalhes com os preços disponíveis
       const detailedStocks = stocksArray.map(stock => {
         // Garantir que preço e quantidade sejam números válidos
-        const currentPrice = typeof stockPrices[stock.ticker] === 'number' && !isNaN(stockPrices[stock.ticker]) 
-          ? stockPrices[stock.ticker] 
+        const currentPrice = isValidNumber(stockPrices[stock.ticker])
+          ? stockPrices[stock.ticker]
           : 0;
-        const quantity = typeof stock.quantity === 'number' && !isNaN(stock.quantity) 
-          ? stock.quantity 
+        const quantity = isValidNumber(stock.quantity)
+          ? stock.quantity
           : 0;
         const currentValue = currentPrice * quantity;
 
@@ -447,34 +467,65 @@ export function usePortfolio() {
   const totalPortfolioValue = stocksWithDetails.reduce(
     (sum, stock) => {
       // Garantir que currentValue seja um número válido
-      const value = typeof stock.currentValue === 'number' && !isNaN(stock.currentValue) 
-        ? stock.currentValue 
-        : 0;
+      const value = isValidNumber(stock.currentValue) ? stock.currentValue : 0;
       return sum + value;
     },
     0
   );
 
   // Verificar se há ativos na carteira
-  const hasStocks = Object.keys(stocks).length > 0;
-  
+  // const hasStocks = Object.keys(stocks).length > 0;
+
   // Verificar se há ativos elegíveis para investimento (marcados como "Comprar")
   const hasEligibleStocks = stocksWithDetails.some(stock => stock.userRecommendation === "Comprar");
 
-  return {
+  // Criar objeto de resumo do portfólio
+  const portfolioSummary: PortfolioSummary = {
+    totalValue: isNaN(totalPortfolioValue) ? 0 : totalPortfolioValue,
+    stockCount: stocksWithDetails.length,
+    hasEligibleStocks
+  };
+
+  // Memoizar o valor do contexto para evitar renderizações desnecessárias
+  const contextValue = {
+    // Dados
     stocks,
     stocksWithDetails,
-    totalPortfolioValue: isNaN(totalPortfolioValue) ? 0 : totalPortfolioValue,
+    portfolioSummary,
+    totalPortfolioValue: portfolioSummary.totalValue,
+    hasStocks: Object.keys(stocks).length > 0,
+    hasEligibleStocks: stocksWithDetails.some(stock => stock.quantity > 0),
+
+    // Estado
     loading: loading || pricesLoading,
     error,
     lastUpdated,
     isRefreshing,
     hasPendingOperations: pendingOperations.size > 0,
-    hasStocks,
-    hasEligibleStocks,
+
+    // Ações
     refreshPortfolio,
     addStockToPortfolio,
     removeStockFromPortfolio,
     updateStockInPortfolio
   };
+
+  return (
+    <PortfolioContext.Provider value={contextValue}>
+      {children}
+    </PortfolioContext.Provider>
+  );
+}
+
+/**
+ * Hook para acessar o contexto de portfólio
+ * @returns Contexto de portfólio
+ * @throws Erro se usado fora de um PortfolioProvider
+ */
+export function usePortfolio() {
+  const context = useContext(PortfolioContext);
+  if (context === undefined) {
+    throw new Error("usePortfolio deve ser usado dentro de um PortfolioProvider");
+  }
+  return context;
 }
