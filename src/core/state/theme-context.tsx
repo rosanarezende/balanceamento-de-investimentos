@@ -21,7 +21,10 @@ interface ThemeContextType {
 // Criamos o contexto com um valor padrão para evitar erros durante a renderização no servidor
 const ThemeContext = createContext<ThemeContextType>({
   theme: "dark",
-  toggleTheme: () => {},
+  toggleTheme: () => {
+    // Default implementation does nothing
+    // This will be overwritten by the provider
+  },
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

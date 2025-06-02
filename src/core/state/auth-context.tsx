@@ -108,7 +108,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError(null);
-      await signInWithPopup(auth!, googleProvider!);
+      if (!auth || !googleProvider) {
+        console.error("Firebase Auth ou Google Provider não inicializado.");
+        setError("Erro de configuração de autenticação.");
+        setLoading(false);
+        return;
+      }
+      await signInWithPopup(auth, googleProvider);
     } catch (error: unknown) {
       console.error("Erro ao fazer login com Google:", error);
       if (error instanceof Error) {
@@ -123,7 +129,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
-      await firebaseSignOut(auth!);
+      if (!auth) {
+        console.error("Firebase Auth não inicializado.");
+        setError("Erro de configuração de autenticação.");
+        return;
+      }
+      await firebaseSignOut(auth);
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       setError("Erro ao fazer logout. Por favor, tente novamente.");
