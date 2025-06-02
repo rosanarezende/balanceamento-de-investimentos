@@ -46,11 +46,11 @@ describe('AuthProvider Context Test', () => {
 
     // Mock do Firestore
     const mockFirestore = jest.requireMock('firebase/firestore')
-    mockFirestore.doc.mockReturnValue({})
-    mockFirestore.getDoc.mockResolvedValue({
+    mockFirestore.doc = jest.fn().mockReturnValue({});
+    mockFirestore.getDoc = jest.fn().mockResolvedValue({
       exists: () => false
-    })
-    mockFirestore.setDoc.mockResolvedValue(undefined)
+    });
+    mockFirestore.setDoc = jest.fn().mockResolvedValue(undefined);
   })
 
   it('deve renderizar componente dentro do AuthProvider sem erros', () => {

@@ -12,10 +12,11 @@
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Toaster } from 'sonner'
+
 import { AuthProvider } from '@/core/state/auth-context'
 import { ThemeProvider } from '@/core/state/theme-context'
 import { PortfolioProvider } from '@/core/state/portfolio-context'
-import { Toaster } from 'sonner'
 
 // Páginas e componentes a serem testados
 import LoginPage from '@/app/login/page'
@@ -32,14 +33,14 @@ jest.mock('firebase/auth')
 // Componente wrapper para testes com todos os providers
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <ThemeProvider>
         <PortfolioProvider>
           {children}
           <Toaster />
         </PortfolioProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   )
 }
 
@@ -143,8 +144,9 @@ describe('Testes de Integração - Sistema de Balanceamento', () => {
       )
 
       const emailInput = screen.getByLabelText(/email/i)
-      const passwordInput = screen.getByLabelText(/senha/i)
-      const loginButton = screen.getByRole('button', { name: /entrar/i })
+      const passwordInput = screen.getByLabelText(/password/i)
+      // Selecionar o botão de login específico pelo tipo submit e texto exato
+      const loginButton = screen.getByRole('button', { name: "Login", exact: true })
 
       await userEvent.type(emailInput, 'test@example.com')
       await userEvent.type(passwordInput, 'password123')
@@ -170,8 +172,9 @@ describe('Testes de Integração - Sistema de Balanceamento', () => {
       )
 
       const emailInput = screen.getByLabelText(/email/i)
-      const passwordInput = screen.getByLabelText(/senha/i)
-      const loginButton = screen.getByRole('button', { name: /entrar/i })
+      const passwordInput = screen.getByLabelText(/password/i)
+      // Selecionar o botão de login específico pelo tipo submit e texto exato
+      const loginButton = screen.getByRole('button', { name: "Login", exact: true })
 
       await userEvent.type(emailInput, 'invalid@example.com')
       await userEvent.type(passwordInput, 'wrongpassword')
@@ -228,10 +231,15 @@ describe('Testes de Integração - Sistema de Balanceamento', () => {
         </TestWrapper>
       )
 
-      const tickerInput = screen.getByLabelText(/código/i)
+      await waitFor(() => {
+        expect(screen.getByLabelText(/código do ativo/i)).toBeInTheDocument()
+      })
+
+      const tickerInput = screen.getByLabelText(/código do ativo/i) 
       const quantityInput = screen.getByLabelText(/quantidade/i)
       const targetInput = screen.getByLabelText(/meta/i)
-      const addButton = screen.getByRole('button', { name: /adicionar/i })
+      // O botão de submissão no AddStockForm é "Salvar"
+      const addButton = screen.getByRole('button', { name: /salvar/i })
 
       await userEvent.type(tickerInput, 'MSFT')
       await userEvent.type(quantityInput, '15')
@@ -271,7 +279,19 @@ describe('Testes de Integração - Sistema de Balanceamento', () => {
         expect(screen.getByText('AAPL')).toBeInTheDocument()
       })
 
-      const deleteButton = screen.getByRole('button', { name: /remover/i })
+      // Tentar encontrar o botão pelo data-testid, que seria o ideal.
+      // Se não existir, será necessário adicioná-lo ao componente StockList.
+      // Exemplo: <button data-testid={`delete-stock-AAPL`} ...>
+      // Por agora, vamos tentar um seletor que busca pelo SVG dentro de um botão.
+      // Esta é uma abordagem mais frágil e depende da estrutura do DOM.
+      const deleteButton = screen.getByRole('button', { name: "" }); // Encontra o botão que não tem nome acessível direto (o ícone)
+      // Este seletor assume que o botão de lixeira é o único botão sem nome acessível direto no item da lista.
+      // Se houver outros, este seletor pode pegar o errado.
+      // Uma alternativa seria screen.getAllByRole('button', { name: "" }) e então filtrar ou pegar por índice, mas é mais arriscado.
+      
+      // Verificação para garantir que encontramos um botão antes de clicar
+      expect(deleteButton.querySelector('svg.lucide-trash2')).toBeInTheDocument();
+
       await userEvent.click(deleteButton)
 
       await waitFor(() => {
@@ -300,8 +320,12 @@ describe('Testes de Integração - Sistema de Balanceamento', () => {
         }
       }
 
-      const mockFirestore = jest.requireMock('@/services/firebase/firestore')
-      mockFirestore.getUserPortfolio.mockResolvedValue(mockStocks)
+      const mockFirestore = jest.requireMock('@/services/firebase/firestore');
+      mockFirestore.getUserPortfolio.mockResolvedValue(mockStocks);
+      // Garantir que getDoc e setDoc também estão mockados para createOrUpdateUserData
+      // que é chamado dentro de onAuthStateChanged no AuthContext
+      mockFirestore.getDoc.mockResolvedValue({ exists: () => false }); 
+      mockFirestore.setDoc.mockResolvedValue(undefined);
 
       render(
         <TestWrapper>
@@ -310,7 +334,7 @@ describe('Testes de Integração - Sistema de Balanceamento', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText(/calculadora de balanceamento/i)).toBeInTheDocument()
+        expect(screen.getByText(/Calculadora de Balanceamento de Carteira/i)).toBeInTheDocument()
       })
 
       const investmentInput = screen.getByLabelText(/valor para investir/i)

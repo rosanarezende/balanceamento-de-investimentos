@@ -61,3 +61,52 @@ if (typeof global.Response === 'undefined') {
     text: jest.fn().mockResolvedValue(typeof body === 'string' ? body : JSON.stringify(body)),
   }))
 }
+
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
+// Mock Firebase
+jest.mock('firebase/app', () => ({
+  initializeApp: jest.fn(),
+  getApps: jest.fn(() => [{ name: '[DEFAULT]' }]),
+  getApp: jest.fn(() => ({ name: '[DEFAULT]' })),
+}));
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({})),
+  signInWithEmailAndPassword: jest.fn(),
+  createUserWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
+  onAuthStateChanged: jest.fn(),
+}));
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(() => ({})),
+  collection: jest.fn(),
+  doc: jest.fn(),
+  addDoc: jest.fn(),
+  getDoc: jest.fn(),
+  getDocs: jest.fn(),
+  updateDoc: jest.fn(),
+  deleteDoc: jest.fn(),
+  query: jest.fn(),
+  where: jest.fn(),
+  serverTimestamp: jest.fn(),
+}));
+
+// Mock da configuração do Firebase para evitar erros de inicialização
+// Adicione quaisquer outras chaves de configuração que possam estar faltando
+jest.mock('./src/services/firebase/config', () => ({
+  firebaseConfig: {
+    apiKey: 'mockApiKey',
+    authDomain: 'mockAuthDomain',
+    projectId: 'mockProjectId',
+    storageBucket: 'mockStorageBucket',
+    messagingSenderId: 'mockMessagingSenderId',
+    appId: 'mockAppId',
+  },
+}));
