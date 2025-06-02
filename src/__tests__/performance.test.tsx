@@ -15,17 +15,12 @@ import userEvent from '@testing-library/user-event'
 
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
 import { StockList } from '@/components/stocks/stock-list'
-import { TestWrapper } from '@/src/__tests__/helpers/test-wrapper'
-import { 
-  mockAuth, 
-  mockUser, 
+import { TestWrapper } from './helpers/test-wrapper'
+import {
+  mockAuth,
   mockAuthenticatedUser,
-  resetAllMocks 
-} from '@/src/__tests__/mocks/firebase'
-import { 
-  waitForElement,
-  simulateNetworkDelay 
-} from '@/src/__tests__/helpers/test-utils'
+  resetAllMocks
+} from './mocks/firebase'
 
 // Mocks dos serviços
 jest.mock('@/services/firebase/firestore')
@@ -57,16 +52,16 @@ describe('Testes de Performance', () => {
 
   beforeEach(() => {
     resetAllMocks()
-    
+
     // Setup usuário autenticado
     mockAuthenticatedUser()
     Object.assign(jest.requireMock('firebase/auth'), mockAuth)
-    
+
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
     jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
-    
+
     // Performance.now mock para medições
     const mockPerformance = {
       now: jest.fn(() => Date.now()),
@@ -84,7 +79,7 @@ describe('Testes de Performance', () => {
   describe('Tempos de Carregamento', () => {
     it('deve carregar lista de ativos em menos de 2 segundos', async () => {
       const startTime = Date.now()
-      
+
       mockFirestoreService.getUserPortfolio.mockResolvedValue(
         generateLargePortfolio(50)
       )
@@ -219,7 +214,7 @@ describe('Testes de Performance', () => {
 
       // Não deve renderizar todos os 1000 itens no DOM
       const allStockElements = screen.queryAllByText(/STOCK\d{3}/)
-      
+
       // Deve renderizar apenas uma parte dos itens (virtualização)
       expect(allStockElements.length).toBeLessThan(100)
       expect(allStockElements.length).toBeGreaterThan(5)
@@ -241,7 +236,7 @@ describe('Testes de Performance', () => {
 
       // Simular digitação rápida na busca
       const searchInput = screen.getByPlaceholderText(/buscar|pesquisar/i)
-      
+
       await userEvent.type(searchInput, 'STO', { delay: 10 }) // Digitação rápida
 
       // Aguardar debounce
@@ -439,7 +434,7 @@ describe('Testes de Performance', () => {
   describe('Lazy Loading e Code Splitting', () => {
     it('deve carregar componentes sob demanda', async () => {
       // Simular componente que só carrega quando necessário
-      const LazyComponent = React.lazy(() => 
+      const LazyComponent = React.lazy(() =>
         Promise.resolve({ default: () => <div>Lazy Loaded</div> })
       )
 
@@ -463,8 +458,8 @@ describe('Testes de Performance', () => {
     it('deve carregar rotas sob demanda', async () => {
       // Este teste seria mais relevante com Next.js dynamic imports
       // Por enquanto, vamos simular o comportamento
-      
-      const mockDynamicImport = jest.fn(() => 
+
+      const mockDynamicImport = jest.fn(() =>
         Promise.resolve({ default: () => <div>Dynamic Route</div> })
       )
 
@@ -509,7 +504,7 @@ describe('Testes de Performance', () => {
     })
 
     it('deve detectar renders demorados', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => { })
 
       // Simular componente com render lento
       const SlowComponent = () => {

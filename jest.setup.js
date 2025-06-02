@@ -69,13 +69,20 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
+// Mock do window.location.reload
+Object.defineProperty(window, 'location', {
+  value: {
+    ...window.location,
+    reload: jest.fn(),
+  },
+  writable: true,
+});
+
 // Mock Firebase
 const mockApp = { name: '[DEFAULT]' };
 
 // Criar mocks Jest para as funções de autenticação
 const mockSignInWithPopup = jest.fn();
-const mockSignInWithEmailAndPassword = jest.fn();
-const mockCreateUserWithEmailAndPassword = jest.fn();
 const mockSignOut = jest.fn();
 const mockOnAuthStateChanged = jest.fn();
 
@@ -83,8 +90,6 @@ const mockAuth = {
   currentUser: null,
   app: mockApp,
   signInWithPopup: mockSignInWithPopup,
-  signInWithEmailAndPassword: mockSignInWithEmailAndPassword,
-  createUserWithEmailAndPassword: mockCreateUserWithEmailAndPassword,
   signOut: mockSignOut,
   onAuthStateChanged: mockOnAuthStateChanged,
 };
@@ -101,8 +106,6 @@ jest.mock('firebase/app', () => ({
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(() => mockAuth),
   signInWithPopup: mockSignInWithPopup,
-  signInWithEmailAndPassword: mockSignInWithEmailAndPassword,
-  createUserWithEmailAndPassword: mockCreateUserWithEmailAndPassword,
   signOut: mockSignOut,
   onAuthStateChanged: mockOnAuthStateChanged,
   GoogleAuthProvider: jest.fn(() => mockGoogleProvider),

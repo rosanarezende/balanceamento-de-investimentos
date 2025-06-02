@@ -1,6 +1,6 @@
 /**
  * Testes da Calculadora de Balanceamento
- * 
+ *
  * Testa funcionalidades específicas da calculadora:
  * - Cálculo de balanceamento
  * - Recomendações de compra/venda
@@ -14,19 +14,16 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
-import { TestWrapper } from '@/src/__tests__/helpers/test-wrapper'
-import { 
-  mockAuth, 
-  mockUser, 
+import { TestWrapper } from './helpers/test-wrapper'
+import {
+  mockAuth,
   mockAuthenticatedUser,
-  resetAllMocks 
-} from '@/src/__tests__/mocks/firebase'
-import { 
-  waitForElement,
+  resetAllMocks
+} from './mocks/firebase'
+import {
   expectErrorToast,
   expectSuccessToast,
-  simulateNetworkDelay 
-} from '@/src/__tests__/helpers/test-utils'
+} from './helpers/test-utils'
 
 // Mocks dos serviços
 jest.mock('@/services/firebase/firestore')
@@ -61,25 +58,34 @@ describe('Testes da Calculadora de Balanceamento', () => {
 
   beforeEach(() => {
     resetAllMocks()
-    
+
     // Setup usuário autenticado
     mockAuthenticatedUser()
     Object.assign(jest.requireMock('firebase/auth'), mockAuth)
-    
+
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
     jest.requireMock('next/navigation').usePathname.mockReturnValue('/calculadora-balanceamento')
-    
+
     // Setup mocks do Firestore
     mockFirestoreService.getUserPortfolio.mockResolvedValue(mockPortfolioData)
     mockFirestoreService.saveSimulation.mockResolvedValue('simulation-id-123')
-    
+
     // Setup mocks da API de preços
-    mockStockPriceService.getCurrentPrice.mockImplementation((ticker) => {
-      const prices = { 'AAPL': 150.00, 'GOOGL': 2500.00 }
-      return Promise.resolve(prices[ticker] || 100.00)
-    })
+    interface PriceMap {
+      [ticker: string]: number;
+    }
+
+    interface MockGetCurrentPrice {
+      (ticker: string): Promise<number>;
+    }
+
+    const mockGetCurrentPrice: MockGetCurrentPrice = (ticker) => {
+      const prices: PriceMap = { 'AAPL': 150.00, 'GOOGL': 2500.00 };
+      return Promise.resolve(prices[ticker] || 100.00);
+    }
+    mockStockPriceService.getCurrentPrice.mockImplementation(mockGetCurrentPrice)
   })
 
   describe('Renderização Inicial', () => {

@@ -11,24 +11,21 @@
  */
 
 import React from 'react'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { StockList } from '@/components/stocks/stock-list'
 import { AddStockForm } from '@/components/add-stock-form'
-import { TestWrapper } from '@/src/__tests__/helpers/test-wrapper'
-import { 
-  mockAuth, 
-  mockUser, 
+import { TestWrapper } from './helpers/test-wrapper'
+import {
+  mockAuth,
   mockAuthenticatedUser,
-  resetAllMocks 
-} from '@/src/__tests__/mocks/firebase'
-import { 
-  addAssetToPortfolio, 
-  waitForElement,
+  resetAllMocks
+} from './mocks/firebase'
+import {
   expectErrorToast,
-  expectSuccessToast 
-} from '@/src/__tests__/helpers/test-utils'
+  expectSuccessToast
+} from './helpers/test-utils'
 
 // Mocks dos serviços
 jest.mock('@/services/firebase/firestore')
@@ -50,7 +47,7 @@ describe('Testes de Gestão de Portfólio', () => {
       name: 'Apple Inc.'
     },
     'GOOGL': {
-      ticker: 'GOOGL', 
+      ticker: 'GOOGL',
       quantity: 5,
       targetPercentage: 25,
       userRecommendation: 'Manter' as const,
@@ -60,17 +57,17 @@ describe('Testes de Gestão de Portfólio', () => {
 
   beforeEach(() => {
     resetAllMocks()
-    
+
     // Setup usuário autenticado
     mockAuthenticatedUser()
     Object.assign(jest.requireMock('firebase/auth'), mockAuth)
-    
+
     // Setup mocks do Firestore
     mockFirestoreService.getUserPortfolio.mockResolvedValue(mockPortfolioData)
     mockFirestoreService.updateStock.mockResolvedValue(true)
     mockFirestoreService.removeStock.mockResolvedValue(true)
     mockFirestoreService.validateUserInput.mockReturnValue(true)
-    
+
     // Setup mocks da API de preços
     mockStockPriceService.getCurrentPrice.mockResolvedValue(150.00)
     mockStockPriceService.getPriceHistory.mockResolvedValue([
@@ -162,7 +159,7 @@ describe('Testes de Gestão de Portfólio', () => {
       const tickerInput = screen.getByLabelText(/código.*ativo|ticker/i)
       const quantityInput = screen.getByLabelText(/quantidade/i)
       const targetInput = screen.getByLabelText(/meta|target|alocação.*desejada/i)
-      
+
       await userEvent.type(tickerInput, 'MSFT')
       await userEvent.type(quantityInput, '15')
       await userEvent.type(targetInput, '20')
@@ -211,10 +208,10 @@ describe('Testes de Gestão de Portfólio', () => {
       )
 
       const tickerInput = screen.getByLabelText(/código.*ativo|ticker/i)
-      
+
       // Ticker inválido (muito longo)
       await userEvent.type(tickerInput, 'TICKER_MUITO_LONGO')
-      
+
       const saveButton = screen.getByRole('button', { name: /salvar|adicionar/i })
       await userEvent.click(saveButton)
 
@@ -232,7 +229,7 @@ describe('Testes de Gestão de Portfólio', () => {
 
       const quantityInput = screen.getByLabelText(/quantidade/i)
       const targetInput = screen.getByLabelText(/meta|target|alocação.*desejada/i)
-      
+
       // Valores inválidos
       await userEvent.type(quantityInput, '-5') // negativo
       await userEvent.type(targetInput, '150') // maior que 100%
@@ -260,7 +257,7 @@ describe('Testes de Gestão de Portfólio', () => {
       const tickerInput = screen.getByLabelText(/código.*ativo|ticker/i)
       const quantityInput = screen.getByLabelText(/quantidade/i)
       const targetInput = screen.getByLabelText(/meta|target|alocação.*desejada/i)
-      
+
       await userEvent.type(tickerInput, 'MSFT')
       await userEvent.type(quantityInput, '15')
       await userEvent.type(targetInput, '20')
@@ -297,8 +294,8 @@ describe('Testes de Gestão de Portfólio', () => {
       })
 
       // Encontrar e clicar no botão de remover
-      const removeButton = screen.getByRole('button', { 
-        name: /remover.*aapl|excluir.*aapl|deletar.*aapl/i 
+      const removeButton = screen.getByRole('button', {
+        name: /remover.*aapl|excluir.*aapl|deletar.*aapl/i
       })
       await userEvent.click(removeButton)
 
@@ -331,8 +328,8 @@ describe('Testes de Gestão de Portfólio', () => {
         expect(screen.getByText('AAPL')).toBeInTheDocument()
       })
 
-      const removeButton = screen.getByRole('button', { 
-        name: /remover.*aapl|excluir.*aapl|deletar.*aapl/i 
+      const removeButton = screen.getByRole('button', {
+        name: /remover.*aapl|excluir.*aapl|deletar.*aapl/i
       })
       await userEvent.click(removeButton)
 
@@ -355,8 +352,8 @@ describe('Testes de Gestão de Portfólio', () => {
         expect(screen.getByText('AAPL')).toBeInTheDocument()
       })
 
-      const removeButton = screen.getByRole('button', { 
-        name: /remover.*aapl|excluir.*aapl|deletar.*aapl/i 
+      const removeButton = screen.getByRole('button', {
+        name: /remover.*aapl|excluir.*aapl|deletar.*aapl/i
       })
       await userEvent.click(removeButton)
 
@@ -377,8 +374,8 @@ describe('Testes de Gestão de Portfólio', () => {
       })
 
       // Encontrar botão de editar
-      const editButton = screen.getByRole('button', { 
-        name: /editar.*aapl|alterar.*aapl/i 
+      const editButton = screen.getByRole('button', {
+        name: /editar.*aapl|alterar.*aapl/i
       })
       await userEvent.click(editButton)
 
@@ -418,8 +415,8 @@ describe('Testes de Gestão de Portfólio', () => {
         expect(screen.getByText('AAPL')).toBeInTheDocument()
       })
 
-      const editButton = screen.getByRole('button', { 
-        name: /editar.*aapl|alterar.*aapl/i 
+      const editButton = screen.getByRole('button', {
+        name: /editar.*aapl|alterar.*aapl/i
       })
       await userEvent.click(editButton)
 
@@ -514,7 +511,7 @@ describe('Testes de Gestão de Portfólio', () => {
         'AAPL': { ...mockPortfolioData.AAPL, targetPercentage: 60 },
         'GOOGL': { ...mockPortfolioData.GOOGL, targetPercentage: 50 }
       }
-      
+
       mockFirestoreService.getUserPortfolio.mockResolvedValue(invalidPortfolio)
 
       render(

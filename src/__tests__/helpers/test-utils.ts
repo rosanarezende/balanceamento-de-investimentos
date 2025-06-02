@@ -13,51 +13,26 @@ export const waitForElement = async (text: string, options?: { timeout?: number 
 }
 
 /**
- * Helper para aguardar que um elemento desapareça da tela
- */
-export const waitForElementToDisappear = async (text: string, options?: { timeout?: number }) => {
-  return await waitFor(() => {
-    expect(screen.queryByText(text)).not.toBeInTheDocument()
-  }, { timeout: options?.timeout || 3000 })
-}
-
-/**
- * Helper para preencher um formulário de login
- */
-export const fillLoginForm = async (email: string, password: string) => {
-  const user = userEvent.setup()
-  
-  const emailInput = screen.getByLabelText(/email/i)
-  const passwordInput = screen.getByLabelText(/senha|password/i)
-  
-  await user.clear(emailInput)
-  await user.type(emailInput, email)
-  
-  await user.clear(passwordInput)
-  await user.type(passwordInput, password)
-}
-
-/**
  * Helper para adicionar um ativo ao portfólio
  */
 export const addAssetToPortfolio = async (
-  symbol: string, 
-  name: string, 
-  currentAllocation: string, 
+  symbol: string,
+  name: string,
+  currentAllocation: string,
   targetAllocation: string
 ) => {
   const user = userEvent.setup()
-  
+
   // Procura e clica no botão de adicionar ativo
   const addButton = screen.getByText(/adicionar ativo/i)
   await user.click(addButton)
-  
+
   // Preenche o formulário
   await user.type(screen.getByLabelText(/símbolo/i), symbol)
   await user.type(screen.getByLabelText(/nome/i), name)
   await user.type(screen.getByLabelText(/alocação atual/i), currentAllocation)
   await user.type(screen.getByLabelText(/alocação desejada/i), targetAllocation)
-  
+
   // Confirma
   const confirmButton = screen.getByText(/confirmar|salvar|adicionar/i)
   await user.click(confirmButton)
@@ -66,7 +41,7 @@ export const addAssetToPortfolio = async (
 /**
  * Helper para aguardar loading states
  */
-export const waitForLoadingToFinish = async (loadingText: string = 'carregando', timeout: number = 3000) => {
+export const waitForLoadingToFinish = async (loadingText = 'carregando', timeout = 3000) => {
   try {
     await waitFor(() => {
       expect(screen.queryByText(new RegExp(loadingText, 'i'))).not.toBeInTheDocument()
@@ -109,7 +84,7 @@ export const expectSuccessToast = async (successMessage?: string) => {
 /**
  * Helper para simular delay de rede
  */
-export const simulateNetworkDelay = (ms: number = 100) => {
+export const simulateNetworkDelay = (ms = 100) => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 

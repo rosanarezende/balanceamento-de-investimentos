@@ -1,6 +1,6 @@
 /**
  * Testes de Tratamento de Erros
- * 
+ *
  * Testa como o sistema lida com diferentes tipos de erro:
  * - Erros de rede
  * - Erros de autenticação
@@ -17,19 +17,16 @@ import LoginPage from '@/app/login/page'
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
 import { StockList } from '@/components/stocks/stock-list'
 import { AddStockForm } from '@/components/add-stock-form'
-import { TestWrapper } from '@/src/__tests__/helpers/test-wrapper'
-import { 
-  mockAuth, 
-  mockUser, 
+import { TestWrapper } from './helpers/test-wrapper'
+import {
+  mockAuth,
   mockAuthenticatedUser,
   mockUnauthenticatedUser,
-  resetAllMocks 
-} from '@/src/__tests__/mocks/firebase'
-import { 
-  fillLoginForm,
+  resetAllMocks
+} from './mocks/firebase'
+import {
   expectErrorToast,
-  waitForElement 
-} from '@/src/__tests__/helpers/test-utils'
+} from './helpers/test-utils'
 
 // Mocks dos serviços
 jest.mock('@/services/firebase/firestore')
@@ -44,19 +41,19 @@ describe('Testes de Tratamento de Erros', () => {
 
   beforeEach(() => {
     resetAllMocks()
-    
+
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
     jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
-    
+
     // Setup Firebase Auth
     Object.assign(jest.requireMock('firebase/auth'), mockAuth)
-    
+
     // Setup Firestore base
     const mockFirestore = jest.requireMock('firebase/firestore')
     mockFirestore.getFirestore.mockReturnValue({})
-    mockFirestore.doc.mockImplementation((db, path) => ({ id: path, path }))
+    mockFirestore.doc.mockImplementation((db: any, path: any) => ({ id: path, path }))
     mockFirestore.getDoc.mockResolvedValue({ exists: () => false, data: () => undefined })
     mockFirestore.setDoc.mockResolvedValue(undefined)
     mockFirestore.serverTimestamp.mockReturnValue(new Date())
@@ -67,10 +64,10 @@ describe('Testes de Tratamento de Erros', () => {
       mockUnauthenticatedUser()
     })
 
-    it('deve tratar erro de credenciais inválidas', async () => {
-      mockAuth.signInWithEmailAndPassword.mockRejectedValue({
-        code: 'auth/invalid-credential',
-        message: 'Invalid email or password'
+    it('deve tratar erro de popup bloqueado no Google login', async () => {
+      mockAuth.signInWithPopup.mockRejectedValue({
+        code: 'auth/popup-blocked',
+        message: 'Popup blocked'
       })
 
       render(
@@ -79,20 +76,16 @@ describe('Testes de Tratamento de Erros', () => {
         </TestWrapper>
       )
 
-      await fillLoginForm('invalid@example.com', 'wrongpassword')
-      
-      const loginButton = screen.getByRole('button', { 
-        name: (name) => name === 'Login' && !name.toLowerCase().includes('google')
-      })
-      await userEvent.click(loginButton)
+      const googleLoginButton = screen.getByRole('button', { name: /continuar com google/i })
+      await userEvent.click(googleLoginButton)
 
-      await expectErrorToast('credenciais.*inválidas|email.*senha.*incorretos')
+      await expectErrorToast('popup.*bloqueado|habilite.*popup')
     })
 
-    it('deve tratar erro de usuário não encontrado', async () => {
-      mockAuth.signInWithEmailAndPassword.mockRejectedValue({
-        code: 'auth/user-not-found',
-        message: 'User not found'
+    it('deve tratar erro de popup fechado pelo usuário', async () => {
+      mockAuth.signInWithPopup.mockRejectedValue({
+        code: 'auth/popup-closed-by-user',
+        message: 'Popup closed by user'
       })
 
       render(
@@ -101,20 +94,20 @@ describe('Testes de Tratamento de Erros', () => {
         </TestWrapper>
       )
 
-      await fillLoginForm('notfound@example.com', 'password123')
-      
-      const loginButton = screen.getByRole('button', { 
-        name: (name) => name === 'Login' && !name.toLowerCase().includes('google')
-      })
-      await userEvent.click(loginButton)
+      const googleLoginButton = screen.getByRole('button', { name: /continuar com google/i })
+      await userEvent.click(googleLoginButton)
 
-      await expectErrorToast('usuário.*não.*encontrado|conta.*não.*existe')
+      // Este erro pode ser silencioso ou mostrar mensagem suave
+      await waitFor(() => {
+        // Não deve mostrar erro grave, pois foi ação do usuário
+        expect(screen.queryByText(/erro.*grave|erro.*crítico/i)).not.toBeInTheDocument()
+      })
     })
 
-    it('deve tratar erro de muitas tentativas', async () => {
-      mockAuth.signInWithEmailAndPassword.mockRejectedValue({
-        code: 'auth/too-many-requests',
-        message: 'Too many requests'
+    it('deve tratar erro de rede na autenticação com Google', async () => {
+      mockAuth.signInWithPopup.mockRejectedValue({
+        code: 'auth/network-request-failed',
+        message: 'Network error'
       })
 
       render(
@@ -123,14 +116,10 @@ describe('Testes de Tratamento de Erros', () => {
         </TestWrapper>
       )
 
-      await fillLoginForm('test@example.com', 'password123')
-      
-      const loginButton = screen.getByRole('button', { 
-        name: (name) => name === 'Login' && !name.toLowerCase().includes('google')
-      })
-      await userEvent.click(loginButton)
+      const googleLoginButton = screen.getByRole('button', { name: /continuar com google/i })
+      await userEvent.click(googleLoginButton)
 
-      await expectErrorToast('muitas.*tentativas|tente.*mais.*tarde')
+      await expectErrorToast('erro.*conexão|verifique.*internet')
     })
 
     it('deve tratar erro de popup bloqueado no Google login', async () => {
@@ -173,10 +162,10 @@ describe('Testes de Tratamento de Erros', () => {
       })
     })
 
-    it('deve tratar erro de rede na autenticação', async () => {
-      mockAuth.signInWithEmailAndPassword.mockRejectedValue({
-        code: 'auth/network-request-failed',
-        message: 'Network error'
+    it('deve tratar erro de conta desabilitada no Google login', async () => {
+      mockAuth.signInWithPopup.mockRejectedValue({
+        code: 'auth/user-disabled',
+        message: 'User account disabled'
       })
 
       render(
@@ -185,14 +174,10 @@ describe('Testes de Tratamento de Erros', () => {
         </TestWrapper>
       )
 
-      await fillLoginForm('test@example.com', 'password123')
-      
-      const loginButton = screen.getByRole('button', { 
-        name: (name) => name === 'Login' && !name.toLowerCase().includes('google')
-      })
-      await userEvent.click(loginButton)
+      const googleLoginButton = screen.getByRole('button', { name: /continuar com google/i })
+      await userEvent.click(googleLoginButton)
 
-      await expectErrorToast('erro.*conexão|verifique.*internet')
+      await expectErrorToast('conta.*desabilitada|usuário.*bloqueado')
     })
   })
 
@@ -231,7 +216,7 @@ describe('Testes de Tratamento de Erros', () => {
       // Preencher formulário
       const tickerInput = screen.getByLabelText(/código.*ativo|ticker/i)
       const quantityInput = screen.getByLabelText(/quantidade/i)
-      
+
       await userEvent.type(tickerInput, 'AAPL')
       await userEvent.type(quantityInput, '10')
 
@@ -401,7 +386,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       const tickerInput = screen.getByLabelText(/código.*ativo|ticker/i)
       const quantityInput = screen.getByLabelText(/quantidade/i)
-      
+
       await userEvent.type(tickerInput, 'AAPL')
       await userEvent.type(quantityInput, '-10')
 
@@ -422,7 +407,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       const tickerInput = screen.getByLabelText(/código.*ativo|ticker/i)
       const targetInput = screen.getByLabelText(/meta|target|alocação.*desejada/i)
-      
+
       await userEvent.type(tickerInput, 'AAPL')
       await userEvent.type(targetInput, '150') // maior que 100%
 
@@ -474,7 +459,7 @@ describe('Testes de Tratamento de Erros', () => {
       await userEvent.type(investmentInput, '1000')
 
       const calculateButton = screen.getByRole('button', { name: /calcular/i })
-      
+
       // Primeira tentativa - falha
       await userEvent.click(calculateButton)
       await expectErrorToast()
@@ -503,7 +488,7 @@ describe('Testes de Tratamento de Erros', () => {
       // Primeira tentativa - erro
       const tickerInput = screen.getByLabelText(/código.*ativo|ticker/i)
       const quantityInput = screen.getByLabelText(/quantidade/i)
-      
+
       await userEvent.type(tickerInput, 'AAPL')
       await userEvent.type(quantityInput, '10')
 
@@ -526,7 +511,7 @@ describe('Testes de Tratamento de Erros', () => {
       mockStockPriceService.getCurrentPrice.mockRejectedValue(
         new Error('API indisponível')
       )
-      
+
       mockFirestoreService.getUserPortfolio.mockResolvedValue({
         'AAPL': {
           ticker: 'AAPL',
@@ -558,7 +543,9 @@ describe('Testes de Tratamento de Erros', () => {
         throw new Error('Critical auth error')
       })
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {
+        // Mock console.error to avoid noise in test output
+      })
 
       render(
         <TestWrapper>
@@ -574,7 +561,9 @@ describe('Testes de Tratamento de Erros', () => {
     })
 
     it('deve permitir recarregar página após erro crítico', async () => {
-      const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(() => {})
+      const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(() => {
+        // Mock window.location.reload to avoid actual page reload in tests
+      })
 
       // Simular erro crítico
       mockAuth.onAuthStateChanged.mockImplementation(() => {

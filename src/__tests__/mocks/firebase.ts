@@ -1,6 +1,6 @@
 /**
  * Mocks do Firebase Auth e outras funcionalidades para testes
- * 
+ *
  * Este arquivo complementa os mocks globais definidos no jest.setup.js
  * fornecendo helpers específicos e configurações personalizadas
  */
@@ -22,7 +22,7 @@ export const mockUser = {
 // Helper para configurar mock de usuário logado
 export const mockAuthenticatedUser = () => {
   mockAuth.currentUser = mockUser;
-  
+
   // Configurar o onAuthStateChanged para chamar imediatamente com o usuário
   mockAuth.onAuthStateChanged.mockImplementation((callback: (user: any) => void) => {
     if (typeof callback === 'function') {
@@ -35,7 +35,7 @@ export const mockAuthenticatedUser = () => {
 // Helper para configurar mock de usuário não logado
 export const mockUnauthenticatedUser = () => {
   mockAuth.currentUser = null;
-  
+
   // Configurar o onAuthStateChanged para chamar imediatamente com null
   mockAuth.onAuthStateChanged.mockImplementation((callback: (user: any) => void) => {
     if (typeof callback === 'function') {
@@ -49,26 +49,16 @@ export const mockUnauthenticatedUser = () => {
 export const resetAllMocks = () => {
   // Resetar mocks das funções
   mockAuth.signInWithPopup.mockReset();
-  mockAuth.signInWithEmailAndPassword.mockReset();
-  mockAuth.createUserWithEmailAndPassword.mockReset();
   mockAuth.signOut.mockReset();
   mockAuth.onAuthStateChanged.mockReset();
-  
+
   // Resetar estado do usuário
   mockAuth.currentUser = null;
 };
 
 // Helper para configurar respostas de sucesso padrão
 export const setupSuccessfulAuth = () => {
-  mockAuth.signInWithEmailAndPassword.mockResolvedValue({
-    user: mockUser
-  });
-
   mockAuth.signInWithPopup.mockResolvedValue({
-    user: mockUser
-  });
-
-  mockAuth.createUserWithEmailAndPassword.mockResolvedValue({
     user: mockUser
   });
 
@@ -77,7 +67,5 @@ export const setupSuccessfulAuth = () => {
 
 // Helper para configurar erros de autenticação
 export const setupAuthErrors = () => {
-  mockAuth.signInWithEmailAndPassword.mockRejectedValue(new Error('Invalid credentials'));
   mockAuth.signInWithPopup.mockRejectedValue(new Error('Popup closed'));
-  mockAuth.createUserWithEmailAndPassword.mockRejectedValue(new Error('Email already in use'));
 };
