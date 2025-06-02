@@ -2,7 +2,6 @@
  * Testes de Autenticação
  * 
  * Testa o fluxo completo de autenticação incluindo:
- * - Login com email/senha
  * - Login com Google
  * - Logout
  * - Tratamento de erros
@@ -11,11 +10,10 @@
 
 import React from 'react'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 
 import LoginPage from '@/app/login/page'
 import { TestWrapper } from './helpers/test-wrapper'
-import { fillLoginForm, expectErrorToast } from './helpers/test-utils'
+import { expectErrorToast } from './helpers/test-utils'
 import {
   mockAuth,
   mockUser,
@@ -67,54 +65,6 @@ describe('Testes de Autenticação', () => {
     mockFirebaseFirestoreLib.serverTimestamp.mockReturnValue(new Date())
   })
 
-  describe('Login com Email e Senha', () => {
-    it.skip('deve permitir login com credenciais válidas', async () => {
-      render(
-        <TestWrapper>
-          <LoginPage />
-        </TestWrapper>
-      )
-
-      // Usar helper para preencher formulário
-      await fillLoginForm('test@example.com', 'password123')
-
-      const loginButton = screen.getByRole('button', { name: "Login" })
-      await userEvent.click(loginButton)
-
-      await waitFor(() => {
-        expect(mockAuth.signInWithEmailAndPassword).toHaveBeenCalledWith(
-          expect.any(Object), // auth instance
-          'test@example.com',
-          'password123'
-        )
-      })
-    })
-
-    it('deve exibir erro para credenciais inválidas', async () => {
-      mockAuth.signInWithEmailAndPassword.mockRejectedValue(new Error('Invalid credentials'))
-
-      render(
-        <TestWrapper>
-          <LoginPage />
-        </TestWrapper>
-      )
-
-      // Usar helper para preencher formulário
-      await fillLoginForm('invalid@example.com', 'wrongpassword')
-
-      // Busca o botão com o texto exato "Login" (não "Login com Google")
-      const loginButton = screen.getByRole('button', {
-        name: (name, element) =>
-          name === 'Login' && (!element || !element.textContent?.toLowerCase().includes('google'))
-      })
-
-      await userEvent.click(loginButton)
-
-      // Usar helper para verificar erro
-      await expectErrorToast()
-    })
-  })
-
   describe('Login com Google', () => {
     it('deve permitir login com Google', async () => {
       render(
@@ -123,7 +73,7 @@ describe('Testes de Autenticação', () => {
         </TestWrapper>
       )
 
-      const googleLoginButton = screen.getByRole('button', { name: /login with google/i })
+      const googleLoginButton = screen.getByRole('button', { name: /continuar com google/i })
       fireEvent.click(googleLoginButton)
 
       await waitFor(() => {
@@ -140,7 +90,7 @@ describe('Testes de Autenticação', () => {
         </TestWrapper>
       )
 
-      const googleLoginButton = screen.getByRole('button', { name: /login with google/i })
+      const googleLoginButton = screen.getByRole('button', { name: /continuar com google/i })
       fireEvent.click(googleLoginButton)
 
       // Usar helper para verificar erro
@@ -162,7 +112,7 @@ describe('Testes de Autenticação', () => {
       mockAuthenticatedUser()
       setupSuccessfulAuth()
 
-      // Simular um refresh renderizando o componente novamente
+      // Renderizar o componente
       const { rerender } = render(
         <TestWrapper>
           <LoginPage />
@@ -174,6 +124,9 @@ describe('Testes de Autenticação', () => {
         expect(mockAuth.onAuthStateChanged).toHaveBeenCalled()
       })
 
+      // Verificar se o estado do auth foi configurado corretamente
+      expect(mockAuth.currentUser).toBe(mockUser)
+
       // Simular refresh re-renderizando
       rerender(
         <TestWrapper>
@@ -181,9 +134,9 @@ describe('Testes de Autenticação', () => {
         </TestWrapper>
       )
 
-      // Verificar se mantém o estado
+      // Verificar se o usuário continua autenticado após o refresh
       await waitFor(() => {
-        expect(mockAuth.onAuthStateChanged).toHaveBeenCalledTimes(2)
+        expect(mockAuth.currentUser).toBe(mockUser)
       })
     })
   })

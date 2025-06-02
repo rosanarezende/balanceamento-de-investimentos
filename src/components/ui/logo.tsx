@@ -7,13 +7,14 @@ interface LogoProps {
   icon?: boolean
   size?: "sm" | "md" | "lg" | "xl"
   withText?: boolean
+  asLink?: boolean // Nova prop para controlar se deve ser um link
 }
 
 const LOGO_DARK_URL = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2_20250519_205643_0001-jwHSizUNUv3PlioAZMQzjeHDb0b1Xl.png"
 const LOGO_LIGHT_URL = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_20250519_205643_0000-hdgTdkfc35ThdiejMWPueDZdR80Mdw.png"
 const ICON_URL = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/icon-oQejjZLvlzKkhVsN6JrQfFUVjoJx2S.png"
 
-export function Logo({ icon, size = "md", withText = false }: LogoProps) {
+export function Logo({ icon, size = "md", withText = false, asLink = true }: LogoProps) {
   const { theme } = useTheme()
 
   const logoSrc = theme === "dark" ? LOGO_DARK_URL : LOGO_LIGHT_URL
@@ -28,8 +29,8 @@ export function Logo({ icon, size = "md", withText = false }: LogoProps) {
 
   const sizes = sizeClasses[size] || sizeClasses["md"]
 
-  return (
-    <Link href="/" className="flex items-center gap-2">
+  const logoContent = (
+    <>
       <div className={`relative ${sizes.div}`}>
         <Image
           src={src || "/placeholder.svg"}
@@ -42,6 +43,20 @@ export function Logo({ icon, size = "md", withText = false }: LogoProps) {
       {withText && (
         <span className={`font-bold ${sizes.text} tracking-tight text-white`}>EquilibreInvest</span>
       )}
+    </>
+  )
+
+  if (!asLink) {
+    return (
+      <div className="flex items-center gap-2">
+        {logoContent}
+      </div>
+    )
+  }
+
+  return (
+    <Link href="/" className="flex items-center gap-2">
+      {logoContent}
     </Link>
   )
 }
