@@ -14,8 +14,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "preformat": "bash scripts/check-node-version.sh",
     "format": "prettier --write .",
-    "pretest": "bash scripts/check-node-version.sh",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "pretest:watch": "bash scripts/check-node-version.sh",
     "test:watch": "jest --watch",
     "clean": "rm -rf node_modules dist"
