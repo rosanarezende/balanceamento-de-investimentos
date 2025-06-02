@@ -7,10 +7,32 @@ import { render, screen } from '@testing-library/react'
 import { AuthProvider } from '@/core/state/auth-context'
 import { ThemeProvider } from '@/core/state/theme-context'
 
-// Mock dos serviços
-jest.mock('@/services/firebase/config')
-jest.mock('firebase/auth')
-jest.mock('firebase/firestore')
+// Mock dos serviços ANTES dos imports
+jest.mock('@/services/firebase/config', () => ({
+  auth: {
+    onAuthStateChanged: jest.fn(),
+    signInWithPopup: jest.fn(),
+    signOut: jest.fn()
+  },
+  db: {
+    doc: jest.fn(),
+    getDoc: jest.fn(),
+    setDoc: jest.fn()
+  },
+  googleProvider: {}
+}))
+
+jest.mock('firebase/auth', () => ({
+  onAuthStateChanged: jest.fn(),
+  signInWithPopup: jest.fn(),
+  signOut: jest.fn()
+}))
+
+jest.mock('firebase/firestore', () => ({
+  doc: jest.fn(),
+  getDoc: jest.fn(),
+  setDoc: jest.fn()
+}))
 
 // Componente de teste simples
 const TestComponent: React.FC = () => {
