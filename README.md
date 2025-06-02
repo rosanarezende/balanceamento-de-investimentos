@@ -17,10 +17,11 @@ A jornada de desenvolvimento de código assistido por IA seguiu algumas etapas:
 1.  **v0.dev:** A prototipagem inicial e a primeira versão da interface foram exploradas com o `v0.dev`. Embora promissor para dar o pontapé inicial no design, o projeto encontrou limitações, seja pela ferramenta não atender precisamente aos requisitos esperados em termos de código ou pelas restrições de uso da versão gratuita.
 2.  **Copilot Workspace (Preview):** Em seguida, a exploração continuou com o Copilot Workspace, em sua versão Preview ([https://copilot-workspace.githubnext.com/](https://copilot-workspace.githubnext.com/)). Esta ferramenta, apesar de inovadora, mostrou-se pouco assertiva na geração de soluções robustas para os desafios mais complexos do projeto neste estágio.
 3.  **Manus AI:** A experiência com a Manus AI foi particularmente notável. Esta ferramenta surpreendeu positivamente pela sua capacidade de análise de contexto, compreensão do código existente e pela eficácia na resolução de problemas e implementação de novas funcionalidades. A assertividade da Manus AI foi um diferencial importante. Se não fosse pelo modelo de custo, teria sido a ferramenta de escolha para uma utilização mais integral e contínua no desenvolvimento do EquilibreInvest.
+4.  **GitHub Copilot (VSCode Integrado com Agents Claude Sonnet):** A verdadeira virada de chave em termos de eficiência e experiência de desenvolvimento ocorreu com a utilização intensiva do GitHub Copilot (versão Pro) diretamente integrado ao VSCode, especialmente através do chat com os agents, como o Claude Sonnet (versões 3.5 e 4). A capacidade de interagir de forma simples e direta, fornecendo contexto do projeto e recebendo sugestões de código, refatorações e soluções para problemas complexos, superou significativamente as ferramentas anteriores. A assertividade e a qualidade do código gerado, combinadas com a fluidez da integração no editor, tornaram o processo de desenvolvimento muito mais ágil e produtivo.
 
 ## Intervenção Manual
 
-É importante salientar que, embora o objetivo fosse maximizar o uso de IAs para a geração de código, intervenções manuais foram necessárias em momentos pontuais. Esses ajustes ocorreram principalmente para corrigir pequenas inconsistências, integrar as saídas das diferentes ferramentas, ou refinar detalhes específicos da lógica de negócios, especialmente antes da fase de utilização da Manus AI, que demonstrou maior autonomia na compreensão e modificação da base de código existente.
+É importante salientar que, embora o objetivo fosse maximizar o uso de IAs para a geração de código, intervenções manuais foram necessárias em momentos pontuais. Esses ajustes ocorreram principalmente para corrigir pequenas inconsistências, integrar as saídas das diferentes ferramentas, ou refinar detalhes específicos da lógica de negócios, especialmente antes da fase de utilização da Manus AI, que demonstrou maior autonomia na compreensão e modificação da base de código existente. Contudo, com a adoção do Copilot integrado ao VSCode e seus agents, a necessidade de intervenção manual diminuiu consideravelmente, focando mais em revisões estratégicas e ajustes finos.
 
 Este projeto é, portanto, um reflexo tanto de uma necessidade prática quanto de uma exploração contínua das fronteiras do desenvolvimento de software assistido por inteligência artificial.
 
@@ -40,11 +41,11 @@ Este projeto é, portanto, um reflexo tanto de uma necessidade prática quanto d
     * Definição de percentuais meta para cada ativo.
     * Input manual de "Recomendação Própria" ('Comprar', 'Manter', 'Evitar Aporte') para guiar decisões.
 * **Calculadora de Balanceamento:**
-    * Sugestão de quanto investir em cada ativo para alcançar o balanceamento desejado com novos aportes, considerando as recomendações do usuário.
+    * Sugestão de quanto investir em cada ativo para alcançar o balanceamento desejado com novos aportes, considerando as recomendações do usuário e o valor disponível para o aporte.
 * **Dashboard Intuitivo:**
     * Painel de resumo com valor total da carteira, total de ativos.
     * Gráficos de composição (percentual atual vs. meta).
-    * "Equilibra Insights": Dicas e observações (baseadas em regras) sobre a carteira.
+    * "Equilibra Insights": Dicas e observações personalizadas (baseadas em regras e na configuração da carteira) sobre a carteira, como alertas de desbalanceamento significativo, sugestões de ativos para foco com base nas metas, ou observações sobre a diversificação.
 * **Visualização e Organização:**
     * Cards de ativos detalhados.
     * Opções de ordenação para os ativos listados.
