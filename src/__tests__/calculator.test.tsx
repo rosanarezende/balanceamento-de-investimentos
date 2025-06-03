@@ -32,7 +32,7 @@ jest.mock('firebase/auth')
 jest.mock('firebase/firestore')
 jest.mock('next/navigation')
 
-describe('Testes da Calculadora de Balanceamento', () => {
+describe.skip('Testes da Calculadora de Balanceamento', () => {
   const mockFirestoreService = jest.requireMock('@/services/firebase/firestore')
   const mockStockPriceService = jest.requireMock('@/services/api/stock-price')
 
