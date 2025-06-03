@@ -60,7 +60,7 @@ describe.skip('Testes de Performance', () => {
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
-    jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
+    jest.requireMock('next/navigation').usePathname.mockReturnValue('/carteira')
 
     // Performance.now mock para medições
     const mockPerformance = {
