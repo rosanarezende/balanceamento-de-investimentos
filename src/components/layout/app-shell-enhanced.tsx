@@ -25,7 +25,7 @@ import { useTheme } from "@/core/state/theme-context"
 import { cn } from "@/core/utils/styling"
 
 import { LucideProps } from "lucide-react"
-import AuthGuard from "../auth-guard"
+import AuthGuard from "@/components/auth-guard"
 
 interface NavItem {
   name: string
