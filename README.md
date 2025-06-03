@@ -119,6 +119,140 @@ Calculadora → Configuração → Resultado → Salvar → Histórico → Detal
 
 ---
 
+## Diagrama de Arquitetura
+
+Este diagrama foi criado com o Mermaid.js e hospedado no site [GitDiagram](https://gitdiagram.com/rosanarezende/balanceamento-de-investimentos). Ele ilustra a arquitetura do EquilibreInvest, incluindo os principais componentes e suas interações.
+
+![Diagrama de Arquitetura do EquilibreInvest](public/diagram.png)
+
+<details>
+<summary>Código no Mermaid</summary>
+
+
+```mermaid
+flowchart TB
+    %% Frontend Layer
+    subgraph "Frontend (Next.js + React)"
+        direction TB
+        AppShell["App Shell"]:::ui
+        ThemeProvider["Theme Provider"]:::ui
+        UIComponents["UI Components Library"]:::ui
+
+        subgraph "Pages"
+            direction TB
+            LoginPage["Login Page"]:::ui
+            DashboardLayout["Dashboard Layout"]:::ui
+            DashboardPage["Dashboard Page"]:::ui
+            CalculadoraLayout["Calculadora Layout"]:::ui
+            CalculadoraPage["Calculadora Page"]:::ui
+            RecomendacoesPage["Recomendações Subpage"]:::ui
+            ResultadoPage["Resultado Subpage"]:::ui
+            HistoricoList["Histórico Listagem"]:::ui
+            HistoricoDetail["Histórico Detalhe"]:::ui
+            EditarAtivos["Editar Ativos Page"]:::ui
+            CarteiraPage["Carteira (Watchlist) Page"]:::ui
+        end
+
+        subgraph "Contexts (Global State)"
+            direction TB
+            AuthContext["AuthContext"]:::service
+            PortfolioContext["PortfolioContext"]:::service
+            ThemeContext["ThemeContext"]:::service
+        end
+    end
+
+    %% Backend/API Layer
+    subgraph "Backend (API Routes)" 
+        direction TB
+        StockPriceAPI["/api/stock-price"]:::api
+        AIRecAPI["/api/ai-recommendation"]:::api
+    end
+
+    %% Data Layer
+    subgraph "Data Layer (Firebase)" 
+        direction TB
+        FirebaseAuth["Firebase Authentication"]:::data
+        FirestoreDB["Firebase Firestore"]:::data
+    end
+
+    %% External Services
+    subgraph "External Services" 
+        direction TB
+        MarketDataAPI["Alpha Vantage / Yahoo Finance"]:::external
+        AIService["AI Text Generation Service"]:::external
+    end
+
+    %% Infrastructure
+    subgraph "Infra & CI"
+        direction TB
+        Vercel["Vercel Deployment"]:::infra
+        GitHubActions["GitHub Actions CI"]:::infra
+    end
+
+    %% Data Flows
+    LoginPage -->|uses| AuthContext
+    AuthContext -->|auth via OAuth| FirebaseAuth
+    DashboardPage -->|reads/writes| FirestoreDB
+    DashboardPage -->|fetch prices| StockPriceAPI
+    DashboardLayout -->|layout| UIComponents
+    CalculadoraPage -->|calls| AIRecAPI
+    CalculadoraPage -->|calls| StockPriceAPI
+    RecomendacoesPage -->|calls| AIRecAPI
+    ResultadoPage -->|saves| FirestoreDB
+    HistoricoList -->|reads| FirestoreDB
+    HistoricoDetail -->|reads| FirestoreDB
+    EditarAtivos -->|CRUD| FirestoreDB
+    CarteiraPage -->|CRUD| FirestoreDB
+
+    StockPriceAPI -->|proxy| MarketDataAPI
+    AIRecAPI -->|requests| AIService
+
+    AppShell -->|wraps| ThemeProvider
+    AppShell -->|wraps| UIComponents
+    ThemeProvider -->|provides| ThemeContext
+    UIComponents -->|used by| LoginPage
+    UIComponents -->|used by| DashboardPage
+    UIComponents -->|used by| CalculadoraPage
+
+    GitHubActions -->|CI for| Vercel
+
+    %% Click Events
+    click AppShell "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/layout.tsx"
+    click ThemeProvider "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/components/theme-provider.tsx"
+    click UIComponents "https://github.com/rosanarezende/balanceamento-de-investimentos/tree/main/src/components/ui/"
+    click LoginPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/login/page.tsx"
+    click DashboardLayout "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/dashboard/layout.tsx"
+    click DashboardPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/dashboard/page.tsx"
+    click CalculadoraLayout "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/layout.tsx"
+    click CalculadoraPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/page.tsx"
+    click RecomendacoesPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/recomendacoes/page.tsx"
+    click ResultadoPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/resultado/page.tsx"
+    click HistoricoList "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/historico/page.tsx"
+    click HistoricoDetail "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/historico/[id]/page.tsx"
+    click EditarAtivos "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/editar-ativos/page.tsx"
+    click CarteiraPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/carteira/page.tsx"
+    click AuthContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/auth-context.tsx"
+    click PortfolioContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/portfolio-context.tsx"
+    click ThemeContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/theme-context.tsx"
+    click StockPriceAPI "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/api/stock-price/route.ts"
+    click AIRecAPI "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/api/ai-recommendation/route.ts"
+    click FirebaseAuth "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/services/firebase/config.ts"
+    click FirestoreDB "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/services/firebase/firestore.ts"
+    click GitHubActions "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/.github/workflows/ci.yml"
+    click Vercel "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/next.config.mjs"
+
+    %% Styles
+    classDef ui fill:#D0E8FF,stroke:#3399FF,color:#000
+    classDef service fill:#DFF7D8,stroke:#28A745,color:#000
+    classDef api fill:#C8F0FF,stroke:#0CA2DB,color:#000
+    classDef data fill:#FFE8B8,stroke:#E09F3E,color:#000
+    classDef external fill:#E0E0E0,stroke:#A0A0A0,color:#000
+    classDef infra fill:#F0E6FF,stroke:#8C41FF,color:#000
+```
+
+</details>
+
+
 ## Como Rodar Localmente
 
 Para rodar este projeto em seu ambiente local, siga os passos abaixo:
