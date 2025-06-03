@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 
 import AuthGuard from "@/components/auth-guard"
-import { AppShell } from "@/components/layout/app-shell"
+import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -153,7 +153,7 @@ export default function DetalhesSimulacao() {
   if (loading) {
     return (
       <AuthGuard>
-        <AppShell>
+        <AppShellEnhanced>
           <div className="container max-w-4xl mx-auto px-4 py-6">
             <div className="flex items-center mb-6">
               <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
@@ -163,7 +163,7 @@ export default function DetalhesSimulacao() {
             </div>
             <LoadingSkeleton />
           </div>
-        </AppShell>
+        </AppShellEnhanced>
       </AuthGuard>
     )
   }
@@ -171,7 +171,7 @@ export default function DetalhesSimulacao() {
   if (error || !simulation) {
     return (
       <AuthGuard>
-        <AppShell>
+        <AppShellEnhanced>
           <div className="container max-w-4xl mx-auto px-4 py-6">
             <div className="flex items-center mb-6">
               <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
@@ -181,7 +181,7 @@ export default function DetalhesSimulacao() {
             </div>
             <ErrorDisplay />
           </div>
-        </AppShell>
+        </AppShellEnhanced>
       </AuthGuard>
     )
   }
@@ -194,7 +194,7 @@ export default function DetalhesSimulacao() {
 
   return (
     <AuthGuard>
-      <AppShell>
+      <AppShellEnhanced>
         <div className="container max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center mb-6">
             <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
@@ -328,7 +328,7 @@ export default function DetalhesSimulacao() {
             </CardContent>
           </Card>
         </div>
-      </AppShell>
+      </AppShellEnhanced>
     </AuthGuard>
   )
 }

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react"
 import { ArrowLeft, AlertTriangle, RefreshCw, CheckCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-import { AppShell } from "@/components/layout/app-shell"
+import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
 
 import AuthGuard from "@/components/auth-guard"
 import { Button } from "@/components/ui/button"
@@ -154,7 +154,7 @@ export default function CalculadoraBalanceamento() {
 
   return (
     <AuthGuard>
-      <AppShell>
+      <AppShellEnhanced>
         <div className="container mx-auto max-w-md">
           <Card className="border-none shadow-none bg-card">
             <div className="p-4 flex items-center border-b border-border">
@@ -236,9 +236,9 @@ export default function CalculadoraBalanceamento() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => router.push('/')}
+                                onClick={() => router.push('/carteira')}
                               >
-                                Ir para Dashboard
+                                Ir para Carteira
                               </Button>
                             </div>
                           </div>
@@ -260,7 +260,7 @@ export default function CalculadoraBalanceamento() {
                               variant="outline"
                               size="sm"
                               className="mt-2"
-                              onClick={() => router.push('/')}
+                              onClick={() => router.push('/carteira')}
                             >
                               Gerenciar Ativos
                             </Button>
@@ -314,7 +314,7 @@ export default function CalculadoraBalanceamento() {
             </CardContent>
           </Card>
         </div>
-      </AppShell>
+      </AppShellEnhanced>
     </AuthGuard>
   )
 }
