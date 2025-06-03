@@ -1,18 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
+
+import {
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
   Plus,
   Search,
   ChevronUp,
@@ -22,12 +15,22 @@ import {
   RefreshCw
 } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts"
-import { useAuth } from "@/core/state/auth-context"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
+
+import { useToast } from "@/hooks/use-toast"
 import { getUserPortfolio, updateStock, removeStock } from "@/services/firebase/firestore"
+import { useAuth } from "@/core/state/auth-context"
 import { formatCurrency } from "@/core/utils"
 import { cn } from "@/core/utils"
-import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
-import AuthGuard from "@/components/auth-guard"
+
+import DashboardLayout from "./layout"
 
 // Cores inspiradas no design Behance - tema dark com acentos vibrantes
 const COLORS = [
@@ -331,7 +334,7 @@ export default function CarteiraPage() {
 
   if (loading) {
     return (
-      <AuthGuard>
+      <DashboardLayout>
         <AppShellEnhanced>
           <div className="container mx-auto p-6 space-y-6">
             <Skeleton className="h-8 w-64" />
@@ -342,12 +345,12 @@ export default function CarteiraPage() {
             </div>
           </div>
         </AppShellEnhanced>
-      </AuthGuard>
+      </DashboardLayout>
     )
   }
 
   return (
-    <AuthGuard>
+    <DashboardLayout>
       <AppShellEnhanced>
         <div className="container mx-auto p-6 space-y-8">
           {/* Header */}
@@ -725,6 +728,6 @@ export default function CarteiraPage() {
           </Dialog>
         </div>
       </AppShellEnhanced>
-    </AuthGuard>
+    </DashboardLayout>
   )
 }

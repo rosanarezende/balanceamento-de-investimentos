@@ -8,7 +8,6 @@ import Layout from "./layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import AuthGuard from "@/components/auth-guard"
 
 import { useAuth } from "@/core/state/auth-context"
 import { Stock } from "@/core/schemas/stock"
@@ -58,7 +57,7 @@ export default function EditarAtivos() {
     }
 
     try {
-      await Promise.all(stocks.map(stock => 
+      await Promise.all(stocks.map(stock =>
         updateStock(user.uid, stock.ticker, {
           quantity: stock.quantity,
           targetPercentage: stock.targetPercentage,
@@ -180,152 +179,150 @@ export default function EditarAtivos() {
   const totalTargetPercentage = stocks.reduce((sum, stock) => sum + stock.targetPercentage, 0)
 
   return (
-    <AuthGuard>
-      <Layout>
-        <div className="container max-w-md mx-auto px-4 py-6">
-          <Button variant="ghost" size="icon" className="mb-4" onClick={handleBack} aria-label="Voltar">
-            <ArrowLeft className="h-6 w-6" />
-          </Button>
+    <Layout>
+      <div className="container max-w-md mx-auto px-4 py-6">
+        <Button variant="ghost" size="icon" className="mb-4" onClick={handleBack} aria-label="Voltar">
+          <ArrowLeft className="h-6 w-6" />
+        </Button>
 
-          <h1 className="text-2xl font-bold mb-6">Editar Ativos Manualmente</h1>
+        <h1 className="text-2xl font-bold mb-6">Editar Ativos Manualmente</h1>
 
-          {error && (
-            <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
+            {error}
+          </div>
+        )}
 
-          <div className="space-y-4 mb-6">
-            {stocks.map((stock, index) => (
-              <Card key={index}>
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-[1fr,auto] gap-4">
-                    <div className="space-y-4">
+        <div className="space-y-4 mb-6">
+          {stocks.map((stock, index) => (
+            <Card key={index}>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-[1fr,auto] gap-4">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Código do Ativo</label>
+                      <Input
+                        value={stock.ticker}
+                        onChange={(e) => handleStockChange(index, "ticker", e.target.value)}
+                        placeholder="Ex: PETR4"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">Código do Ativo</label>
+                        <label className="block text-sm font-medium mb-1">Quantidade</label>
                         <Input
-                          value={stock.ticker}
-                          onChange={(e) => handleStockChange(index, "ticker", e.target.value)}
-                          placeholder="Ex: PETR4"
+                          type="number"
+                          value={stock.quantity}
+                          onChange={(e) => handleStockChange(index, "quantity", e.target.value)}
+                          min="0"
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Quantidade</label>
-                          <Input
-                            type="number"
-                            value={stock.quantity}
-                            onChange={(e) => handleStockChange(index, "quantity", e.target.value)}
-                            min="0"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium mb-1">META (%)</label>
-                          <Input
-                            type="number"
-                            value={stock.targetPercentage}
-                            onChange={(e) => handleStockChange(index, "targetPercentage", e.target.value)}
-                            min="0"
-                            max="100"
-                            step="0.01"
-                          />
-                        </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">META (%)</label>
+                        <Input
+                          type="number"
+                          value={stock.targetPercentage}
+                          onChange={(e) => handleStockChange(index, "targetPercentage", e.target.value)}
+                          min="0"
+                          max="100"
+                          step="0.01"
+                        />
                       </div>
                     </div>
-
-                    <div className="flex items-start pt-8">
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => handleRemoveStock(index)}
-                        aria-label="Remover ativo"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
 
-          <Card className="mb-6">
-            <CardContent className="p-4">
-              <h3 className="font-medium mb-4">Adicionar Novo Ativo</h3>
+                  <div className="flex items-start pt-8">
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleRemoveStock(index)}
+                      aria-label="Remover ativo"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-              <div className="space-y-4">
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <h3 className="font-medium mb-4">Adicionar Novo Ativo</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Código do Ativo</label>
+                <Input
+                  value={newStock.ticker}
+                  onChange={(e) => handleNewStockChange("ticker", e.target.value)}
+                  placeholder="Ex: PETR4"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Código do Ativo</label>
+                  <label className="block text-sm font-medium mb-1">Quantidade</label>
                   <Input
-                    value={newStock.ticker}
-                    onChange={(e) => handleNewStockChange("ticker", e.target.value)}
-                    placeholder="Ex: PETR4"
+                    type="number"
+                    value={newStock.quantity || ""}
+                    onChange={(e) => handleNewStockChange("quantity", e.target.value)}
+                    min="0"
+                    placeholder="0"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Quantidade</label>
-                    <Input
-                      type="number"
-                      value={newStock.quantity || ""}
-                      onChange={(e) => handleNewStockChange("quantity", e.target.value)}
-                      min="0"
-                      placeholder="0"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">META (%)</label>
-                    <Input
-                      type="number"
-                      value={newStock.targetPercentage || ""}
-                      onChange={(e) => handleNewStockChange("targetPercentage", e.target.value)}
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      placeholder="0.00"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">META (%)</label>
+                  <Input
+                    type="number"
+                    value={newStock.targetPercentage || ""}
+                    onChange={(e) => handleNewStockChange("targetPercentage", e.target.value)}
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="0.00"
+                  />
                 </div>
-
-                <Button className="w-full" variant="outline" onClick={handleAddStock}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  ADICIONAR ATIVO
-                </Button>
               </div>
-            </CardContent>
-          </Card>
 
-          <div className="bg-gray-50 p-4 rounded-lg mb-6">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Total META:</span>
-              <span
-                className={`font-bold ${Math.abs(totalTargetPercentage - 100) > 0.01 ? "text-red-600" : "text-green-600"}`}
-              >
-                {totalTargetPercentage.toFixed(2)}%
-              </span>
+              <Button className="w-full" variant="outline" onClick={handleAddStock}>
+                <Plus className="mr-2 h-4 w-4" />
+                ADICIONAR ATIVO
+              </Button>
             </div>
-            {Math.abs(totalTargetPercentage - 100) > 0.01 && (
-              <p className="text-red-600 text-sm mt-2">A soma dos percentuais META deve ser 100%.</p>
-            )}
-          </div>
+          </CardContent>
+        </Card>
 
-          <Button className="w-full" size="lg" onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            SALVAR ALTERAÇÕES
-          </Button>
-
-          <div className="mt-4">
-            <Button className="w-full" size="lg" onClick={() => router.push("/editar-ativos")}>
-              <Save className="mr-2 h-4 w-4" />
-              Acessar Edição de Ativos
-            </Button>
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="flex justify-between items-center">
+            <span className="font-medium">Total META:</span>
+            <span
+              className={`font-bold ${Math.abs(totalTargetPercentage - 100) > 0.01 ? "text-red-600" : "text-green-600"}`}
+            >
+              {totalTargetPercentage.toFixed(2)}%
+            </span>
           </div>
+          {Math.abs(totalTargetPercentage - 100) > 0.01 && (
+            <p className="text-red-600 text-sm mt-2">A soma dos percentuais META deve ser 100%.</p>
+          )}
         </div>
-      </Layout>
-    </AuthGuard>
+
+        <Button className="w-full" size="lg" onClick={handleSave}>
+          <Save className="mr-2 h-4 w-4" />
+          SALVAR ALTERAÇÕES
+        </Button>
+
+        <div className="mt-4">
+          <Button className="w-full" size="lg" onClick={() => router.push("/editar-ativos")}>
+            <Save className="mr-2 h-4 w-4" />
+            Acessar Edição de Ativos
+          </Button>
+        </div>
+      </div>
+    </Layout>
   )
 }

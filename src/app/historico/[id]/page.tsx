@@ -3,17 +3,16 @@
 import React, { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { 
-  ArrowLeft, 
-  Calendar, 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
+import {
+  ArrowLeft,
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
   DollarSign,
   Share
 } from "lucide-react"
 
-import AuthGuard from "@/components/auth-guard"
 import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -109,7 +108,7 @@ export default function DetalhesSimulacao() {
           </div>
         </CardContent>
       </Card>
-      
+
       {[1, 2, 3].map((i) => (
         <Card key={i}>
           <CardHeader>
@@ -152,37 +151,33 @@ export default function DetalhesSimulacao() {
 
   if (loading) {
     return (
-      <AuthGuard>
-        <AppShellEnhanced>
-          <div className="container max-w-4xl mx-auto px-4 py-6">
-            <div className="flex items-center mb-6">
-              <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-              <h1 className="text-2xl font-bold ml-4">Detalhes da Simulação</h1>
-            </div>
-            <LoadingSkeleton />
+      <AppShellEnhanced>
+        <div className="container max-w-4xl mx-auto px-4 py-6">
+          <div className="flex items-center mb-6">
+            <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+            <h1 className="text-2xl font-bold ml-4">Detalhes da Simulação</h1>
           </div>
-        </AppShellEnhanced>
-      </AuthGuard>
+          <LoadingSkeleton />
+        </div>
+      </AppShellEnhanced>
     )
   }
 
   if (error || !simulation) {
     return (
-      <AuthGuard>
-        <AppShellEnhanced>
-          <div className="container max-w-4xl mx-auto px-4 py-6">
-            <div className="flex items-center mb-6">
-              <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-              <h1 className="text-2xl font-bold ml-4">Detalhes da Simulação</h1>
-            </div>
-            <ErrorDisplay />
+      <AppShellEnhanced>
+        <div className="container max-w-4xl mx-auto px-4 py-6">
+          <div className="flex items-center mb-6">
+            <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+            <h1 className="text-2xl font-bold ml-4">Detalhes da Simulação</h1>
           </div>
-        </AppShellEnhanced>
-      </AuthGuard>
+          <ErrorDisplay />
+        </div>
+      </AppShellEnhanced>
     )
   }
 
@@ -193,142 +188,140 @@ export default function DetalhesSimulacao() {
   const isPositive = difference >= 0
 
   return (
-    <AuthGuard>
-      <AppShellEnhanced>
-        <div className="container max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-center mb-6">
-            <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-            <h1 className="text-2xl font-bold ml-4">Detalhes da Simulação</h1>
-          </div>
-
-          {/* Resumo da Simulação */}
-          <Card className="mb-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  {formatDate(simulation.date)}
-                </CardTitle>
-                <Badge variant={isPositive ? "default" : "destructive"} className="text-sm">
-                  {isPositive ? (
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 mr-1" />
-                  )}
-                  {percentage.toFixed(2)}%
-                </Badge>
-              </div>
-            </CardHeader>
-            
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <DollarSign className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Valor Investido</p>
-                  <p className="text-lg font-bold text-blue-600">
-                    {formatCurrency(simulation.investmentAmount)}
-                  </p>
-                </div>
-                
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <BarChart3 className="h-6 w-6 mx-auto mb-2 text-gray-600" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Valor Antes</p>
-                  <p className="text-lg font-bold">
-                    {formatCurrency(simulation.portfolioValueBefore)}
-                  </p>
-                </div>
-                
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <BarChart3 className="h-6 w-6 mx-auto mb-2 text-gray-600" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Valor Depois</p>
-                  <p className="text-lg font-bold">
-                    {formatCurrency(simulation.portfolioValueAfter)}
-                  </p>
-                </div>
-                
-                <div className={`text-center p-4 rounded-lg ${isPositive ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                  {isPositive ? (
-                    <TrendingUp className={`h-6 w-6 mx-auto mb-2 text-green-600`} />
-                  ) : (
-                    <TrendingDown className={`h-6 w-6 mx-auto mb-2 text-red-600`} />
-                  )}
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Variação</p>
-                  <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                    {isPositive ? '+' : ''}{formatCurrency(difference)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Detalhes das Alocações */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Share className="h-5 w-5" />
-                Alocações Simuladas ({simulation.allocations.length} ativos)
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent>
-              <div className="space-y-4">
-                {simulation.allocations.map((allocation, index) => (
-                  <div key={`${allocation.ticker}-${index}`}>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <Badge variant="outline" className="font-mono font-bold">
-                          {allocation.ticker}
-                        </Badge>
-                        {getRecommendationBadge(allocation.userRecommendation)}
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">
-                          {formatCurrency(allocation.investmentAmount)}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          para investir
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Valor Atual</p>
-                        <p className="font-medium">{formatCurrency(allocation.currentValue)}</p>
-                        <p className="text-xs text-gray-500">{allocation.currentQuantity} ações</p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">% Atual</p>
-                        <p className="font-medium">{allocation.currentPercentage.toFixed(2)}%</p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">% Alvo</p>
-                        <p className="font-medium text-blue-600">{allocation.targetPercentage.toFixed(2)}%</p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Comprar</p>
-                        <p className="font-medium text-green-600">{allocation.quantityToAcquire} ações</p>
-                        <p className="text-xs text-gray-500">
-                          {formatCurrency(allocation.currentPrice)}/ação
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {index < simulation.allocations.length - 1 && (
-                      <Separator className="mt-4" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+    <AppShellEnhanced>
+      <div className="container max-w-4xl mx-auto px-4 py-6">
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-2xl font-bold ml-4">Detalhes da Simulação</h1>
         </div>
-      </AppShellEnhanced>
-    </AuthGuard>
+
+        {/* Resumo da Simulação */}
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                {formatDate(simulation.date)}
+              </CardTitle>
+              <Badge variant={isPositive ? "default" : "destructive"} className="text-sm">
+                {isPositive ? (
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 mr-1" />
+                )}
+                {percentage.toFixed(2)}%
+              </Badge>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <DollarSign className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                <p className="text-sm text-gray-600 dark:text-gray-400">Valor Investido</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {formatCurrency(simulation.investmentAmount)}
+                </p>
+              </div>
+
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <BarChart3 className="h-6 w-6 mx-auto mb-2 text-gray-600" />
+                <p className="text-sm text-gray-600 dark:text-gray-400">Valor Antes</p>
+                <p className="text-lg font-bold">
+                  {formatCurrency(simulation.portfolioValueBefore)}
+                </p>
+              </div>
+
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <BarChart3 className="h-6 w-6 mx-auto mb-2 text-gray-600" />
+                <p className="text-sm text-gray-600 dark:text-gray-400">Valor Depois</p>
+                <p className="text-lg font-bold">
+                  {formatCurrency(simulation.portfolioValueAfter)}
+                </p>
+              </div>
+
+              <div className={`text-center p-4 rounded-lg ${isPositive ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                {isPositive ? (
+                  <TrendingUp className={`h-6 w-6 mx-auto mb-2 text-green-600`} />
+                ) : (
+                  <TrendingDown className={`h-6 w-6 mx-auto mb-2 text-red-600`} />
+                )}
+                <p className="text-sm text-gray-600 dark:text-gray-400">Variação</p>
+                <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                  {isPositive ? '+' : ''}{formatCurrency(difference)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Detalhes das Alocações */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Share className="h-5 w-5" />
+              Alocações Simuladas ({simulation.allocations.length} ativos)
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <div className="space-y-4">
+              {simulation.allocations.map((allocation, index) => (
+                <div key={`${allocation.ticker}-${index}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="font-mono font-bold">
+                        {allocation.ticker}
+                      </Badge>
+                      {getRecommendationBadge(allocation.userRecommendation)}
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">
+                        {formatCurrency(allocation.investmentAmount)}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        para investir
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Valor Atual</p>
+                      <p className="font-medium">{formatCurrency(allocation.currentValue)}</p>
+                      <p className="text-xs text-gray-500">{allocation.currentQuantity} ações</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">% Atual</p>
+                      <p className="font-medium">{allocation.currentPercentage.toFixed(2)}%</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">% Alvo</p>
+                      <p className="font-medium text-blue-600">{allocation.targetPercentage.toFixed(2)}%</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Comprar</p>
+                      <p className="font-medium text-green-600">{allocation.quantityToAcquire} ações</p>
+                      <p className="text-xs text-gray-500">
+                        {formatCurrency(allocation.currentPrice)}/ação
+                      </p>
+                    </div>
+                  </div>
+
+                  {index < simulation.allocations.length - 1 && (
+                    <Separator className="mt-4" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </AppShellEnhanced>
   )
 }

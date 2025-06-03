@@ -5,7 +5,6 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Eye, RefreshCw, Calendar, TrendingUp, TrendingDown, BarChart3 } from "lucide-react"
 
-import AuthGuard from "@/components/auth-guard"
 import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -145,127 +144,125 @@ export default function HistoricoSimulacoes() {
   )
 
   return (
-    <AuthGuard>
-      <AppShellEnhanced>
-        <div className="container max-w-2xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-            <h1 className="text-2xl font-bold">Histórico de Simulações</h1>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleRefresh} 
-              disabled={refreshing}
-              aria-label="Atualizar"
-            >
-              <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-
-          {loading ? (
-            <LoadingSkeleton />
-          ) : error ? (
-            <ErrorDisplay />
-          ) : simulations.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <div className="space-y-4">
-              {simulations.map((simulation) => {
-                const { difference, percentage } = calculateGainLoss(
-                  simulation.portfolioValueBefore,
-                  simulation.portfolioValueAfter
-                )
-                const isPositive = difference >= 0
-
-                return (
-                  <Card key={simulation.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm text-gray-500">
-                            {formatDate(simulation.date)}
-                          </span>
-                        </div>
-                        <Badge variant={isPositive ? "default" : "destructive"}>
-                          {isPositive ? (
-                            <TrendingUp className="h-3 w-3 mr-1" />
-                          ) : (
-                            <TrendingDown className="h-3 w-3 mr-1" />
-                          )}
-                          {percentage.toFixed(2)}%
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="pt-0">
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1">Valor Investido</p>
-                          <p className="font-semibold text-blue-600">
-                            {formatCurrency(simulation.investmentAmount)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1">Variação</p>
-                          <p className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                            {isPositive ? '+' : ''}{formatCurrency(difference)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1">Valor Antes</p>
-                          <p className="text-sm font-medium">
-                            {formatCurrency(simulation.portfolioValueBefore)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1">Valor Depois</p>
-                          <p className="text-sm font-medium">
-                            {formatCurrency(simulation.portfolioValueAfter)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <p className="text-sm text-gray-500 mb-2">
-                          Ativos simulados: {simulation.allocations.length}
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {simulation.allocations.slice(0, 5).map((allocation) => (
-                            <Badge key={allocation.ticker} variant="outline" className="text-xs">
-                              {allocation.ticker}
-                            </Badge>
-                          ))}
-                          {simulation.allocations.length > 5 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{simulation.allocations.length - 5} mais
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      <Button 
-                        className="w-full" 
-                        variant="outline"
-                        onClick={() => handleViewSimulation(simulation.id || '')}
-                        disabled={!simulation.id}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Ver Detalhes
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
+    <AppShellEnhanced>
+      <div className="container max-w-2xl mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-2xl font-bold">Histórico de Simulações</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            aria-label="Atualizar"
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
-      </AppShellEnhanced>
-    </AuthGuard>
+
+        {loading ? (
+          <LoadingSkeleton />
+        ) : error ? (
+          <ErrorDisplay />
+        ) : simulations.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="space-y-4">
+            {simulations.map((simulation) => {
+              const { difference, percentage } = calculateGainLoss(
+                simulation.portfolioValueBefore,
+                simulation.portfolioValueAfter
+              )
+              const isPositive = difference >= 0
+
+              return (
+                <Card key={simulation.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-500">
+                          {formatDate(simulation.date)}
+                        </span>
+                      </div>
+                      <Badge variant={isPositive ? "default" : "destructive"}>
+                        {isPositive ? (
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <TrendingDown className="h-3 w-3 mr-1" />
+                        )}
+                        {percentage.toFixed(2)}%
+                      </Badge>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Valor Investido</p>
+                        <p className="font-semibold text-blue-600">
+                          {formatCurrency(simulation.investmentAmount)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Variação</p>
+                        <p className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                          {isPositive ? '+' : ''}{formatCurrency(difference)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Valor Antes</p>
+                        <p className="text-sm font-medium">
+                          {formatCurrency(simulation.portfolioValueBefore)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Valor Depois</p>
+                        <p className="text-sm font-medium">
+                          {formatCurrency(simulation.portfolioValueAfter)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-500 mb-2">
+                        Ativos simulados: {simulation.allocations.length}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {simulation.allocations.slice(0, 5).map((allocation) => (
+                          <Badge key={allocation.ticker} variant="outline" className="text-xs">
+                            {allocation.ticker}
+                          </Badge>
+                        ))}
+                        {simulation.allocations.length > 5 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{simulation.allocations.length - 5} mais
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => handleViewSimulation(simulation.id || '')}
+                      disabled={!simulation.id}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver Detalhes
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </AppShellEnhanced>
   )
 }
