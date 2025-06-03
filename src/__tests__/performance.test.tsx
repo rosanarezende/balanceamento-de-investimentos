@@ -504,7 +504,7 @@ describe.skip('Testes de Performance', () => {
     })
 
     it('deve detectar renders demorados', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => { })
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => { /* intentionally empty */ })
 
       // Simular componente com render lento
       const SlowComponent = () => {
