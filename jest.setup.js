@@ -69,23 +69,50 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
+// Mock do window.location.reload
+Object.defineProperty(window, 'location', {
+  value: {
+    ...window.location,
+    reload: jest.fn(),
+  },
+  writable: true,
+});
+
 // Mock Firebase
+const mockApp = { name: '[DEFAULT]' };
+
+// Criar mocks Jest para as funções de autenticação
+const mockSignInWithPopup = jest.fn();
+const mockSignOut = jest.fn();
+const mockOnAuthStateChanged = jest.fn();
+
+const mockAuth = {
+  currentUser: null,
+  app: mockApp,
+  signInWithPopup: mockSignInWithPopup,
+  signOut: mockSignOut,
+  onAuthStateChanged: mockOnAuthStateChanged,
+};
+
+const mockDb = {};
+const mockGoogleProvider = {};
+
 jest.mock('firebase/app', () => ({
-  initializeApp: jest.fn(),
-  getApps: jest.fn(() => [{ name: '[DEFAULT]' }]),
-  getApp: jest.fn(() => ({ name: '[DEFAULT]' })),
+  initializeApp: jest.fn(() => mockApp),
+  getApps: jest.fn(() => [mockApp]),
+  getApp: jest.fn(() => mockApp),
 }));
 
 jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(() => ({})),
-  signInWithEmailAndPassword: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(),
-  signOut: jest.fn(),
-  onAuthStateChanged: jest.fn(),
+  getAuth: jest.fn(() => mockAuth),
+  signInWithPopup: mockSignInWithPopup,
+  signOut: mockSignOut,
+  onAuthStateChanged: mockOnAuthStateChanged,
+  GoogleAuthProvider: jest.fn(() => mockGoogleProvider),
 }));
 
 jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})),
+  getFirestore: jest.fn(() => mockDb),
   collection: jest.fn(),
   doc: jest.fn(),
   addDoc: jest.fn(),
@@ -100,7 +127,6 @@ jest.mock('firebase/firestore', () => ({
 }));
 
 // Mock da configuração do Firebase para evitar erros de inicialização
-// Adicione quaisquer outras chaves de configuração que possam estar faltando
 jest.mock('./src/services/firebase/config', () => ({
   firebaseConfig: {
     apiKey: 'mockApiKey',
@@ -111,4 +137,8 @@ jest.mock('./src/services/firebase/config', () => ({
     appId: 'mockAppId',
     measurementId: 'mockMeasurementId',
   },
+  app: mockApp,
+  auth: mockAuth,
+  db: mockDb,
+  googleProvider: mockGoogleProvider,
 }));

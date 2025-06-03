@@ -37,10 +37,6 @@ export async function getUserPortfolio(userId: string): Promise<Portfolio> {
     throw new Error("Database not initialized");
   }
 
-  if (!db) {
-    throw new Error("Database not initialized");
-  }
-
   try {
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);

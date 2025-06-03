@@ -29,7 +29,17 @@ Este projeto é, portanto, um reflexo tanto de uma necessidade prática quanto d
 
 ## Status do Projeto
 
-**Em Desenvolvimento Ativo.** O projeto está continuamente recebendo novas funcionalidades e melhorias.
+**Em Desenvolvimento Ativo com Funcionalidades Core Implementadas.** 
+
+O projeto possui agora um conjunto robusto de funcionalidades essenciais:
+- ✅ **Sistema de Autenticação** completo com Firebase
+- ✅ **Gerenciamento de Carteira** com CRUD completo de ativos
+- ✅ **Calculadora de Balanceamento** funcional com simulações
+- ✅ **Histórico de Simulações** para acompanhamento temporal
+- ✅ **Dashboard Interativo** com gráficos e insights
+- ✅ **Interface Responsiva** com tema escuro/claro
+
+O projeto está continuamente recebendo novas funcionalidades e melhorias, com foco em otimização da experiência do usuário e implementação de recursos avançados de análise de investimentos.
 
 ---
 
@@ -42,6 +52,13 @@ Este projeto é, portanto, um reflexo tanto de uma necessidade prática quanto d
     * Input manual de "Recomendação Própria" ('Comprar', 'Manter', 'Evitar Aporte') para guiar decisões.
 * **Calculadora de Balanceamento:**
     * Sugestão de quanto investir em cada ativo para alcançar o balanceamento desejado com novos aportes, considerando as recomendações do usuário e o valor disponível para o aporte.
+    * Simulação completa com cálculo de novas alocações e impacto no portfólio.
+* **Histórico de Simulações:**
+    * Salvamento automático de todas as simulações de balanceamento realizadas.
+    * Visualização completa do histórico ordenado por data.
+    * Detalhamento individual de cada simulação com métricas de performance.
+    * Acompanhamento da evolução das decisões de investimento ao longo do tempo.
+    * Interface intuitiva para revisar alocações passadas e resultados obtidos.
 * **Dashboard Intuitivo:**
     * Painel de resumo com valor total da carteira, total de ativos.
     * Gráficos de composição (percentual atual vs. meta).
@@ -49,20 +66,55 @@ Este projeto é, portanto, um reflexo tanto de uma necessidade prática quanto d
 * **Visualização e Organização:**
     * Cards de ativos detalhados.
     * Opções de ordenação para os ativos listados.
+    * Interface responsiva e moderna com tema escuro/claro.
 * **Lista de Observação (Watchlist):** Acompanhamento de ativos de interesse.
 * **Perfil de Usuário:** Configurações básicas e gerenciamento da conta.
 
 ---
 
+## Funcionalidades Recentemente Implementadas
+
+### 🆕 Sistema Completo de Histórico de Simulações
+Uma das mais importantes adições ao EquilibreInvest é o sistema completo de histórico de simulações, que permite aos usuários:
+
+* **Registro Automático:** Todas as simulações de balanceamento são automaticamente salvas no Firebase Firestore.
+* **Visualização Cronológica:** Interface dedicada (`/historico`) que lista todas as simulações ordenadas por data mais recente.
+* **Detalhamento Completo:** Cada simulação pode ser visualizada individualmente (`/historico/[id]`) com:
+  - Resumo financeiro (valor investido, valor antes/depois, variação percentual)
+  - Lista detalhada de todas as alocações por ativo
+  - Recomendações aplicadas (Comprar/Vender/Aguardar)
+  - Métricas de quantidade de ações e preços
+* **Controle de Performance:** Acompanhamento da evolução das decisões de investimento ao longo do tempo.
+* **Interface Intuitiva:** Design responsivo com estados de loading, erro e dados vazios bem tratados.
+
+### 🔄 Fluxo Completo de Simulação
+O fluxo de simulação agora está totalmente integrado:
+```
+Calculadora → Configuração → Resultado → Salvar → Histórico → Detalhes
+```
+
+### 🎨 Melhorias na Interface
+* **Estados Visuais:** Indicadores claros de loading, sucesso e erro
+* **Badges Informativos:** Identificação visual de ganhos/perdas e recomendações
+* **Navegação Fluida:** Transições suaves entre páginas com botões de volta
+* **Responsividade:** Interface que funciona perfeitamente em desktop e mobile
+
+---
+
 ## Tecnologias Utilizadas
 
-* **Frontend:** React, Next.js 
+* **Frontend:** React, Next.js 14 (App Router)
 * **Autenticação:** Firebase Authentication (Google Provider)
 * **Banco de Dados:** Firebase Firestore (NoSQL, em nuvem)
-* **API de Cotações:** Alpha Vantage
+* **API de Cotações:** Alpha Vantage, Yahoo Finance
+* **UI/UX:** Tailwind CSS, Radix UI, Lucide Icons
+* **Estado:** Context API, React Hooks
+* **Validação:** Zod (Type-safe schemas)
+* **Notificações:** Sonner (Toast notifications)
+* **Gráficos:** Recharts
 * **Hospedagem/Deploy:** Vercel
-* **Linguagem Principal:** JavaScript / TypeScript
-* **Ferramentas de IA para Geração/Prototipagem de Código:** v0.dev, Copilot Workspace, Manus AI
+* **Linguagem Principal:** TypeScript
+* **Ferramentas de IA para Geração/Prototipagem de Código:** v0.dev, Copilot Workspace, Manus AI, GitHub Copilot (Claude Sonnet)
 * **Otimização de Prompts:** Gemini 2.5 Pro (Google)
 
 ---

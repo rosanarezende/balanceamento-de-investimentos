@@ -65,7 +65,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Usar uma variável para controlar se o componente ainda está montado
     let isMounted = true;
 
-    const unsubscribe = onAuthStateChanged(auth!, async (currentUser) => {
+    if (!auth) {
+      console.error("Firebase Auth não inicializado.");
+      setError("Erro de configuração de autenticação.");
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       try {
         if (!isMounted) return;
 
