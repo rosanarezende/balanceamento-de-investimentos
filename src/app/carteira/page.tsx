@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 import {
   BarChart3,
@@ -25,10 +25,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
 
 import { useToast } from "@/hooks/use-toast"
-import { getUserPortfolio, updateStock, removeStock } from "@/services/firebase/firestore"
-import { useAuth } from "@/core/state/auth-context"
+import { usePortfolio } from "@/core/state/portfolio-context"
 import { formatCurrency } from "@/core/utils"
 import { cn } from "@/core/utils"
+import { StockWithDetails } from "@/core/types"
 
 import DashboardLayout from "./layout"
 
@@ -44,38 +44,20 @@ const COLORS = [
   '#F97316', // Laranja
 ]
 
-interface Stock {
-  ticker: string
-  quantity: number
-  targetPercentage: number
-  userRecommendation?: "Comprar" | "Vender" | "Aguardar"
-  currentPrice?: number
-  currentValue?: number
-  currentPercentage?: number
-  dailyChange?: number
-  dailyChangePercentage?: number
-}
-
-interface PortfolioSummary {
-  totalValue: number
-  totalAssets: number
-  dailyChange: number
-  dailyChangePercentage: number
-  performanceToday: "up" | "down" | "neutral"
-}
-
 export default function CarteiraPage() {
-  const { user } = useAuth()
   const { toast } = useToast()
-  const [stocks, setStocks] = useState<Stock[]>([])
-  const [portfolioSummary, setPortfolioSummary] = useState<PortfolioSummary>({
-    totalValue: 0,
-    totalAssets: 0,
-    dailyChange: 0,
-    dailyChangePercentage: 0,
-    performanceToday: "neutral"
-  })
-  const [loading, setLoading] = useState(true)
+  const {
+    stocksWithDetails,
+    portfolioSummary,
+    loading,
+    error,
+    refreshPortfolio,
+    addStockToPortfolio,
+    removeStockFromPortfolio,
+    updateStockInPortfolio
+  } = usePortfolio()
+
+  // Estados para UI
   const [isExpanded, setIsExpanded] = useState(true)
   const [sortBy, setSortBy] = useState<"ticker" | "value" | "percentage" | "target">("ticker")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
@@ -85,7 +67,7 @@ export default function CarteiraPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedStock, setSelectedStock] = useState<Stock | null>(null)
+  const [selectedStock, setSelectedStock] = useState<StockWithDetails | null>(null)
 
   // Estados para formulários
   const [formData, setFormData] = useState({
@@ -94,81 +76,13 @@ export default function CarteiraPage() {
     targetPercentage: 0
   })
 
-  // Mock data para desenvolvimento - substitua pela API real
-  const mockStockPrices = {
-    "RANI3": 45.20,
-    "ITUB4": 28.50,
-    "PETR4": 32.80,
-    "VALE3": 55.90,
-    "BBDC4": 22.15
-  }
-
-  useEffect(() => {
-    loadPortfolio()
-  }, [user])
-
-  const loadPortfolio = async () => {
-    if (!user) return
-
-    try {
-      setLoading(true)
-
-      // Buscar dados do portfolio do Firestore
-      const portfolioData = await getUserPortfolio(user.uid)
-
-      // Simular preços atuais (substitua pela API real)
-      const stocksWithPrices: Stock[] = Object.entries(portfolioData).map(([ticker, data]) => {
-        const currentPrice = mockStockPrices[ticker as keyof typeof mockStockPrices] || 50
-        const currentValue = data.quantity * currentPrice
-        const dailyChange = (Math.random() - 0.5) * 4 // Simular variação diária
-
-        return {
-          ticker,
-          quantity: data.quantity,
-          targetPercentage: data.targetPercentage,
-          userRecommendation: data.userRecommendation,
-          currentPrice,
-          currentValue,
-          dailyChange,
-          dailyChangePercentage: (dailyChange / currentPrice) * 100
-        }
-      })
-
-      // Calcular valor total e percentuais atuais
-      const totalValue = stocksWithPrices.reduce((sum, stock) => sum + (stock.currentValue || 0), 0)
-
-      const stocksWithPercentages = stocksWithPrices.map(stock => ({
-        ...stock,
-        currentPercentage: totalValue > 0 ? ((stock.currentValue || 0) / totalValue) * 100 : 0
-      }))
-
-      // Calcular resumo do portfólio
-      const totalDailyChange = stocksWithPrices.reduce((sum, stock) => sum + (stock.dailyChange || 0) * stock.quantity, 0)
-      const dailyChangePercentage = totalValue > 0 ? (totalDailyChange / totalValue) * 100 : 0
-
-      setStocks(stocksWithPercentages)
-      setPortfolioSummary({
-        totalValue,
-        totalAssets: stocksWithPercentages.length,
-        dailyChange: totalDailyChange,
-        dailyChangePercentage,
-        performanceToday: dailyChangePercentage > 0 ? "up" : dailyChangePercentage < 0 ? "down" : "neutral"
-      })
-
-    } catch (error) {
-      console.error("Erro ao carregar portfolio:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   // Funções para modais
   const openAddModal = () => {
     setFormData({ ticker: "", quantity: 0, targetPercentage: 0 })
     setIsAddModalOpen(true)
   }
 
-  const openEditModal = (stock: Stock) => {
+  const openEditModal = (stock: StockWithDetails) => {
     setSelectedStock(stock)
     setFormData({
       ticker: stock.ticker,
@@ -178,7 +92,7 @@ export default function CarteiraPage() {
     setIsEditModalOpen(true)
   }
 
-  const openDeleteModal = (stock: Stock) => {
+  const openDeleteModal = (stock: StockWithDetails) => {
     setSelectedStock(stock)
     setIsDeleteModalOpen(true)
   }
@@ -193,8 +107,6 @@ export default function CarteiraPage() {
 
   const handleSaveStock = async () => {
     try {
-      if (!user) return
-
       // Validações
       if (!formData.ticker.trim()) {
         toast({
@@ -223,28 +135,30 @@ export default function CarteiraPage() {
         return
       }
 
-      // Salvar no Firestore
-      if (isEditModalOpen) {
-        await updateStock(user.uid, formData.ticker, {
+      let success = false
+
+      // Usar as funções do contexto
+      if (isEditModalOpen && selectedStock) {
+        success = await updateStockInPortfolio(selectedStock.ticker, {
           quantity: formData.quantity,
           targetPercentage: formData.targetPercentage,
-          userRecommendation: "Aguardar" // Valor padrão
+          userRecommendation: selectedStock.userRecommendation || "Aguardar"
         })
       } else {
-        await updateStock(user.uid, formData.ticker, {
+        success = await addStockToPortfolio(formData.ticker, {
           quantity: formData.quantity,
           targetPercentage: formData.targetPercentage,
-          userRecommendation: "Aguardar" // Valor padrão
+          userRecommendation: "Aguardar"
         })
       }
 
-      toast({
-        title: "Sucesso",
-        description: isEditModalOpen ? "Ação atualizada com sucesso" : "Ação adicionada com sucesso"
-      })
-
-      closeModals()
-      loadPortfolio()
+      if (success) {
+        toast({
+          title: "Sucesso",
+          description: isEditModalOpen ? "Ação atualizada com sucesso" : "Ação adicionada com sucesso"
+        })
+        closeModals()
+      }
     } catch (error) {
       toast({
         title: "Erro",
@@ -256,18 +170,17 @@ export default function CarteiraPage() {
 
   const handleDeleteStock = async () => {
     try {
-      if (!user || !selectedStock) return
+      if (!selectedStock) return
 
-      // Remover do Firestore
-      await removeStock(user.uid, selectedStock.ticker)
+      const success = await removeStockFromPortfolio(selectedStock.ticker)
 
-      toast({
-        title: "Sucesso",
-        description: "Ação removida com sucesso"
-      })
-
-      closeModals()
-      loadPortfolio()
+      if (success) {
+        toast({
+          title: "Sucesso",
+          description: "Ação removida com sucesso"
+        })
+        closeModals()
+      }
     } catch (error) {
       toast({
         title: "Erro",
@@ -286,7 +199,7 @@ export default function CarteiraPage() {
     }
   }
 
-  const filteredAndSortedStocks = stocks
+  const filteredAndSortedStocks = stocksWithDetails
     .filter(stock =>
       stock.ticker.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -318,14 +231,14 @@ export default function CarteiraPage() {
     })
 
   // Dados para o gráfico de pizza (composição atual)
-  const pieData = stocks.map((stock, index) => ({
+  const pieData = stocksWithDetails.map((stock, index) => ({
     name: stock.ticker,
     value: stock.currentPercentage || 0,
     fill: COLORS[index % COLORS.length]
   }))
 
   // Dados para o gráfico de barras (atual vs meta)
-  const barData = stocks.map(stock => ({
+  const barData = stocksWithDetails.map(stock => ({
     ticker: stock.ticker,
     atual: stock.currentPercentage || 0,
     meta: stock.targetPercentage,
@@ -349,6 +262,31 @@ export default function CarteiraPage() {
     )
   }
 
+  if (error) {
+    return (
+      <DashboardLayout>
+        <AppShellEnhanced>
+          <div className="container mx-auto p-6">
+            <Card className="border-red-800 bg-red-900/20">
+              <CardContent className="p-6 text-center">
+                <div className="text-red-400 text-lg font-medium mb-2">
+                  Erro ao carregar carteira
+                </div>
+                <div className="text-red-300 mb-4">
+                  {error}
+                </div>
+                <Button onClick={refreshPortfolio} variant="outline">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Tentar Novamente
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </AppShellEnhanced>
+      </DashboardLayout>
+    )
+  }
+
   return (
     <DashboardLayout>
       <AppShellEnhanced>
@@ -364,7 +302,7 @@ export default function CarteiraPage() {
               </p>
             </div>
             <Button
-              onClick={loadPortfolio}
+              onClick={refreshPortfolio}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
@@ -396,7 +334,7 @@ export default function CarteiraPage() {
 
                 <div className="text-center p-6 rounded-lg bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30">
                   <div className="text-3xl font-bold text-white">
-                    {portfolioSummary.totalAssets}
+                    {portfolioSummary.stockCount}
                   </div>
                   <div className="text-slate-400">Ativos Diferentes</div>
                 </div>
@@ -416,14 +354,14 @@ export default function CarteiraPage() {
                   )}>
                     {portfolioSummary.performanceToday === "up" ? <TrendingUp className="w-6 h-6 mr-2" /> :
                       portfolioSummary.performanceToday === "down" ? <TrendingDown className="w-6 h-6 mr-2" /> : null}
-                    {portfolioSummary.dailyChangePercentage.toFixed(2)}%
+                    {(portfolioSummary.dailyChangePercentage || 0).toFixed(2)}%
                   </div>
                   <div className="text-slate-400">Hoje</div>
                 </div>
 
                 <div className="text-center p-6 rounded-lg bg-gradient-to-r from-amber-600/20 to-orange-600/20 border border-amber-500/30">
                   <div className="text-3xl font-bold text-white">
-                    {formatCurrency(portfolioSummary.dailyChange)}
+                    {formatCurrency(portfolioSummary.dailyChange || 0)}
                   </div>
                   <div className="text-slate-400">Variação (R$)</div>
                 </div>
