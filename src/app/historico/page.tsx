@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, Eye, RefreshCw, Calendar, TrendingUp, TrendingDown, BarChart3 } from "lucide-react"
 
 import AuthGuard from "@/components/auth-guard"
-import { AppShell } from "@/components/layout/app-shell"
+import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -53,7 +53,7 @@ export default function HistoricoSimulacoes() {
   }
 
   const handleBack = () => {
-    router.push("/")
+    router.push("/carteira")
   }
 
   const handleViewSimulation = (simulationId: string) => {
@@ -146,7 +146,7 @@ export default function HistoricoSimulacoes() {
 
   return (
     <AuthGuard>
-      <AppShell>
+      <AppShellEnhanced>
         <div className="container max-w-2xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-6">
             <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Voltar">
@@ -265,7 +265,7 @@ export default function HistoricoSimulacoes() {
             </div>
           )}
         </div>
-      </AppShell>
+      </AppShellEnhanced>
     </AuthGuard>
   )
 }

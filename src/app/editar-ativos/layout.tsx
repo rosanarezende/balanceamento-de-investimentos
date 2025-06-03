@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { AppShell } from "@/components/layout/app-shell";
+import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced";
 import { PortfolioProvider } from '@/core/state/portfolio-context';
 
 interface LayoutProps {
@@ -9,7 +9,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <PortfolioProvider>
-      <AppShell>{children}</AppShell>
+      <AppShellEnhanced>{children}</AppShellEnhanced>
     </PortfolioProvider>
   );
 }

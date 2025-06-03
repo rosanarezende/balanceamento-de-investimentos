@@ -26,6 +26,8 @@ import { useAuth } from "@/core/state/auth-context"
 import { getUserPortfolio, updateStock, removeStock } from "@/services/firebase/firestore"
 import { formatCurrency } from "@/core/utils"
 import { cn } from "@/core/utils"
+import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
+import AuthGuard from "@/components/auth-guard"
 
 // Cores inspiradas no design Behance - tema dark com acentos vibrantes
 const COLORS = [
@@ -329,426 +331,400 @@ export default function CarteiraPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Skeleton className="h-96" />
-          <Skeleton className="h-96" />
-          <Skeleton className="h-96" />
-        </div>
-      </div>
+      <AuthGuard>
+        <AppShellEnhanced>
+          <div className="container mx-auto p-6 space-y-6">
+            <Skeleton className="h-8 w-64" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Skeleton className="h-96" />
+              <Skeleton className="h-96" />
+              <Skeleton className="h-96" />
+            </div>
+          </div>
+        </AppShellEnhanced>
+      </AuthGuard>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-purple-950">
-      <div className="container mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Minha Carteira
-            </h1>
-            <p className="text-slate-400 mt-2">
-              Gerencie seus investimentos e acompanhe o desempenho
-            </p>
+    <AuthGuard>
+      <AppShellEnhanced>
+        <div className="container mx-auto p-6 space-y-8">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Minha Carteira
+              </h1>
+              <p className="text-slate-400 mt-2">
+                Gerencie seus investimentos e acompanhe o desempenho
+              </p>
+            </div>
+            <Button
+              onClick={loadPortfolio}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Atualizar
+            </Button>
           </div>
-          <Button
-            onClick={loadPortfolio}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Atualizar
-          </Button>
-        </div>
 
-        {/* Painel de Resumo Expansível */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-          <CardHeader
-            className="cursor-pointer"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-2xl text-white">Resumo da Carteira</CardTitle>
-              {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-            </div>
-          </CardHeader>
-
-          <CardContent className={cn("transition-all duration-300", !isExpanded ? "hidden" : "")}>
-            {/* Métricas principais */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="text-center p-6 rounded-lg bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30">
-                <div className="text-3xl font-bold text-white">
-                  {formatCurrency(portfolioSummary.totalValue)}
-                </div>
-                <div className="text-slate-400">Valor Total</div>
+          {/* Painel de Resumo Expansível */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+            <CardHeader
+              className="cursor-pointer"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-2xl text-white">Resumo da Carteira</CardTitle>
+                {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               </div>
+            </CardHeader>
 
-              <div className="text-center p-6 rounded-lg bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30">
-                <div className="text-3xl font-bold text-white">
-                  {portfolioSummary.totalAssets}
+            <CardContent className={cn("transition-all duration-300", !isExpanded ? "hidden" : "")}>
+              {/* Métricas principais */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="text-center p-6 rounded-lg bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30">
+                  <div className="text-3xl font-bold text-white">
+                    {formatCurrency(portfolioSummary.totalValue)}
+                  </div>
+                  <div className="text-slate-400">Valor Total</div>
                 </div>
-                <div className="text-slate-400">Ativos Diferentes</div>
-              </div>
 
-              <div className={cn(
-                "text-center p-6 rounded-lg border",
-                portfolioSummary.performanceToday === "up"
-                  ? "bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-green-500/30"
-                  : portfolioSummary.performanceToday === "down"
-                    ? "bg-gradient-to-r from-red-600/20 to-rose-600/20 border-red-500/30"
-                    : "bg-gradient-to-r from-slate-600/20 to-gray-600/20 border-slate-500/30"
-              )}>
+                <div className="text-center p-6 rounded-lg bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30">
+                  <div className="text-3xl font-bold text-white">
+                    {portfolioSummary.totalAssets}
+                  </div>
+                  <div className="text-slate-400">Ativos Diferentes</div>
+                </div>
+
                 <div className={cn(
-                  "text-3xl font-bold flex items-center justify-center",
-                  portfolioSummary.performanceToday === "up" ? "text-green-400" :
-                    portfolioSummary.performanceToday === "down" ? "text-red-400" : "text-slate-400"
+                  "text-center p-6 rounded-lg border",
+                  portfolioSummary.performanceToday === "up"
+                    ? "bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-green-500/30"
+                    : portfolioSummary.performanceToday === "down"
+                      ? "bg-gradient-to-r from-red-600/20 to-rose-600/20 border-red-500/30"
+                      : "bg-gradient-to-r from-slate-600/20 to-gray-600/20 border-slate-500/30"
                 )}>
-                  {portfolioSummary.performanceToday === "up" ? <TrendingUp className="w-6 h-6 mr-2" /> :
-                    portfolioSummary.performanceToday === "down" ? <TrendingDown className="w-6 h-6 mr-2" /> : null}
-                  {portfolioSummary.dailyChangePercentage.toFixed(2)}%
+                  <div className={cn(
+                    "text-3xl font-bold flex items-center justify-center",
+                    portfolioSummary.performanceToday === "up" ? "text-green-400" :
+                      portfolioSummary.performanceToday === "down" ? "text-red-400" : "text-slate-400"
+                  )}>
+                    {portfolioSummary.performanceToday === "up" ? <TrendingUp className="w-6 h-6 mr-2" /> :
+                      portfolioSummary.performanceToday === "down" ? <TrendingDown className="w-6 h-6 mr-2" /> : null}
+                    {portfolioSummary.dailyChangePercentage.toFixed(2)}%
+                  </div>
+                  <div className="text-slate-400">Hoje</div>
                 </div>
-                <div className="text-slate-400">Hoje</div>
-              </div>
 
-              <div className="text-center p-6 rounded-lg bg-gradient-to-r from-amber-600/20 to-orange-600/20 border border-amber-500/30">
-                <div className="text-3xl font-bold text-white">
-                  {formatCurrency(portfolioSummary.dailyChange)}
-                </div>
-                <div className="text-slate-400">Variação (R$)</div>
-              </div>
-            </div>
-
-            {/* Gráficos */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Gráfico de Pizza - Composição Atual */}
-              <div className="p-6 rounded-lg bg-slate-800/50">
-                <h3 className="text-xl font-semibold text-white mb-4">Composição Atual</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={120}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#1e293b',
-                          border: '1px solid #334155',
-                          borderRadius: '8px'
-                        }}
-                        formatter={(value: number) => [`${value.toFixed(1)}%`, 'Participação']}
-                      />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
+                <div className="text-center p-6 rounded-lg bg-gradient-to-r from-amber-600/20 to-orange-600/20 border border-amber-500/30">
+                  <div className="text-3xl font-bold text-white">
+                    {formatCurrency(portfolioSummary.dailyChange)}
+                  </div>
+                  <div className="text-slate-400">Variação (R$)</div>
                 </div>
               </div>
 
-              {/* Gráfico de Barras - Atual vs Meta */}
-              <div className="p-6 rounded-lg bg-slate-800/50">
-                <h3 className="text-xl font-semibold text-white mb-4">Atual vs Meta</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barData}>
-                      <XAxis dataKey="ticker" stroke="#94a3b8" />
-                      <YAxis stroke="#94a3b8" />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#1e293b',
-                          border: '1px solid #334155',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Legend />
-                      <Bar dataKey="atual" fill="#00D4FF" name="Atual %" />
-                      <Bar dataKey="meta" fill="#7C3AED" name="Meta %" />
-                    </BarChart>
-                  </ResponsiveContainer>
+              {/* Gráficos */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Gráfico de Pizza - Composição Atual */}
+                <div className="p-6 rounded-lg bg-slate-800/50">
+                  <h3 className="text-xl font-semibold text-white mb-4">Composição Atual</h3>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={120}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#1e293b',
+                            border: '1px solid #334155',
+                            borderRadius: '8px'
+                          }}
+                          formatter={(value: number) => [`${value.toFixed(1)}%`, 'Participação']}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Gráfico de Barras - Atual vs Meta */}
+                <div className="p-6 rounded-lg bg-slate-800/50">
+                  <h3 className="text-xl font-semibold text-white mb-4">Atual vs Meta</h3>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={barData}>
+                        <XAxis dataKey="ticker" stroke="#94a3b8" />
+                        <YAxis stroke="#94a3b8" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#1e293b',
+                            border: '1px solid #334155',
+                            borderRadius: '8px'
+                          }}
+                          formatter={(value: number) => [`${value.toFixed(1)}%`, '']}
+                        />
+                        <Legend />
+                        <Bar dataKey="atual" name="% Atual" fill="#00D4FF" />
+                        <Bar dataKey="meta" name="% Meta" fill="#7C3AED" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Lista de Ativos */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle className="text-2xl text-white">Meus Ativos</CardTitle>
-
-              <div className="flex flex-col sm:flex-row gap-2">
-                {/* Busca */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                    placeholder="Buscar ativo..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800 border-slate-700 text-white"
-                  />
-                </div>
-
-                {/* Botões de ordenação */}
-                <div className="flex gap-2">
-                  <Button
-                    variant={sortBy === "ticker" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleSort("ticker")}
-                    className="text-xs"
-                  >
-                    Ticker {sortBy === "ticker" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </Button>
-                  <Button
-                    variant={sortBy === "value" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleSort("value")}
-                    className="text-xs"
-                  >
-                    Valor {sortBy === "value" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </Button>
-                </div>
-
+          {/* Lista de Ativos */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-2xl text-white">Meus Ativos</CardTitle>
                 <Button
                   onClick={openAddModal}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Adicionar Ativo
                 </Button>
               </div>
-            </div>
-          </CardHeader>
+            </CardHeader>
 
-          <CardContent>
-            {filteredAndSortedStocks.length === 0 ? (
-              <div className="text-center py-12">
-                <BarChart3 className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-                <h3 className="text-xl font-semibold text-slate-400 mb-2">Nenhum ativo encontrado</h3>
-                <p className="text-slate-500 mb-6">Adicione seus primeiros ativos para começar a acompanhar seu portfólio</p>
-                <Button
-                  onClick={openAddModal}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            <CardContent>
+              {/* Barra de pesquisa e filtros */}
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Buscar por ticker..."
+                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* Cabeçalho da tabela */}
+              <div className="grid grid-cols-5 gap-4 mb-4 px-4 py-2 bg-slate-800 rounded-lg">
+                <button
+                  className="flex items-center text-slate-300 hover:text-white"
+                  onClick={() => handleSort("ticker")}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar Primeiro Ativo
-                </Button>
+                  Ticker
+                  {sortBy === "ticker" && (
+                    sortOrder === "asc" ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />
+                  )}
+                </button>
+                <button
+                  className="flex items-center text-slate-300 hover:text-white"
+                  onClick={() => handleSort("value")}
+                >
+                  Valor
+                  {sortBy === "value" && (
+                    sortOrder === "asc" ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />
+                  )}
+                </button>
+                <button
+                  className="flex items-center text-slate-300 hover:text-white"
+                  onClick={() => handleSort("percentage")}
+                >
+                  % Atual
+                  {sortBy === "percentage" && (
+                    sortOrder === "asc" ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />
+                  )}
+                </button>
+                <button
+                  className="flex items-center text-slate-300 hover:text-white"
+                  onClick={() => handleSort("target")}
+                >
+                  % Meta
+                  {sortBy === "target" && (
+                    sortOrder === "asc" ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />
+                  )}
+                </button>
+                <div className="text-slate-300">Ações</div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredAndSortedStocks.map((stock) => (
-                  <Card
-                    key={stock.ticker}
-                    className={cn(
-                      "border bg-gradient-to-br backdrop-blur-sm transition-all duration-300 hover:scale-105",
-                      stock.userRecommendation === "Comprar"
-                        ? "border-green-500/50 from-green-900/20 to-emerald-900/20 shadow-green-500/20 shadow-lg"
-                        : "border-slate-700 from-slate-800/50 to-slate-900/50"
-                    )}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-xl font-bold text-white">{stock.ticker}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge
-                              variant={
-                                stock.userRecommendation === "Comprar" ? "default" :
-                                  stock.userRecommendation === "Vender" ? "destructive" : "secondary"
-                              }
-                              className="text-xs"
-                            >
-                              {stock.userRecommendation || "Aguardar"}
-                            </Badge>
-                            {stock.dailyChangePercentage && (
-                              <span className={cn(
-                                "text-sm font-medium",
-                                stock.dailyChangePercentage > 0 ? "text-green-400" : "text-red-400"
-                              )}>
-                                {stock.dailyChangePercentage > 0 ? "+" : ""}{stock.dailyChangePercentage.toFixed(2)}%
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => openEditModal(stock)}
-                            className="text-slate-400 hover:text-white"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => openDeleteModal(stock)}
-                            className="text-slate-400 hover:text-red-400"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
 
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="text-slate-400">Quantidade</div>
-                          <div className="text-white font-semibold">{stock.quantity}</div>
-                        </div>
-                        <div>
-                          <div className="text-slate-400">Preço Atual</div>
-                          <div className="text-white font-semibold">
-                            {formatCurrency(stock.currentPrice || 0)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-slate-400">Valor Total</div>
-                          <div className="text-white font-semibold">
-                            {formatCurrency(stock.currentValue || 0)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-slate-400">Variação</div>
-                          <div className={cn(
-                            "font-semibold",
-                            (stock.dailyChange || 0) > 0 ? "text-green-400" : "text-red-400"
-                          )}>
-                            {formatCurrency(stock.dailyChange || 0)}
-                          </div>
-                        </div>
+              {/* Lista de ativos */}
+              {filteredAndSortedStocks.length === 0 ? (
+                <div className="text-center py-12">
+                  <BarChart3 className="w-12 h-12 mx-auto text-slate-500 mb-4" />
+                  <h3 className="text-xl font-medium text-white mb-2">Nenhum ativo encontrado</h3>
+                  <p className="text-slate-400 mb-6">
+                    {searchTerm ? "Nenhum resultado para sua busca" : "Adicione seu primeiro ativo para começar"}
+                  </p>
+                  <Button onClick={openAddModal}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Ativo
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredAndSortedStocks.map((stock) => (
+                    <div
+                      key={stock.ticker}
+                      className="grid grid-cols-5 gap-4 px-4 py-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors"
+                    >
+                      <div className="flex items-center">
+                        <Badge variant="outline" className="font-mono font-bold">
+                          {stock.ticker}
+                        </Badge>
+                        <span className="ml-2 text-slate-400">
+                          {stock.quantity} ações
+                        </span>
                       </div>
+                      <div className="text-white">
+                        {formatCurrency(stock.currentValue || 0)}
+                      </div>
+                      <div className="text-white">
+                        {(stock.currentPercentage || 0).toFixed(2)}%
+                      </div>
+                      <div className="text-white">
+                        {stock.targetPercentage.toFixed(2)}%
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openEditModal(stock)}
+                          className="text-slate-300 hover:text-white hover:bg-slate-700"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openDeleteModal(stock)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-900/30"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-                      {/* Barras de progresso para atual vs meta */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-slate-400">Atual: {(stock.currentPercentage || 0).toFixed(1)}%</span>
-                          <span className="text-slate-400">Meta: {stock.targetPercentage.toFixed(1)}%</span>
-                        </div>
-                        <div className="relative h-2 bg-slate-700 rounded-full overflow-hidden">
-                          <div
-                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-500"
-                            style={{ width: `${Math.min((stock.currentPercentage || 0), 100)}%` }}
-                          />
-                          <div
-                            className="absolute top-0 h-full w-0.5 bg-white/60"
-                            style={{ left: `${Math.min(stock.targetPercentage, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+          {/* Modal de Adicionar Ativo */}
+          <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+            <DialogContent className="bg-slate-900 border-slate-800">
+              <DialogHeader>
+                <DialogTitle className="text-white">Adicionar Ativo</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="ticker" className="text-slate-300">Ticker</Label>
+                  <Input
+                    id="ticker"
+                    placeholder="Ex: PETR4"
+                    className="bg-slate-800 border-slate-700 text-white"
+                    value={formData.ticker}
+                    onChange={(e) => setFormData({ ...formData, ticker: e.target.value.toUpperCase() })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="quantity" className="text-slate-300">Quantidade</Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    className="bg-slate-800 border-slate-700 text-white"
+                    value={formData.quantity || ""}
+                    onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="targetPercentage" className="text-slate-300">Percentual Alvo (%)</Label>
+                  <Input
+                    id="targetPercentage"
+                    type="number"
+                    className="bg-slate-800 border-slate-700 text-white"
+                    value={formData.targetPercentage || ""}
+                    onChange={(e) => setFormData({ ...formData, targetPercentage: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={closeModals}>Cancelar</Button>
+                <Button onClick={handleSaveStock}>Adicionar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-      {/* Modal Adicionar/Editar Ação */}
-      <Dialog open={isAddModalOpen || isEditModalOpen} onOpenChange={closeModals}>
-        <DialogContent className="bg-slate-900 border-slate-700">
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              {isEditModalOpen ? "Editar Ação" : "Adicionar Nova Ação"}
-            </DialogTitle>
-          </DialogHeader>
+          {/* Modal de Editar Ativo */}
+          <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+            <DialogContent className="bg-slate-900 border-slate-800">
+              <DialogHeader>
+                <DialogTitle className="text-white">Editar Ativo</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="edit-ticker" className="text-slate-300">Ticker</Label>
+                  <Input
+                    id="edit-ticker"
+                    className="bg-slate-800 border-slate-700 text-white"
+                    value={formData.ticker}
+                    disabled
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-quantity" className="text-slate-300">Quantidade</Label>
+                  <Input
+                    id="edit-quantity"
+                    type="number"
+                    className="bg-slate-800 border-slate-700 text-white"
+                    value={formData.quantity || ""}
+                    onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-targetPercentage" className="text-slate-300">Percentual Alvo (%)</Label>
+                  <Input
+                    id="edit-targetPercentage"
+                    type="number"
+                    className="bg-slate-800 border-slate-700 text-white"
+                    value={formData.targetPercentage || ""}
+                    onChange={(e) => setFormData({ ...formData, targetPercentage: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={closeModals}>Cancelar</Button>
+                <Button onClick={handleSaveStock}>Salvar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="ticker" className="text-slate-300">Ticker da Ação</Label>
-              <Input
-                id="ticker"
-                value={formData.ticker}
-                onChange={(e) => setFormData(prev => ({ ...prev, ticker: e.target.value.toUpperCase() }))}
-                placeholder="Ex: PETR4"
-                className="bg-slate-800 border-slate-600 text-white"
-                disabled={isEditModalOpen} // Não permitir editar ticker
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="quantity" className="text-slate-300">Quantidade</Label>
-              <Input
-                id="quantity"
-                type="number"
-                min="1"
-                value={formData.quantity || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
-                placeholder="Ex: 100"
-                className="bg-slate-800 border-slate-600 text-white"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="targetPercentage" className="text-slate-300">Percentual Alvo (%)</Label>
-              <Input
-                id="targetPercentage"
-                type="number"
-                min="0.1"
-                max="100"
-                step="0.1"
-                value={formData.targetPercentage || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, targetPercentage: parseFloat(e.target.value) || 0 }))}
-                placeholder="Ex: 25.5"
-                className="bg-slate-800 border-slate-600 text-white"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={closeModals} className="border-slate-600 text-slate-300">
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSaveStock}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              {isEditModalOpen ? "Atualizar" : "Adicionar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal Confirmar Exclusão */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={closeModals}>
-        <DialogContent className="bg-slate-900 border-slate-700">
-          <DialogHeader>
-            <DialogTitle className="text-white">Confirmar Exclusão</DialogTitle>
-          </DialogHeader>
-
-          <div className="py-4">
-            <p className="text-slate-300">
-              Tem certeza que deseja remover a ação <strong className="text-white">{selectedStock?.ticker}</strong> da sua carteira?
-            </p>
-            <p className="text-slate-400 text-sm mt-2">
-              Esta ação não poderá ser desfeita.
-            </p>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={closeModals} className="border-slate-600 text-slate-300">
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleDeleteStock}
-              className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700"
-            >
-              Remover
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+          {/* Modal de Excluir Ativo */}
+          <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+            <DialogContent className="bg-slate-900 border-slate-800">
+              <DialogHeader>
+                <DialogTitle className="text-white">Excluir Ativo</DialogTitle>
+              </DialogHeader>
+              <p className="text-slate-300">
+                Tem certeza que deseja excluir o ativo <span className="font-bold text-white">{selectedStock?.ticker}</span>?
+                Esta ação não pode ser desfeita.
+              </p>
+              <DialogFooter>
+                <Button variant="outline" onClick={closeModals}>Cancelar</Button>
+                <Button variant="destructive" onClick={handleDeleteStock}>Excluir</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </AppShellEnhanced>
+    </AuthGuard>
   )
 }

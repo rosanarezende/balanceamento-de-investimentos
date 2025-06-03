@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, BarChart2, PieChart, RefreshCw } from "lucide-react"
 
 import AuthGuard from "@/components/auth-guard"
-import { AppShell } from "@/components/layout/app-shell"
+import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,8 +28,13 @@ export default function Dashboard() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isRecovering, setIsRecovering] = useState(false)
 
+  // Redirecionar para a página unificada de carteira
+  useEffect(() => {
+    router.push('/carteira');
+  }, [router]);
+
   const handleBack = () => {
-    router.push("/")
+    router.push("/carteira")
   }
 
   // Tratamento de erros não capturados
@@ -90,7 +95,7 @@ export default function Dashboard() {
 
   return (
     <AuthGuard>
-      <AppShell>
+      <AppShellEnhanced>
         <DashboardLayout>
           <div className="container max-w-md mx-auto px-4 py-6">
             <div className="flex items-center justify-between mb-6">
@@ -170,7 +175,7 @@ export default function Dashboard() {
                 ) : stocksWithDetails.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">Você ainda não possui ações na sua carteira.</p>
-                    <Button className="mt-4" onClick={() => router.push("/")}>
+                    <Button className="mt-4" onClick={() => router.push("/carteira")}>
                       Adicionar Ações
                     </Button>
                   </div>
@@ -190,7 +195,7 @@ export default function Dashboard() {
             )}
           </div>
         </DashboardLayout>
-      </AppShell>
+      </AppShellEnhanced>
     </AuthGuard>
   )
 }
