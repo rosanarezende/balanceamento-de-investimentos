@@ -146,14 +146,14 @@ Consulte [`config/MERMAID_QUALITY_CONFIG.md`](./config/MERMAID_QUALITY_CONFIG.md
 ### Scripts NPM para Diagramas
 
 ```bash
-# Gerar todos os formatos (PNG + SVG)
+# Gerar diagrama PNG em alta qualidade
 npm run generate-diagram
 
-# Gerar apenas PNG (padrão para docs)
-npm run generate-diagram:png
-
-# Gerar apenas SVG (padrão para web)
+# Gerar diagrama SVG vetorial
 npm run generate-diagram:svg
+
+# Gerar ambos com arquivamento automático
+npm run generate-diagram:both
 ```
 
 ### Configuração de Qualidade
