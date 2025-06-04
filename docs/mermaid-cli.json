@@ -1,0 +1,49 @@
+{
+  "theme": "default",
+  "width": 1920,
+  "height": 1080,
+  "backgroundColor": "#FFFFFF",
+  "scale": 3,
+  "outputFormat": "png",
+  "quiet": false,
+  "puppeteerConfig": {
+    "headless": "new",
+    "args": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ]
+  },
+  "flowchart": {
+    "useMaxWidth": true,
+    "htmlLabels": true,
+    "curve": "basis",
+    "padding": 25,
+    "nodeSpacing": 75,
+    "rankSpacing": 100
+  },
+  "themeVariables": {
+    "fontFamily": "Inter, Segoe UI, Tahoma, Geneva, Verdana, sans-serif",
+    "fontSize": "16px",
+    "textColor": "#1A202C",
+    "primaryTextColor": "#000000",
+    "lineColor": "#4A5568",
+    "arrowheadColor": "#4A5568",
+    "nodeBorder": "#333333",
+    "clusterBkg": "#F7FAFC",
+    "clusterBorder": "#CBD5E0",
+    "titleColor": "#2D3748",
+    "uiFill": "#D0E8FF",
+    "uiStroke": "#3399FF",
+    "serviceFill": "#DFF7D8",
+    "serviceStroke": "#28A745",
+    "apiFill": "#C8F0FF",
+    "apiStroke": "#0CA2DB",
+    "dataFill": "#FFE8B8",
+    "dataStroke": "#E09F3E",
+    "externalFill": "#E0E0E0",
+    "externalStroke": "#A0A0A0",
+    "infraFill": "#F0E6FF",
+    "infraStroke": "#8C41FF",
+    "edgeLabelBackground": "#FFFFFF"
+  }
+}
