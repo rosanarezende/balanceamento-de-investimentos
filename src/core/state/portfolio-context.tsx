@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/core/state/auth-context";
 import {
@@ -20,7 +20,7 @@ import {
   StockWithDetails,
   PortfolioSummary
 } from "@/core/types";
-import { isValidNumber } from "@/core/utils";
+import { safeNumber } from "@/core/utils";
 
 /**
  * Interface para o contexto de portfólio
@@ -413,18 +413,20 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
       // Calcular detalhes com os preços disponíveis
       const detailedStocks = stocksArray.map(stock => {
         // Garantir que preço e quantidade sejam números válidos
-        const currentPrice = isValidNumber(stockPrices[stock.ticker])
-          ? stockPrices[stock.ticker]
-          : 0;
-        const quantity = isValidNumber(stock.quantity)
-          ? stock.quantity
-          : 0;
+        const currentPrice = safeNumber(stockPrices[stock.ticker]);
+        const quantity = safeNumber(stock.quantity);
         const currentValue = currentPrice * quantity;
+
+        // Simular variação diária para cada ação
+        const dailyChangePercentage = (Math.random() - 0.5) * 10; // Entre -5% e +5%
+        const dailyChange = (dailyChangePercentage / 100) * currentPrice;
 
         return {
           ...stock,
           currentPrice,
           currentValue,
+          dailyChange,
+          dailyChangePercentage,
           currentPercentage: 0, // Será calculado depois
           targetValue: 0, // Será calculado depois
           targetDifference: 0, // Será calculado depois
@@ -434,7 +436,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
 
       // Calcular valor total da carteira com validação
       const totalValue = detailedStocks.reduce((sum, stock) => {
-        return sum + (isNaN(stock.currentValue) ? 0 : stock.currentValue);
+        return sum + safeNumber(stock.currentValue);
       }, 0);
 
       // Calcular percentuais e diferenças
@@ -463,38 +465,58 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     }
   }, [stocks, stockPrices]);
 
+  // Verificar se há ativos na carteira
+  const hasStocks = Object.keys(stocks).length > 0;
+
+  // Verificar se há ativos elegíveis para investimento (marcados como "Comprar")
+  const hasEligibleStocks = stocksWithDetails.some(stock => stock.userRecommendation === "Comprar");
+
   // Calcular valor total da carteira com validação robusta
   const totalPortfolioValue = stocksWithDetails.reduce(
     (sum, stock) => {
-      // Garantir que currentValue seja um número válido
-      const value = isValidNumber(stock.currentValue) ? stock.currentValue : 0;
+      const value = safeNumber(stock.currentValue);
       return sum + value;
     },
     0
   );
 
-  // Verificar se há ativos na carteira
-  // const hasStocks = Object.keys(stocks).length > 0;
+  // Calcular métricas de performance do portfólio
+  const totalValue = safeNumber(totalPortfolioValue);
 
-  // Verificar se há ativos elegíveis para investimento (marcados como "Comprar")
-  const hasEligibleStocks = stocksWithDetails.some(stock => stock.userRecommendation === "Comprar");
+  const totalDailyChange = stocksWithDetails.reduce((sum, stock) => {
+    const change = safeNumber(stock.dailyChange);
+    const quantity = safeNumber(stock.quantity);
+    return sum + (change * quantity);
+  }, 0);
 
-  // Criar objeto de resumo do portfólio
+  // Calcular percentual de variação diária da carteira
+  const dailyChangePercentage = totalValue > 0 ? (totalDailyChange / totalValue) * 100 : 0;
+
+  // Performance baseada na variação total da carteira (mais simples e correto)
+  const performanceToday: "neutral" | "up" | "down" =
+    dailyChangePercentage > 0 ? "up" :
+      dailyChangePercentage < 0 ? "down" :
+        "neutral";
+
+  // Criar objeto de resumo do portfólio com todas as métricas calculadas
   const portfolioSummary: PortfolioSummary = {
-    totalValue: isNaN(totalPortfolioValue) ? 0 : totalPortfolioValue,
+    totalValue,
     stockCount: stocksWithDetails.length,
-    hasEligibleStocks
+    hasEligibleStocks,
+    dailyChange: totalDailyChange,
+    dailyChangePercentage,
+    performanceToday
   };
 
   // Memoizar o valor do contexto para evitar renderizações desnecessárias
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     // Dados
     stocks,
     stocksWithDetails,
     portfolioSummary,
     totalPortfolioValue: portfolioSummary.totalValue,
-    hasStocks: Object.keys(stocks).length > 0,
-    hasEligibleStocks: stocksWithDetails.some(stock => stock.quantity > 0),
+    hasStocks,
+    hasEligibleStocks,
 
     // Estado
     loading: loading || pricesLoading,
@@ -508,7 +530,23 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     addStockToPortfolio,
     removeStockFromPortfolio,
     updateStockInPortfolio
-  };
+  }), [
+    stocks,
+    stocksWithDetails,
+    portfolioSummary,
+    hasStocks,
+    hasEligibleStocks,
+    loading,
+    pricesLoading,
+    error,
+    lastUpdated,
+    isRefreshing,
+    pendingOperations.size,
+    refreshPortfolio,
+    addStockToPortfolio,
+    removeStockFromPortfolio,
+    updateStockInPortfolio
+  ]);
 
   return (
     <PortfolioContext.Provider value={contextValue}>

@@ -24,7 +24,7 @@ export function createError(message: string, code?: string, details?: unknown): 
  * @param value - Valor a ser validado
  * @returns true se for um número válido, false caso contrário
  */
-export function isValidNumber(value: unknown): boolean {
+export function isValidNumber(value: unknown): value is number {
   return typeof value === 'number' && !isNaN(value) && isFinite(value);
 }
 
@@ -52,4 +52,14 @@ export function handleError(error: unknown): ErrorInfo {
   } else {
     return createError('Ocorreu um erro desconhecido', undefined, error);
   }
+}
+
+/**
+ * Converte um valor para número válido ou retorna 0
+ * Encapsula o padrão repetitivo: isValidNumber(value) ? value : 0
+ * @param value - Valor a ser convertido
+ * @returns Número válido ou 0
+ */
+export function safeNumber(value: unknown): number {
+  return isValidNumber(value) ? value : 0;
 }
