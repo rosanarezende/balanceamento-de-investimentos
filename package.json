@@ -18,9 +18,10 @@
     "pretest:watch": "bash scripts/check-node-version.sh",
     "test:watch": "jest --watch",
     "clean": "rm -rf node_modules dist",
-    "generate-diagram": "mmdc -i ./docs/arquitetura.mmd -o ./docs/arquitetura.png -c ./docs/mermaid-cli.json",
-    "generate-diagram:svg": "mmdc -i ./docs/arquitetura.mmd -o ./docs/arquitetura.svg -c ./docs/mermaid-cli.json",
-    "generate-diagram:both": "npm run generate-diagram && npm run generate-diagram:svg"
+    "_archive-current-diagrams": "TIMESTAMP=$(date +%Y%m%d-%H%M%S) && mkdir -p ./docs/arquivo && (test -f ./docs/arquitetura.png && mv ./docs/arquitetura.png ./docs/arquivo/arquitetura_\"$TIMESTAMP\".png && echo \"Arquivado: ./docs/arquivo/arquitetura_\"$TIMESTAMP\".png\" || echo \"Info: ./docs/arquitetura.png não encontrado para arquivar.\") && (test -f ./docs/arquitetura.svg && mv ./docs/arquitetura.svg ./docs/arquivo/arquitetura_\"$TIMESTAMP\".svg && echo \"Arquivado: ./docs/arquivo/arquitetura_\"$TIMESTAMP\".svg\" || echo \"Info: ./docs/arquitetura.svg não encontrado para arquivar.\")",
+    "generate-diagram": "npx mmdc -i ./docs/arquitetura.mmd -o ./docs/arquitetura.png -c ./docs/mermaid-cli.json -s 3 -w 1920 -H 1080 && echo \"Gerado: ./docs/arquitetura.png\"",
+    "generate-diagram:svg": "npx mmdc -i ./docs/arquitetura.mmd -o ./docs/arquitetura.svg -c ./docs/mermaid-cli.json -s 3 -w 1920 -H 1080 && echo \"Gerado: ./docs/arquitetura.svg\"",
+    "generate-diagram:both": "npm run _archive-current-diagrams && npm run generate-diagram && npm run generate-diagram:svg"
   },
   "dependencies": {
     "@ai-sdk/openai": "1.0.0",

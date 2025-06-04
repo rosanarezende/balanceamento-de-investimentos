@@ -138,6 +138,8 @@ Este diagrama foi criado com o Mermaid.js e hospedado no site [GitDiagram](https
 
 ![Diagrama de Arquitetura do EquilibreInvest](public/diagram.png)
 
+> 📋 **Configuração de Qualidade**: Para detalhes sobre como os diagramas são gerados com alta qualidade e configurações personalizadas, consulte [MERMAID_QUALITY_CONFIG.md](MERMAID_QUALITY_CONFIG.md).
+
 <details>
 <summary>Código no Mermaid</summary>
 
