@@ -321,6 +321,61 @@ NEXT_PUBLIC_OFFLINE_MODE=false  # Defina como 'true' para testes sem dependênci
 
 ---
 
+## 🛠️ Modo de Desenvolvimento
+
+Para facilitar o desenvolvimento local sem dependências externas, a aplicação possui um **modo de desenvolvimento** que permite executar todas as funcionalidades usando dados simulados.
+
+### Configuração do Modo de Desenvolvimento
+
+1. **Configure as variáveis de ambiente** no arquivo `.env.local`:
+   ```bash
+   # Modo de desenvolvimento (bypass de todas as dependências externas)
+   NEXT_PUBLIC_DEVELOPMENT_MODE=true
+   NEXT_PUBLIC_MOCK_AUTH=true
+   NEXT_PUBLIC_MOCK_DATA=true
+   ```
+
+2. **Execute a aplicação**:
+   ```bash
+   npm run dev
+   ```
+
+### O que o Modo de Desenvolvimento Oferece
+
+- **🔐 Autenticação Simulada**: Bypass completo do Firebase Auth
+- **📊 Dados Mock de Carteira**: Portfolio pré-configurado com ações populares (AAPL, GOOGL, MSFT, AMZN, TSLA)
+- **💰 Preços Simulados**: Cotações mockadas para todas as ações
+- **📈 Watchlist Mock**: Lista de acompanhamento pré-configurada
+- **🔄 Simulações de Balanceamento**: Histórico de simulações para demonstração
+- **⚡ Sem Dependências Externas**: Funciona completamente offline
+
+### Dados de Demonstração
+
+O modo de desenvolvimento inclui:
+
+- **Usuário Mock**: `dev@example.com` (Usuário Desenvolvimento)
+- **Portfolio**: 5 ações com alocações e recomendações
+- **Preços**: Valores realistas para demonstração
+- **Watchlist**: NVDA e META com preços-alvo
+- **Simulações**: Histórico de 2 simulações exemplo
+
+### Logs de Desenvolvimento
+
+Quando ativo, o modo de desenvolvimento gera logs informativos no console do navegador:
+```
+[DEV MODE] Usando dados mock para portfólio
+[DEV MODE] Usando preços mock para múltiplas ações: AAPL, GOOGL, MSFT
+```
+
+### Desabilitando o Modo de Desenvolvimento
+
+Para usar a aplicação com dados reais:
+1. Defina `NEXT_PUBLIC_DEVELOPMENT_MODE=false` no `.env.local`
+2. Configure todas as credenciais do Firebase e APIs externas
+3. Reinicie a aplicação
+
+---
+
 ## Como Contribuir
 
 Contribuições são muito bem-vindas! Se você tem interesse em ajudar a melhorar o EquilibreInvest, seja com novas funcionalidades, correção de bugs ou otimizações, sinta-se à vontade para:
