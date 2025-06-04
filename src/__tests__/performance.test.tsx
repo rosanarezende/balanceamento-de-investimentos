@@ -19,8 +19,8 @@ import { TestWrapper } from './helpers/test-wrapper'
 import {
   mockAuth,
   mockAuthenticatedUser,
-  resetAllMocks
-} from './mocks/firebase'
+  resetAuthMocks
+} from '@/__mocks__'
 
 // Mocks dos serviços
 jest.mock('@/services/firebase/firestore')
@@ -51,7 +51,7 @@ describe.skip('Testes de Performance', () => {
   }
 
   beforeEach(() => {
-    resetAllMocks()
+    resetAuthMocks()
 
     // Setup usuário autenticado
     mockAuthenticatedUser()

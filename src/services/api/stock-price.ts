@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { shouldUseMockData, mockDelay, devLog, simulateStockPrice, simulateStockPrices } from "@/core/utils/development";
+import { shouldUseMockData, mockDelay, devLog, simulateStockPrice, simulateStockPrices } from "@/__mocks__";
 
 /**
  * Serviço para obtenção de preços de ações

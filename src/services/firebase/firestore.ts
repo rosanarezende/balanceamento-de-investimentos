@@ -26,7 +26,7 @@ import {
   mockWatchlistData,
   mockSimulations,
   devLog
-} from "@/core/utils/development";
+} from "@/__mocks__";
 
 /**
  * Serviço para interação com o Firestore

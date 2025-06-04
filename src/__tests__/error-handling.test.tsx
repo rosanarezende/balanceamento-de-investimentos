@@ -22,8 +22,8 @@ import {
   mockAuth,
   mockAuthenticatedUser,
   mockUnauthenticatedUser,
-  resetAllMocks
-} from './mocks/firebase'
+  resetAuthMocks
+} from '@/__mocks__'
 import {
   expectErrorToast,
 } from './helpers/test-utils'
@@ -40,7 +40,7 @@ describe('Testes de Tratamento de Erros', () => {
   const mockStockPriceService = jest.requireMock('@/services/api/stock-price')
 
   beforeEach(() => {
-    resetAllMocks()
+    resetAuthMocks()
 
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }

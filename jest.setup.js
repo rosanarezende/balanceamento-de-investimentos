@@ -1,4 +1,4 @@
-/* global jest */
+/* global jest, beforeAll, afterAll */
 
 // Optional: configure or set up a testing framework before each test.
 // If you delete this file, remove `setupFilesAfterEnv` from `jest.config.js`
@@ -77,6 +77,17 @@ Object.defineProperty(window, 'location', {
   },
   writable: true,
 });
+
+beforeAll(() => {
+  // Silenciar console.error durante os testes
+  jest.spyOn(console, 'error').mockImplementation(() => {})
+  jest.spyOn(console, 'warn').mockImplementation(() => {})
+})
+
+afterAll(() => {
+  // Restaurar console.error após os testes
+  jest.restoreAllMocks()
+})
 
 // Mock Firebase
 const mockApp = { name: '[DEFAULT]' };

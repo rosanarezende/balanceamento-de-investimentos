@@ -18,10 +18,10 @@ import {
   mockAuth,
   mockUser,
   mockUnauthenticatedUser,
-  resetAllMocks,
+  resetAuthMocks,
   setupSuccessfulAuth,
   mockAuthenticatedUser
-} from './mocks/firebase'
+} from '@/__mocks__'
 
 // Mocks dos serviços - usar os mocks básicos do jest.setup.js
 jest.mock('next/navigation')
@@ -31,7 +31,7 @@ describe('Testes de Autenticação', () => {
   const mockRouter = jest.requireMock('next/navigation')
 
   beforeEach(() => {
-    resetAllMocks()
+    resetAuthMocks()
     jest.clearAllMocks()
 
     // Configurar mocks do router

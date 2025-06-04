@@ -20,8 +20,8 @@ import { TestWrapper } from './helpers/test-wrapper'
 import {
   mockAuth,
   mockAuthenticatedUser,
-  resetAllMocks
-} from './mocks/firebase'
+  resetAuthMocks
+} from '@/__mocks__'
 import {
   expectErrorToast,
   expectSuccessToast
@@ -56,7 +56,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
   }
 
   beforeEach(() => {
-    resetAllMocks()
+    resetAuthMocks()
 
     // Setup usuário autenticado
     mockAuthenticatedUser()

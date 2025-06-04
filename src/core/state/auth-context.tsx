@@ -11,7 +11,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/services/firebase/config";
 import { AuthContextType, UserData } from "@/core/types";
 import { handleError } from "@/core/utils";
-import { isDevelopmentMode, shouldMockAuth, getMockUser, getMockUserData } from "@/core/utils/development";
+import { isDevelopmentMode, shouldMockAuth, mockUser, getMockUserData } from "@/__mocks__";
 
 /**
  * Contexto de autenticação
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Verificar se estamos em modo de desenvolvimento com mock auth
     if (isDevelopmentMode() && shouldMockAuth()) {
       // Em modo de desenvolvimento, usar dados mockados
-      setUser(getMockUser() as User);
+      setUser(mockUser as User);
       setUserData(getMockUserData());
       setLoading(false);
       return;
@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Se estamos em modo de desenvolvimento com mock auth, simular login
       if (isDevelopmentMode() && shouldMockAuth()) {
-        setUser(getMockUser() as User);
+        setUser(mockUser as User);
         setUserData(getMockUserData());
         setLoading(false);
         return;
