@@ -1,0 +1,14 @@
+{
+  "theme": "default",
+  "backgroundColor": "#ffffff",
+  "width": 1600,
+  "height": 2000,
+  "configFile": "./docs/mermaid.config.js",
+  "puppeteerConfig": {
+    "headless": true,
+    "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+  },
+  "outputFormat": "png",
+  "scale": 2,
+  "quality": 100
+}

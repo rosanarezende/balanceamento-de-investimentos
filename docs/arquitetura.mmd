@@ -1,0 +1,148 @@
+%% ===============================================
+%% DIAGRAMA DE ARQUITETURA - EQUILIBREINVEST
+%% ===============================================
+%% Orientação: Vertical (Top-Bottom) para melhor legibilidade
+%% Cores padronizadas por camada para fácil identificação
+
+flowchart TB
+    %% ===============================================
+    %% CAMADA FRONTEND
+    %% ===============================================
+    subgraph "🎨 Frontend Layer (Next.js + React)"
+        direction TB
+        
+        %% Core App Components
+        AppShell["🏠 App Shell<br/><small>Layout Principal</small>"]:::ui
+        ThemeProvider["🌓 Theme Provider<br/><small>Gerenciamento de Tema</small>"]:::ui
+        UIComponents["🧩 UI Components<br/><small>Biblioteca de Componentes</small>"]:::ui
+
+        %% Pages Subgraph
+        subgraph "📄 Application Pages"
+            direction TB
+            LoginPage["🔐 Login Page<br/><small>Autenticação Google</small>"]:::ui
+            CarteiraPage["💼 Carteira Page<br/><small>Gestão de Watchlist</small>"]:::ui
+            CalculadoraPage["🧮 Calculadora Page<br/><small>Balanceamento Principal</small>"]:::ui
+            RecomendacoesPage["💡 Recomendações Page<br/><small>Sugestões IA</small>"]:::ui
+            ResultadoPage["📊 Resultado Page<br/><small>Resultados & Salvamento</small>"]:::ui
+            HistoricoList["📈 Histórico List<br/><small>Lista de Simulações</small>"]:::ui
+            HistoricoDetail["🔍 Histórico Detail<br/><small>Detalhes da Simulação</small>"]:::ui
+            EditarAtivos["✏️ Editar Ativos<br/><small>CRUD de Ações</small>"]:::ui
+        end
+
+        %% State Management Subgraph  
+        subgraph "🧠 Global State Management"
+            direction TB
+            AuthContext["👤 Auth Context<br/><small>Estado de Autenticação</small>"]:::service
+            PortfolioContext["💰 Portfolio Context<br/><small>Estado da Carteira</small>"]:::service
+            ThemeContext["🎨 Theme Context<br/><small>Estado do Tema</small>"]:::service
+        end
+    end
+
+    %% ===============================================
+    %% CAMADA BACKEND/API
+    %% ===============================================
+    subgraph "⚙️ Backend Layer (API Routes)"
+        direction TB
+        StockPriceAPI["📈 Stock Price API<br/><small>/api/stock-price</small>"]:::api
+        AIRecAPI["🤖 AI Recommendation API<br/><small>/api/ai-recommendation</small>"]:::api
+    end
+
+    %% ===============================================
+    %% CAMADA DE DADOS
+    %% ===============================================
+    subgraph "🗄️ Data Layer (Firebase Cloud)"
+        direction TB
+        FirebaseAuth["🔒 Firebase Auth<br/><small>Autenticação OAuth</small>"]:::data
+        FirestoreDB["📚 Firestore DB<br/><small>Banco NoSQL</small>"]:::data
+    end
+
+    %% ===============================================
+    %% SERVIÇOS EXTERNOS
+    %% ===============================================
+    subgraph "🌐 External Services"
+        direction TB
+        MarketDataAPI["📊 Market Data APIs<br/><small>Alpha Vantage / Yahoo</small>"]:::external
+        AIService["🧠 AI Services<br/><small>Hugging Face / OpenAI</small>"]:::external
+    end
+
+    %% ===============================================
+    %% INFRAESTRUTURA
+    %% ===============================================
+    subgraph "🏗️ Infrastructure & CI/CD"
+        direction TB
+        Vercel["🚀 Vercel Deploy<br/><small>Hospedagem & CDN</small>"]:::infra
+        GitHubActions["⚡ GitHub Actions<br/><small>CI/CD Pipeline</small>"]:::infra
+    end
+
+    %% ===============================================
+    %% FLUXOS DE DADOS PRINCIPAIS
+    %% ===============================================
+    
+    %% Autenticação e Estado Global
+    LoginPage -.->|"🔐 autenticação"| AuthContext
+    AuthContext -.->|"📡 OAuth login"| FirebaseAuth
+    ThemeProvider -.->|"🎨 fornece tema"| ThemeContext
+    
+    %% Gestão de Carteira
+    CarteiraPage -.->|"💾 CRUD ações"| FirestoreDB
+    CarteiraPage -.->|"📈 busca preços"| StockPriceAPI
+    EditarAtivos -.->|"✏️ edita portfolio"| FirestoreDB
+    
+    %% Calculadora e Recomendações
+    CalculadoraPage -.->|"🤖 solicita IA"| AIRecAPI
+    CalculadoraPage -.->|"📊 preços atuais"| StockPriceAPI
+    CalculadoraPage -.->|"➡️ navega para"| RecomendacoesPage
+    RecomendacoesPage -.->|"🧠 processamento"| AIRecAPI
+    RecomendacoesPage -.->|"➡️ navega para"| ResultadoPage
+    ResultadoPage -.->|"💾 salva simulação"| FirestoreDB
+    
+    %% Histórico e Consultas
+    HistoricoList -.->|"📚 lista simulações"| FirestoreDB
+    HistoricoList -.->|"➡️ navega para"| HistoricoDetail
+    HistoricoDetail -.->|"🔍 detalhes"| FirestoreDB
+    
+    %% APIs e Serviços Externos
+    StockPriceAPI -.->|"📡 proxy request"| MarketDataAPI
+    AIRecAPI -.->|"🤖 gera recomendações"| AIService
+    
+    %% Estrutura da Aplicação
+    AppShell -.->|"🏗️ envolve"| ThemeProvider
+    AppShell -.->|"🧩 usa"| UIComponents
+    UIComponents -.->|"🎨 componentes"| LoginPage
+    UIComponents -.->|"🎨 componentes"| CarteiraPage
+    UIComponents -.->|"🎨 componentes"| CalculadoraPage
+    
+    %% CI/CD e Infraestrutura
+    GitHubActions -.->|"🚀 deploy para"| Vercel
+
+    %% Click Events
+    click AppShell "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/layout.tsx"
+    click ThemeProvider "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/components/theme-provider.tsx"
+    click UIComponents "https://github.com/rosanarezende/balanceamento-de-investimentos/tree/main/src/components/ui/"
+    click LoginPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/login/page.tsx"
+    click CalculadoraPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/page.tsx"
+    click RecomendacoesPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/recomendacoes/page.tsx"
+    click ResultadoPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/resultado/page.tsx"
+    click HistoricoList "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/historico/page.tsx"
+    click HistoricoDetail "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/historico/[id]/page.tsx"
+    click EditarAtivos "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/editar-ativos/page.tsx"
+    click CarteiraPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/carteira/page.tsx"
+    click AuthContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/auth-context.tsx"
+    click PortfolioContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/portfolio-context.tsx"
+    click ThemeContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/theme-context.tsx"
+    click StockPriceAPI "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/api/stock-price/route.ts"
+    click AIRecAPI "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/api/ai-recommendation/route.ts"
+    click FirebaseAuth "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/services/firebase/config.ts"
+    click FirestoreDB "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/services/firebase/firestore.ts"
+    click GitHubActions "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/.github/workflows/ci.yml"
+    click Vercel "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/next.config.mjs"
+
+    %% ===============================================
+    %% ESTILOS E CORES
+    %% ===============================================
+    classDef ui fill:#D0E8FF,stroke:#2563eb,stroke-width:2px,color:#000,font-weight:bold
+    classDef service fill:#DFF7D8,stroke:#16a34a,stroke-width:2px,color:#000,font-weight:bold
+    classDef api fill:#C8F0FF,stroke:#0284c7,stroke-width:2px,color:#000,font-weight:bold
+    classDef data fill:#FFE8B8,stroke:#ea580c,stroke-width:2px,color:#000,font-weight:bold
+    classDef external fill:#E0E0E0,stroke:#6b7280,stroke-width:2px,color:#000,font-weight:bold
+    classDef infra fill:#F0E6FF,stroke:#7c3aed,stroke-width:2px,color:#000,font-weight:bold
