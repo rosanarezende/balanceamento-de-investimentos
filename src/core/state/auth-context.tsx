@@ -11,6 +11,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/services/firebase/config";
 import { AuthContextType, UserData } from "@/core/types";
 import { handleError } from "@/core/utils";
+import { isDevelopmentMode, shouldMockAuth, getMockUser, getMockUserData } from "@/core/utils/development";
 
 /**
  * Contexto de autenticação
@@ -65,6 +66,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Usar uma variável para controlar se o componente ainda está montado
     let isMounted = true;
 
+    // Verificar se estamos em modo de desenvolvimento com mock auth
+    if (isDevelopmentMode() && shouldMockAuth()) {
+      // Em modo de desenvolvimento, usar dados mockados
+      setUser(getMockUser() as User);
+      setUserData(getMockUserData());
+      setLoading(false);
+      return;
+    }
+
     if (!auth) {
       console.error("Firebase Auth não inicializado.");
       setError("Erro de configuração de autenticação.");
@@ -115,6 +125,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError(null);
+
+      // Se estamos em modo de desenvolvimento com mock auth, simular login
+      if (isDevelopmentMode() && shouldMockAuth()) {
+        setUser(getMockUser() as User);
+        setUserData(getMockUserData());
+        setLoading(false);
+        return;
+      }
+
       if (!auth || !googleProvider) {
         console.error("Firebase Auth ou Google Provider não inicializado.");
         setError("Erro de configuração de autenticação.");
