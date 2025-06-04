@@ -20,6 +20,8 @@ export const StockWithDetailsSchema = StockSchema.extend({
   targetValue: z.number().min(0, "Valor alvo deve ser maior ou igual a 0"),
   targetDifference: z.number(),
   targetDifferencePercentage: z.number(),
+  dailyChange: z.number().optional(),
+  dailyChangePercentage: z.number().optional(),
 });
 
 /**
@@ -66,6 +68,9 @@ export const PortfolioSummarySchema = z.object({
   totalValue: z.number().min(0),
   stockCount: z.number().min(0),
   hasEligibleStocks: z.boolean(),
+  dailyChange: z.number().optional(),
+  dailyChangePercentage: z.number().optional(),
+  performanceToday: z.enum(["up", "down", "neutral"]).optional(),
 });
 
 // Exportar tipos derivados dos schemas Zod

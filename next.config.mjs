@@ -53,7 +53,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/dashboard',
+        destination: '/carteira',
         permanent: true,
       },
     ];

@@ -45,7 +45,7 @@ describe('Testes de Tratamento de Erros', () => {
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
-    jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
+    jest.requireMock('next/navigation').usePathname.mockReturnValue('/carteira')
 
     // Setup Firebase Auth
     Object.assign(jest.requireMock('firebase/auth'), mockAuth)

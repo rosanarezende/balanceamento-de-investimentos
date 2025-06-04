@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { ArrowLeft, Info, RefreshCw } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-import AuthGuard from "@/components/auth-guard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { LoadingState } from "@/components/ui/loading-state"
@@ -354,190 +353,188 @@ export default function ResultadoCalculadora() {
   }
 
   return (
-    <AuthGuard>
-      <div className="container mx-auto max-w-md">
-        <Card className="border-none shadow-none bg-card">
-          <div className="p-4 flex items-center border-b border-border">
-            <button onClick={handleBack} className="mr-4 text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft size={24} />
-            </button>
-            <div>
-              <h1 className="font-medium text-foreground">Calculadora De Balanceamento</h1>
-              <p className="text-xs text-muted-foreground">Calcule como reorganizar seus investimentos</p>
-            </div>
+    <div className="container mx-auto max-w-md">
+      <Card className="border-none shadow-none bg-card">
+        <div className="p-4 flex items-center border-b border-border">
+          <button onClick={handleBack} className="mr-4 text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft size={24} />
+          </button>
+          <div>
+            <h1 className="font-medium text-foreground">Calculadora De Balanceamento</h1>
+            <p className="text-xs text-muted-foreground">Calcule como reorganizar seus investimentos</p>
           </div>
+        </div>
 
-          <CardContent className="p-4">
-            <h2 className="text-xl font-bold mb-2 text-foreground">3º Passo</h2>
+        <CardContent className="p-4">
+          <h2 className="text-xl font-bold mb-2 text-foreground">3º Passo</h2>
 
-            <p className="text-sm text-muted-foreground mb-4">
-              Baseado nos ativos da carteira, vamos exibir as ações que recomendamos de acordo com o valor informado e
-              suas preferências pessoais.
-            </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Baseado nos ativos da carteira, vamos exibir as ações que recomendamos de acordo com o valor informado e
+            suas preferências pessoais.
+          </p>
 
-            {error && (
-              <div className="bg-destructive/10 p-3 rounded-lg mb-4">
-                <p className="text-destructive text-sm">{error}</p>
-              </div>
-            )}
+          {error && (
+            <div className="bg-destructive/10 p-3 rounded-lg mb-4">
+              <p className="text-destructive text-sm">{error}</p>
+            </div>
+          )}
 
-            {loading || portfolioLoading ? (
-              <LoadingState message="Calculando recomendações de investimento..." />
-            ) : !hasEligibleStocks ? (
-              <div className="bg-yellow-500/10 p-4 rounded-lg mb-6">
-                <h3 className="font-bold text-center mb-2 text-foreground">Nenhum ativo elegível para aporte</h3>
-                <p className="text-sm text-muted-foreground">
-                  Não há ativos marcados como &quot;Comprar&quot; que estejam abaixo do peso na sua carteira. Considere alterar
-                  suas recomendações ou ajustar os percentuais META.
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefreshPortfolio}
-                  disabled={isRefreshing}
-                  className="w-full mt-4"
-                >
-                  {isRefreshing ? (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      Atualizando...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Atualizar Carteira
-                    </>
-                  )}
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4">
-                  <div className="bg-card border rounded-lg p-4">
-                    <h3 className="font-medium mb-2">Resumo do Investimento</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Valor do Aporte</p>
-                        <p className="font-medium">{formatCurrency(totalInvestment)}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Carteira Atual</p>
-                        <p className="font-medium">{formatCurrency(totalPortfolioValue)}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Carteira Após Aporte</p>
-                        <p className="font-medium">{formatCurrency(newTotalPortfolioValue)}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Ativos Elegíveis</p>
-                        <p className="font-medium">
-                          {allocations.filter((a) => a.isEligibleForInvestment && a.investmentAmount > 0).length} de{" "}
-                          {allocations.length}
-                        </p>
-                      </div>
+          {loading || portfolioLoading ? (
+            <LoadingState message="Calculando recomendações de investimento..." />
+          ) : !hasEligibleStocks ? (
+            <div className="bg-yellow-500/10 p-4 rounded-lg mb-6">
+              <h3 className="font-bold text-center mb-2 text-foreground">Nenhum ativo elegível para aporte</h3>
+              <p className="text-sm text-muted-foreground">
+                Não há ativos marcados como &quot;Comprar&quot; que estejam abaixo do peso na sua carteira. Considere alterar
+                suas recomendações ou ajustar os percentuais META.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefreshPortfolio}
+                disabled={isRefreshing}
+                className="w-full mt-4"
+              >
+                {isRefreshing ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Atualizando...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Atualizar Carteira
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4">
+                <div className="bg-card border rounded-lg p-4">
+                  <h3 className="font-medium mb-2">Resumo do Investimento</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Valor do Aporte</p>
+                      <p className="font-medium">{formatCurrency(totalInvestment)}</p>
                     </div>
-                  </div>
-
-                  {aiRecommendation && (
-                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                      <div className="flex items-start">
-                        <Info className="text-blue-500 mr-2 mt-0.5 h-5 w-5 shrink-0" />
-                        <div>
-                          <h3 className="font-medium text-blue-500 mb-1">Análise do Consultor</h3>
-                          <p className="text-sm text-muted-foreground">{aiRecommendation}</p>
-                        </div>
-                      </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Carteira Atual</p>
+                      <p className="font-medium">{formatCurrency(totalPortfolioValue)}</p>
                     </div>
-                  )}
-
-                  {aiLoading && (
-                    <div className="bg-card border rounded-lg p-4">
-                      <div className="flex items-center justify-center">
-                        <RefreshCw className="h-5 w-5 animate-spin mr-2" />
-                        <p className="text-sm">Gerando análise personalizada...</p>
-                      </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Carteira Após Aporte</p>
+                      <p className="font-medium">{formatCurrency(newTotalPortfolioValue)}</p>
                     </div>
-                  )}
-
-                  <div className="bg-card border rounded-lg overflow-hidden">
-                    <div className="p-4 border-b">
-                      <h3 className="font-medium">Recomendações de Compra</h3>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Ativos Elegíveis</p>
+                      <p className="font-medium">
+                        {allocations.filter((a) => a.isEligibleForInvestment && a.investmentAmount > 0).length} de{" "}
+                        {allocations.length}
+                      </p>
                     </div>
-                    <div className="divide-y">
-                      {allocations
-                        .filter((allocation) => allocation.quantityToAcquire > 0)
-                        .sort((a, b) => b.investmentAmount - a.investmentAmount)
-                        .map((allocation) => (
-                          <div key={allocation.ticker} className="p-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <div className="font-medium">{allocation.ticker}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {allocation.currentPercentage.toFixed(1)}% → {allocation.targetPercentage.toFixed(1)}%
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div>
-                                <span className="text-muted-foreground">Comprar: </span>
-                                <span className="font-medium">{allocation.quantityToAcquire} ações</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Investir: </span>
-                                <span className="font-medium">{formatCurrency(allocation.investmentAmount)}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Preço atual: </span>
-                                <span>{formatCurrency(allocation.currentPrice)}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Novo total: </span>
-                                <span>{allocation.newQuantity} ações</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-
-                      {allocations.filter((allocation) => allocation.quantityToAcquire > 0).length === 0 && (
-                        <div className="p-4 text-center">
-                          <p className="text-sm text-muted-foreground">
-                            Não há recomendações de compra para o valor informado.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col space-y-2">
-                    <Button onClick={() => setShowTerms(true)}>Salvar Simulação</Button>
-                    <Button variant="outline" onClick={handleBack}>
-                      Voltar
-                    </Button>
                   </div>
                 </div>
 
-                {showTerms && (
-                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-card rounded-lg max-w-md w-full p-6">
-                      <h3 className="font-bold text-lg mb-2">Salvar Simulação</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Esta simulação será salva no seu histórico para consulta futura. Você poderá acessá-la a qualquer
-                        momento na seção de histórico.
-                      </p>
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="outline" onClick={() => setShowTerms(false)}>
-                          Cancelar
-                        </Button>
-                        <Button onClick={handleAgreeTerms} disabled={savingSimulation}>
-                          {savingSimulation ? "Salvando..." : "Salvar"}
-                        </Button>
+                {aiRecommendation && (
+                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                    <div className="flex items-start">
+                      <Info className="text-blue-500 mr-2 mt-0.5 h-5 w-5 shrink-0" />
+                      <div>
+                        <h3 className="font-medium text-blue-500 mb-1">Análise do Consultor</h3>
+                        <p className="text-sm text-muted-foreground">{aiRecommendation}</p>
                       </div>
                     </div>
                   </div>
                 )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </AuthGuard>
+
+                {aiLoading && (
+                  <div className="bg-card border rounded-lg p-4">
+                    <div className="flex items-center justify-center">
+                      <RefreshCw className="h-5 w-5 animate-spin mr-2" />
+                      <p className="text-sm">Gerando análise personalizada...</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-card border rounded-lg overflow-hidden">
+                  <div className="p-4 border-b">
+                    <h3 className="font-medium">Recomendações de Compra</h3>
+                  </div>
+                  <div className="divide-y">
+                    {allocations
+                      .filter((allocation) => allocation.quantityToAcquire > 0)
+                      .sort((a, b) => b.investmentAmount - a.investmentAmount)
+                      .map((allocation) => (
+                        <div key={allocation.ticker} className="p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="font-medium">{allocation.ticker}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {allocation.currentPercentage.toFixed(1)}% → {allocation.targetPercentage.toFixed(1)}%
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <span className="text-muted-foreground">Comprar: </span>
+                              <span className="font-medium">{allocation.quantityToAcquire} ações</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Investir: </span>
+                              <span className="font-medium">{formatCurrency(allocation.investmentAmount)}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Preço atual: </span>
+                              <span>{formatCurrency(allocation.currentPrice)}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Novo total: </span>
+                              <span>{allocation.newQuantity} ações</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                    {allocations.filter((allocation) => allocation.quantityToAcquire > 0).length === 0 && (
+                      <div className="p-4 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          Não há recomendações de compra para o valor informado.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col space-y-2">
+                  <Button onClick={() => setShowTerms(true)}>Salvar Simulação</Button>
+                  <Button variant="outline" onClick={handleBack}>
+                    Voltar
+                  </Button>
+                </div>
+              </div>
+
+              {showTerms && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-card rounded-lg max-w-md w-full p-6">
+                    <h3 className="font-bold text-lg mb-2">Salvar Simulação</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Esta simulação será salva no seu histórico para consulta futura. Você poderá acessá-la a qualquer
+                      momento na seção de histórico.
+                    </p>
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={() => setShowTerms(false)}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleAgreeTerms} disabled={savingSimulation}>
+                        {savingSimulation ? "Salvando..." : "Salvar"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }

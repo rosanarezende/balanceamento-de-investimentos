@@ -60,7 +60,7 @@ describe.skip('Testes de Performance', () => {
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
-    jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
+    jest.requireMock('next/navigation').usePathname.mockReturnValue('/carteira')
 
     // Performance.now mock para medições
     const mockPerformance = {
@@ -504,7 +504,7 @@ describe.skip('Testes de Performance', () => {
     })
 
     it('deve detectar renders demorados', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => { })
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => { /* intentionally empty */ })
 
       // Simular componente com render lento
       const SlowComponent = () => {

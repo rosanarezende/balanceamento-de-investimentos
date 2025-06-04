@@ -14,7 +14,7 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       await signInWithGoogle()
-      router.push("/dashboard")
+      router.push("/carteira")
     } catch (err) {
       console.error("Erro ao fazer login com Google:", err)
     }
