@@ -1,17 +1,21 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { ArrowLeft, AlertTriangle, RefreshCw, CheckCircle } from "lucide-react"
+import { ArrowLeft, AlertTriangle, RefreshCw, CheckCircle, HelpCircle, Info } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { AppShellEnhanced } from "@/components/layout/app-shell-enhanced"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Alert } from "@/components/ui/alert"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
 
 import { usePortfolio } from "@/core/state/portfolio-context"
 import { useTheme } from "@/core/state/theme-context"
+import { formatCurrency } from "@/core/utils/formatting"
 
 export default function CalculadoraBalanceamento() {
   const [investmentValue, setInvestmentValue] = useState("")
@@ -25,12 +29,14 @@ export default function CalculadoraBalanceamento() {
     isRefreshing,
     lastUpdated,
     hasStocks,
-    hasEligibleStocks
+    hasEligibleStocks,
+    totalPortfolioValue
   } = usePortfolio()
 
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
 
   // Função para forçar a atualização da carteira
   const handleRefreshPortfolio = async () => {
@@ -151,52 +157,129 @@ export default function CalculadoraBalanceamento() {
 
   const { theme, toggleTheme } = useTheme()
 
+  // Calcular percentual sugerido para aporte
+  const suggestedPercentage = totalPortfolioValue > 0 ? Math.min(10, Math.max(1, Math.round(totalPortfolioValue * 0.05 / 100) * 100)) : 1000;
+  const suggestedValue = totalPortfolioValue > 0 ? (totalPortfolioValue * (suggestedPercentage / 100)) : 1000;
+  const formattedSuggestedValue = formatCurrency(suggestedValue);
+
   return (
     <AppShellEnhanced>
       <div className="container mx-auto max-w-md">
         <Card className="border-none shadow-none bg-card">
-          <div className="p-4 flex items-center border-b border-border">
-            <button onClick={handleBack} className="mr-4 text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft size={24} />
-            </button>
-            <div className="flex-1">
-              <h1 className="font-medium text-foreground">Calculadora De Balanceamento</h1>
-              <p className="text-xs text-muted-foreground">Calcule como reorganizar seus investimentos</p>
+          <CardHeader className="p-4 border-b border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <button onClick={handleBack} className="mr-4 text-muted-foreground hover:text-foreground transition-colors">
+                  <ArrowLeft size={24} />
+                </button>
+                <div>
+                  <CardTitle className="text-lg font-medium text-foreground">Calculadora de Balanceamento</CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">Calcule como reorganizar seus investimentos</CardDescription>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRefreshPortfolio}
+                        disabled={isRefreshing || portfolioLoading}
+                      >
+                        <RefreshCw className={`h-4 w-4 ${isRefreshing || portfolioLoading ? 'animate-spin' : ''}`} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Atualizar carteira</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleTheme}
+                      >
+                        {theme === 'dark' ? '🌙' : '☀️'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Alternar tema</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowInfo(!showInfo)}
+                      >
+                        <HelpCircle className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Informações sobre a calculadora</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRefreshPortfolio}
-              disabled={isRefreshing || portfolioLoading}
-              title="Atualizar carteira"
-              className="ml-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing || portfolioLoading ? 'animate-spin' : ''}`} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-              title="Alternar tema"
-              className="ml-2"
-            >
-              {theme === 'dark' ? '🌙' : '☀️'}
-            </Button>
-          </div>
+          </CardHeader>
 
           <CardContent className="p-6">
             <div className="flex flex-col items-center justify-center gap-6">
-              <h2 className="text-3xl font-bold text-center text-foreground">2º Passo</h2>
+              <div className="flex items-center justify-center w-full">
+                <div className="flex items-center justify-center bg-primary/10 rounded-full h-12 w-12 mr-4">
+                  <span className="text-primary font-bold text-lg">1</span>
+                </div>
+                <div className="h-0.5 w-8 bg-muted-foreground/30"></div>
+                <div className="flex items-center justify-center bg-primary rounded-full h-12 w-12 mx-4">
+                  <span className="text-primary-foreground font-bold text-lg">2</span>
+                </div>
+                <div className="h-0.5 w-8 bg-muted-foreground/30"></div>
+                <div className="flex items-center justify-center bg-primary/10 rounded-full h-12 w-12 ml-4">
+                  <span className="text-primary font-bold text-lg">3</span>
+                </div>
+              </div>
 
-              <p className="text-lg text-muted-foreground text-center">
-                Para iniciar a projeção de balanceamento você deve informar abaixo o valor que deseja investir
+              <h2 className="text-2xl font-bold text-center text-foreground">Valor do Aporte</h2>
+
+              <p className="text-base text-muted-foreground text-center">
+                Informe o valor que deseja investir para receber recomendações de balanceamento
               </p>
+
+              {/* Informações da calculadora */}
+              {showInfo && (
+                <Alert className="bg-primary/5 border-primary/20">
+                  <Info className="h-4 w-4 text-primary" />
+                  <AlertTitle>Como funciona a calculadora?</AlertTitle>
+                  <AlertDescription className="text-sm">
+                    <p className="mb-2">A calculadora de balanceamento ajuda você a distribuir seu novo aporte entre os ativos da sua carteira, buscando aproximá-los dos percentuais alvo definidos.</p>
+                    <ol className="list-decimal pl-4 space-y-1">
+                      <li>Informe o valor que deseja investir</li>
+                      <li>Verifique as recomendações para cada ativo</li>
+                      <li>Veja a distribuição sugerida para seu aporte</li>
+                    </ol>
+                    <p className="mt-2 text-xs">Apenas ativos marcados como "Comprar" serão considerados para o balanceamento.</p>
+                  </AlertDescription>
+                </Alert>
+              )}
 
               {/* Mostrar última atualização */}
               {formattedLastUpdate && (
-                <p className="text-xs text-muted-foreground w-full text-center">
-                  Última atualização: {formattedLastUpdate}
-                </p>
+                <div className="flex items-center justify-center w-full">
+                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                    <RefreshCw className="h-3 w-3 mr-1" />
+                    Última atualização: {formattedLastUpdate}
+                  </Badge>
+                </div>
               )}
 
               {/* Mensagem de sucesso */}
@@ -209,9 +292,9 @@ export default function CalculadoraBalanceamento() {
 
               {/* Adicionar indicador de carregamento */}
               {(portfolioLoading || isRefreshing) && (
-                <div className="w-full flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-muted-foreground">
+                <div className="w-full flex flex-col items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+                  <span className="text-muted-foreground text-sm">
                     {isRefreshing ? 'Atualizando carteira...' : 'Carregando carteira...'}
                   </span>
                 </div>
@@ -222,59 +305,73 @@ export default function CalculadoraBalanceamento() {
                 <>
                   {/* Adicionar mensagem de erro quando não há ativos */}
                   {!hasStocks && (
-                    <div className="w-full bg-yellow-500/10 p-4 rounded-lg">
-                      <div className="flex items-start">
-                        <AlertTriangle className="text-yellow-500 mr-2 h-5 w-5 mt-0.5" />
-                        <div>
-                          <h3 className="font-medium text-foreground">Carteira vazia</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Você precisa adicionar ativos à sua carteira antes de usar a calculadora.
-                          </p>
-                          <div className="flex gap-2 mt-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => router.push('/carteira')}
-                            >
-                              Ir para Carteira
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <Alert variant="destructive" className="w-full">
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      <AlertTitle>Carteira vazia</AlertTitle>
+                      <AlertDescription>
+                        Você precisa adicionar ativos à sua carteira antes de usar a calculadora.
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push('/carteira')}
+                          className="mt-2 w-full"
+                        >
+                          Ir para Carteira
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
                   )}
 
                   {/* Mostrar mensagem se não há ativos elegíveis */}
                   {hasStocks && !hasEligibleStocks && (
-                    <div className="w-full bg-yellow-500/10 p-4 rounded-lg">
-                      <div className="flex items-start">
-                        <AlertTriangle className="text-yellow-500 mr-2 h-5 w-5 mt-0.5" />
-                        <div>
-                          <h3 className="font-medium text-foreground">Sem ativos para compra</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Não há ativos marcados como &quot;Comprar&quot; na sua carteira. Adicione recomendações aos seus ativos.
-                          </p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2"
-                            onClick={() => router.push('/carteira')}
-                          >
-                            Gerenciar Ativos
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                    <Alert variant="warning" className="w-full bg-yellow-500/10 border-yellow-500/30">
+                      <AlertTriangle className="text-yellow-500 h-4 w-4 mr-2" />
+                      <AlertTitle>Sem ativos para compra</AlertTitle>
+                      <AlertDescription>
+                        Não há ativos marcados como &quot;Comprar&quot; na sua carteira. Adicione recomendações aos seus ativos.
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push('/carteira')}
+                          className="mt-2 w-full"
+                        >
+                          Gerenciar Ativos
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
                   )}
 
                   {/* Exibir mensagem de erro */}
                   {error && (
-                    <div className="w-full bg-destructive/10 p-4 rounded-lg">
-                      <div className="flex items-start">
-                        <AlertTriangle className="text-destructive mr-2 h-5 w-5 mt-0.5" />
-                        <p className="text-destructive text-sm">{error}</p>
-                      </div>
-                    </div>
+                    <Alert variant="destructive" className="w-full">
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Sugestão de valor */}
+                  {hasStocks && hasEligibleStocks && totalPortfolioValue > 0 && (
+                    <Card className="w-full bg-primary/5 border-primary/20">
+                      <CardContent className="p-4">
+                        <div className="flex items-start">
+                          <Info className="h-4 w-4 text-primary mt-1 mr-2" />
+                          <div>
+                            <p className="text-sm font-medium">Sugestão de aporte</p>
+                            <p className="text-xs text-muted-foreground">
+                              Para uma carteira de {formatCurrency(totalPortfolioValue)}, um aporte de aproximadamente {suggestedPercentage}% ({formattedSuggestedValue}) seria adequado.
+                            </p>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="p-0 h-auto text-primary text-xs"
+                              onClick={() => setInvestmentValue(formattedSuggestedValue.replace("R$", "").trim())}
+                            >
+                              Usar este valor
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
 
                   <div className="w-full">
@@ -285,7 +382,7 @@ export default function CalculadoraBalanceamento() {
                         className="flex-1 text-2xl outline-none bg-transparent text-foreground"
                         value={investmentValue}
                         onChange={handleInputChange}
-                        placeholder="0"
+                        placeholder="0,00"
                         disabled={!hasStocks || !hasEligibleStocks || isCalculating}
                       />
                     </div>
@@ -295,7 +392,7 @@ export default function CalculadoraBalanceamento() {
                     className="w-full py-6 text-xl"
                     size="lg"
                     onClick={handleCalculate}
-                    disabled={!hasStocks || !hasEligibleStocks || isCalculating}
+                    disabled={!hasStocks || !hasEligibleStocks || isCalculating || !investmentValue}
                   >
                     {isCalculating ? (
                       <>
@@ -310,6 +407,12 @@ export default function CalculadoraBalanceamento() {
               )}
             </div>
           </CardContent>
+          
+          <CardFooter className="px-6 pb-6 pt-0">
+            <p className="text-xs text-muted-foreground w-full text-center">
+              Os cálculos são baseados nos ativos da sua carteira e nas recomendações definidas para cada ativo.
+            </p>
+          </CardFooter>
         </Card>
       </div>
     </AppShellEnhanced>
