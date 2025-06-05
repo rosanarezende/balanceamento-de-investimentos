@@ -8,6 +8,40 @@
 import "@testing-library/jest-dom"
 import 'whatwg-fetch'
 
+// Mocks simples dos serviços - valores específicos configurados nos testes
+jest.mock('@/services/firebase/firestore', () => ({
+  getUserPortfolio: jest.fn(),
+  updateStock: jest.fn(),
+  removeStock: jest.fn(),
+  updateUserRecommendation: jest.fn(),
+  validateUserInput: jest.fn(),
+  addStock: jest.fn(),
+  createUserPortfolio: jest.fn(),
+  deleteUserPortfolio: jest.fn(),
+  getUserRecommendation: jest.fn(),
+  saveUserRecommendation: jest.fn(),
+  deleteUserRecommendation: jest.fn(),
+  updateUserProfile: jest.fn(),
+  getUserProfile: jest.fn(),
+  createUserProfile: jest.fn(),
+  saveManualRecommendation: jest.fn(),
+  saveSimulation: jest.fn(),
+  getSimulations: jest.fn(),
+  getSimulation: jest.fn(),
+  getUserWatchlist: jest.fn(),
+  addToWatchlist: jest.fn(),
+  updateWatchlistItem: jest.fn(),
+  removeFromWatchlist: jest.fn(),
+  saveUserPreferences: jest.fn(),
+  getUserPreferences: jest.fn(),
+}))
+jest.mock('@/services/api/stock-price', () => ({
+  getCurrentPrice: jest.fn(),
+  getPriceHistory: jest.fn(),
+  searchStocks: jest.fn(),
+  getStockInfo: jest.fn(),
+}))
+
 // Mock do fetch para testes
 global.fetch = jest.fn()
 
@@ -80,8 +114,8 @@ Object.defineProperty(window, 'location', {
 
 beforeAll(() => {
   // Silenciar console.error durante os testes
-  jest.spyOn(console, 'error').mockImplementation(() => {})
-  jest.spyOn(console, 'warn').mockImplementation(() => {})
+  jest.spyOn(console, 'error').mockImplementation(() => { /* silenciar */ })
+  jest.spyOn(console, 'warn').mockImplementation(() => { /* silenciar */ })
 })
 
 afterAll(() => {
@@ -89,13 +123,18 @@ afterAll(() => {
   jest.restoreAllMocks()
 })
 
+// Configurar variáveis de ambiente para testes
+process.env.NEXT_PUBLIC_DEVELOPMENT_MODE = 'true';
+process.env.NEXT_PUBLIC_MOCK_DATA = 'true';
+process.env.NEXT_PUBLIC_MOCK_AUTH = 'true';
+
 // Mock Firebase
 const mockApp = { name: '[DEFAULT]' };
 
 // Criar mocks Jest para as funções de autenticação
 const mockSignInWithPopup = jest.fn();
 const mockSignOut = jest.fn();
-const mockOnAuthStateChanged = jest.fn();
+const mockOnAuthStateChanged = jest.fn(() => jest.fn()); // Retorna uma função unsubscribe
 
 const mockAuth = {
   currentUser: null,
@@ -109,21 +148,21 @@ const mockDb = {};
 const mockGoogleProvider = {};
 
 jest.mock('firebase/app', () => ({
-  initializeApp: jest.fn(() => mockApp),
-  getApps: jest.fn(() => [mockApp]),
-  getApp: jest.fn(() => mockApp),
+  initializeApp: jest.fn(),
+  getApps: jest.fn(),
+  getApp: jest.fn(),
 }));
 
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(() => mockAuth),
-  signInWithPopup: mockSignInWithPopup,
-  signOut: mockSignOut,
-  onAuthStateChanged: mockOnAuthStateChanged,
-  GoogleAuthProvider: jest.fn(() => mockGoogleProvider),
-}));
+// jest.mock('firebase/auth', () => ({
+//   getAuth: jest.fn(),
+//   signInWithPopup: jest.fn(),
+//   signOut: jest.fn(),
+//   onAuthStateChanged: jest.fn(),
+//   GoogleAuthProvider: jest.fn(),
+// }));
 
 jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => mockDb),
+  getFirestore: jest.fn(),
   collection: jest.fn(),
   doc: jest.fn(),
   addDoc: jest.fn(),

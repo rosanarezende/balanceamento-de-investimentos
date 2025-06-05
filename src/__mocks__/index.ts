@@ -9,5 +9,8 @@ export * from './data/user'
 export * from './data/portfolio'
 export * from './data/stocks'
 export * from './data/simulations'
+
 export * from './services/firebase'
+export * from './services/stock-price'
+
 export * from './utils/helpers'

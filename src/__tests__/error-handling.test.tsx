@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event'
 
 import LoginPage from '@/app/login/page'
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
-import { StockList } from '@/components/stocks/stock-list'
+import { ListaAtivos } from '@/app/carteira/components'
 import { AddStockForm } from '@/components/add-stock-form'
 import { TestWrapper } from './helpers/test-wrapper'
 import {
@@ -194,7 +194,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -234,7 +234,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -249,7 +249,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -341,7 +341,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -524,7 +524,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 

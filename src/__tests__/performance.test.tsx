@@ -14,7 +14,7 @@ import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
-import { StockList } from '@/components/stocks/stock-list'
+import { ListaAtivos } from '@/app/carteira/components'
 import { TestWrapper } from './helpers/test-wrapper'
 import {
   mockAuth,
@@ -86,7 +86,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -110,7 +110,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -134,7 +134,7 @@ describe.skip('Testes de Performance', () => {
       // Primeira renderização
       const { unmount } = render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -147,7 +147,7 @@ describe.skip('Testes de Performance', () => {
       // Segunda renderização - deve usar cache
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -169,7 +169,7 @@ describe.skip('Testes de Performance', () => {
       let renderCount = 0
       const TestComponent = () => {
         renderCount++
-        return <StockList />
+        return <ListaAtivos />
       }
 
       render(
@@ -204,7 +204,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -226,7 +226,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -260,7 +260,7 @@ describe.skip('Testes de Performance', () => {
 
       const { unmount } = render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -310,7 +310,7 @@ describe.skip('Testes de Performance', () => {
 
       const { unmount } = render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
@@ -494,7 +494,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos />
         </TestWrapper>
       )
 
