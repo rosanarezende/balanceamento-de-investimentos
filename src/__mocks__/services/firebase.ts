@@ -1,8 +1,11 @@
 /**
  * Mocks dos serviços Firebase para testes e desenvolvimento
+ * 
+ * Este arquivo centraliza todos os mocks relacionados ao Firebase,
+ * incluindo Auth, Firestore e configurações globais
  */
 
-import { mockUser, mockPortfolioData } from "../"
+import { mockUser, mockPortfolioData, setMockAuthOverride } from "../"
 
 // Obter os mocks globais definidos no jest.setup.js
 export const mockFirebaseConfig = jest.requireMock('@/services/firebase/config');
@@ -12,6 +15,55 @@ const mockFirebaseFirestoreLib = jest.requireMock('firebase/firestore')
 
 // Exportar o mock auth para uso nos testes
 export const mockAuth = mockFirebaseConfig.auth;
+
+/**
+ * Mock centralizado do Firebase Auth
+ * Deve ser chamado nos testes que precisam testar autenticação real
+ */
+export const setupFirebaseAuthMocks = () => {
+  // Mock do firebase/auth diretamente para garantir que as funções sejam mockadas
+  jest.doMock('firebase/auth', () => ({
+    ...jest.requireActual('firebase/auth'),
+    signInWithPopup: jest.fn(),
+    signOut: jest.fn(),
+    onAuthStateChanged: jest.fn(() => jest.fn()), // Retorna uma função unsubscribe
+    GoogleAuthProvider: jest.fn(),
+    getAuth: jest.fn(),
+  }))
+
+  return jest.requireMock('firebase/auth')
+}
+
+/**
+ * Obter o mock do signInWithPopup para configuração em testes
+ */
+export const getMockSignInWithPopup = () => {
+  const firebaseAuth = jest.requireMock('firebase/auth')
+  return firebaseAuth.signInWithPopup
+}
+
+/**
+ * Helper para configurar modo de teste real (desabilita mock auth)
+ */
+export const setupRealAuthMode = () => {
+  // Usar função de override em vez de mudar variável de ambiente
+  setMockAuthOverride(false)
+
+  return () => {
+    setMockAuthOverride(null) // Restaurar comportamento original
+  }
+}
+
+/**
+ * Helper para configurar modo mock (habilita mock auth)
+ */
+export const setupMockAuthMode = () => {
+  setMockAuthOverride(true)
+
+  return () => {
+    setMockAuthOverride(null) // Restaurar comportamento original
+  }
+}
 
 // Setup mocks do Firestore - configurar os valores de retorno
 export const setupFirestoreMocks = () => {

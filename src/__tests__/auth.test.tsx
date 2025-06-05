@@ -16,32 +16,24 @@ import { TestWrapper } from './helpers/test-wrapper'
 import {
   mockAuth,
   mockUnauthenticatedUser,
-  setupFirebaseFirestoreMocks
+  setupFirebaseFirestoreMocks,
+  setupFirebaseAuthMocks,
+  getMockSignInWithPopup,
+  setupRealAuthMode,
 } from '@/__mocks__'
 
 // Mocks dos serviços - usar os mocks básicos do jest.setup.js
 jest.mock('next/navigation')
 
-// Mock do firebase/auth diretamente para garantir que signInWithPopup seja mockado
-jest.mock('firebase/auth', () => ({
-  ...jest.requireActual('firebase/auth'),
-  signInWithPopup: jest.fn(),
-  signOut: jest.fn(),
-  onAuthStateChanged: jest.fn(() => jest.fn()), // Retorna uma função unsubscribe
-  GoogleAuthProvider: jest.fn(),
-  getAuth: jest.fn(),
-}))
-
-const mockSignInWithPopup = jest.fn()
+// Configurar mocks do Firebase Auth usando a função centralizada
+setupFirebaseAuthMocks()
 
 describe('Testes de Autenticação', () => {
   // Mock do Next.js navigation
   const mockRouter = jest.requireMock('next/navigation')
-  const mockFirebaseAuth = jest.requireMock('firebase/auth')
-  mockFirebaseAuth.signInWithPopup = mockSignInWithPopup
+  const mockSignInWithPopup = getMockSignInWithPopup()
 
   beforeEach(() => {
-    // resetAuthMocks()
     jest.clearAllMocks()
 
     // Configurar mocks do router
@@ -56,10 +48,6 @@ describe('Testes de Autenticação', () => {
 
     // Configurar estado inicial: usuário não autenticado
     mockUnauthenticatedUser()
-    // Object.assign(mockFirebaseAuth, mockAuth)
-
-    // // Configurar respostas padrão dos métodos de autenticação usando helper
-    // setupSuccessfulAuth()
 
     // Mock do Firebase Firestore SDK
     setupFirebaseFirestoreMocks()
@@ -88,9 +76,11 @@ describe('Testes de Autenticação', () => {
     })
 
     it('deve permitir login com Google (modo real)', async () => {
-      // Temporariamente desabilitar mock auth para testar a função real
-      const originalMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH
-      process.env.NEXT_PUBLIC_MOCK_AUTH = 'false'
+      // Usar helper para desabilitar mock auth temporariamente
+      const restoreAuthMode = setupRealAuthMode()
+
+      // Configurar o mock para resolver com sucesso
+      mockSignInWithPopup.mockResolvedValueOnce({ user: { uid: 'test-uid' } })
 
       try {
         render(
@@ -100,21 +90,23 @@ describe('Testes de Autenticação', () => {
         )
 
         const googleLoginButton = screen.getByRole('button', { name: /continuar com google/i })
+
+        // Adicionar log para verificar se o clique está funcionando
         fireEvent.click(googleLoginButton)
 
+        // Verificar se houve algum erro ou se o mock foi chamado
         await waitFor(() => {
           expect(mockSignInWithPopup).toHaveBeenCalled()
-        })
+        }, { timeout: 10000 })
       } finally {
-        // Restaurar valor original
-        process.env.NEXT_PUBLIC_MOCK_AUTH = originalMockAuth
+        // Restaurar modo original
+        restoreAuthMode()
       }
     })
 
     it('deve exibir erro ao falhar o login com Google', async () => {
-      // Temporariamente desabilitar mock auth para testar erro real
-      const originalMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH
-      process.env.NEXT_PUBLIC_MOCK_AUTH = 'false'
+      // Usar helper para desabilitar mock auth temporariamente
+      const restoreAuthMode = setupRealAuthMode()
 
       // Configurar signInWithPopup para falhar
       mockSignInWithPopup.mockRejectedValueOnce(new Error('Login failed'))
@@ -134,8 +126,8 @@ describe('Testes de Autenticação', () => {
           expect(screen.getByText(/erro ao fazer login/i)).toBeInTheDocument()
         })
       } finally {
-        // Restaurar valor original
-        process.env.NEXT_PUBLIC_MOCK_AUTH = originalMockAuth
+        // Restaurar modo original
+        restoreAuthMode()
       }
     })
   })

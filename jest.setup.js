@@ -153,13 +153,13 @@ jest.mock('firebase/app', () => ({
   getApp: jest.fn(),
 }));
 
-// jest.mock('firebase/auth', () => ({
-//   getAuth: jest.fn(),
-//   signInWithPopup: jest.fn(),
-//   signOut: jest.fn(),
-//   onAuthStateChanged: jest.fn(),
-//   GoogleAuthProvider: jest.fn(),
-// }));
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+  signInWithPopup: jest.fn(),
+  signOut: jest.fn(),
+  onAuthStateChanged: jest.fn(() => jest.fn()), // Retorna uma função unsubscribe
+  GoogleAuthProvider: jest.fn(),
+}));
 
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),

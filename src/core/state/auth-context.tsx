@@ -127,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
 
       // Se estamos em modo de desenvolvimento com mock auth, simular login
+      // Verificar na hora da chamada para permitir override em testes
       if (isDevelopmentMode() && shouldMockAuth()) {
         setUser(mockUser as User);
         setUserData(getMockUserData());
@@ -151,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // Removendo dependências para permitir re-avaliação
 
   const signOut = useCallback(async () => {
     try {
