@@ -171,7 +171,7 @@ export function AddStockForm({ isOpen, onClose }: { isOpen: boolean; onClose: ()
               <Button variant="outline" type="button" onClick={handleClose} disabled={isSubmitting}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting || !!ticker.trim()}>
+              <Button type="submit" disabled={isSubmitting || !ticker.trim()}>
                 {isSubmitting ? "Salvando..." : "Salvar"}
               </Button>
             </DialogFooter>
