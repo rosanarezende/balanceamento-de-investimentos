@@ -13,7 +13,7 @@ import {
   getStockPrice,
   getMultipleStockPrices
 } from "@/services/api/stock-price";
-import { isDevelopmentMode, simulateStockPrices } from "@/__mocks__";
+import { isDevelopmentMode, simulateStockPrices } from "@/core/utils/development";
 import {
   Stock,
   StockWithDetails,

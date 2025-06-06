@@ -11,7 +11,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/services/firebase/config";
 import { AuthContextType, UserData } from "@/core/types";
 import { handleError } from "@/core/utils";
-import { isDevelopmentMode, shouldMockAuth, mockUser, getMockUserData } from "@/__mocks__";
+import { isDevelopmentMode, shouldMockAuth, mockUser, getMockUserData } from "@/core/utils/development";
 
 /**
  * Contexto de autenticação

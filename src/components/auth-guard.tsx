@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/core/state/auth-context"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorDisplay } from "@/core/state/error-handling"
-import { isDevelopmentMode, shouldMockAuth } from "@/__mocks__"
+import { isDevelopmentMode, shouldMockAuth } from "@/core/utils/development"
 
 // Componente para proteger rotas que exigem autenticação
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
