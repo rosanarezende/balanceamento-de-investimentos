@@ -2,7 +2,7 @@
  * Mock do serviço de preços de ações para testes
  */
 
-import { mockStockPrices, simulateStockPrice } from "../"
+import { mockStockPrices, simulateStockPrice } from "@/core/utils/development"
 
 const mockStockPriceService = jest.requireMock('@/services/api/stock-price')
 

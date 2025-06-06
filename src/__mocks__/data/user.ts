@@ -1,14 +1,17 @@
 /**
- * Dados mock de usuário
+ * Dados mock de usuário para testes
+ * Re-exporta dados do development.ts com extensões específicas para testes
  */
 import { UserData, WatchlistItem } from "@/core/types"
-import { mockPortfolioData } from '../'
+import { 
+  mockUser as baseMockUser, 
+  mockPortfolioData, 
+  mockWatchlistData
+} from '@/core/utils/development';
 
+// Re-exporta o usuario base com extensões para testes
 export const mockUser = {
-  uid: 'dev-user-123',
-  email: 'dev@example.com',
-  displayName: 'Usuário Desenvolvimento',
-  photoURL: null,
+  ...baseMockUser,
   emailVerified: true,
   isAnonymous: false,
   metadata: {
@@ -17,10 +20,10 @@ export const mockUser = {
   },
   providerData: [{
     providerId: 'google.com',
-    uid: 'dev-user-123',
-    displayName: 'Usuário Desenvolvimento',
-    email: 'dev@example.com',
-    photoURL: null,
+    uid: baseMockUser.uid,
+    displayName: baseMockUser.displayName,
+    email: baseMockUser.email,
+    photoURL: baseMockUser.photoURL,
   }],
   refreshToken: 'mock-refresh-token',
   tenantId: null,
@@ -33,20 +36,6 @@ export const testUser = {
   displayName: 'Test User',
   photoURL: null,
 }
-
-// Watchlist mock
-export const mockWatchlistData: WatchlistItem[] = [
-  {
-    ticker: 'NVDA',
-    targetPrice: 500.00,
-    notes: 'Esperando queda para comprar',
-  },
-  {
-    ticker: 'META',
-    targetPrice: 250.00,
-    notes: 'Monitorando para entrada',
-  },
-]
 
 export const getMockUserData = (): UserData => {
   // Convert watchlist array to Record<string, WatchlistItem>
@@ -63,5 +52,11 @@ export const getMockUserData = (): UserData => {
     preferences: {
       theme: "dark" as const,
     },
-  } as UserData
+  }
 }
+
+// Re-exportar dados básicos do development.ts
+export {
+  mockWatchlistData,
+  mockPortfolioData,
+} from '@/core/utils/development';

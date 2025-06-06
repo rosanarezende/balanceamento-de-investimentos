@@ -116,6 +116,7 @@ export const mockPortfolioData: Portfolio = {
     userRecommendation: 'Vender' as const,
   },
 }
+
 export const mockStockPrices: Record<string, number> = {
   'AAPL': 15.00,
   'GOOGL': 25.00,

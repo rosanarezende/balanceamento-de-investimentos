@@ -5,7 +5,7 @@
  * incluindo Auth, Firestore e configurações globais
  */
 
-import { mockUser, mockPortfolioData, setMockAuthOverride } from "../"
+import { mockUser, mockPortfolioData, setMockAuthOverride } from "@/core/utils/development"
 
 // Obter os mocks globais definidos no jest.setup.js
 export const mockFirebaseConfig = jest.requireMock('@/services/firebase/config');

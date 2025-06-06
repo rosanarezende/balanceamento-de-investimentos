@@ -1,37 +1,16 @@
 /**
  * Dados mock de portfólio
+ * 
+ * Este arquivo agora re-exporta dados do development.ts e adiciona
+ * apenas dados específicos para testes.
  */
-import { Portfolio } from "@/core/schemas/stock"
 
-export const mockPortfolioData: Portfolio = {
-  'AAPL': {
-    quantity: 10,
-    targetPercentage: 30,
-    userRecommendation: 'Comprar' as const,
-  },
-  'GOOGL': {
-    quantity: 5,
-    targetPercentage: 25,
-    userRecommendation: 'Aguardar' as const,
-  },
-  'MSFT': {
-    quantity: 8,
-    targetPercentage: 20,
-    userRecommendation: 'Comprar' as const,
-  },
-  'AMZN': {
-    quantity: 3,
-    targetPercentage: 15,
-    userRecommendation: 'Aguardar' as const,
-  },
-  'TSLA': {
-    quantity: 4,
-    targetPercentage: 10,
-    userRecommendation: 'Vender' as const,
-  },
-}
+// Re-exportar dados básicos do development.ts
+export {
+  mockPortfolioData
+} from '@/core/utils/development';
 
-// Dados adicionais para testes específicos
+// Dados adicionais específicos para testes
 export const mockPortfolioDataForTests = {
   'AAPL': {
     ticker: 'AAPL',
@@ -47,4 +26,4 @@ export const mockPortfolioDataForTests = {
     userRecommendation: 'Manter' as const,
     name: 'Alphabet Inc.'
   }
-}
+};
