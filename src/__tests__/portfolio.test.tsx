@@ -201,7 +201,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
       })
     })
 
-    it.only('deve validar valores numéricos', async () => {
+    it('deve validar valores numéricos', async () => {
       render(
         <TestWrapper>
           <AddStockForm isOpen={true} onClose={jest.fn()} />
