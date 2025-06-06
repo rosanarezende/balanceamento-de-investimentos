@@ -177,6 +177,7 @@ A qualidade e estilo dos diagramas são controlados por:
 |-----------|-----------|-------------------|
 | [`REORGANIZATION_SUMMARY.md`](./REORGANIZATION_SUMMARY.md) | Sumário da reorganização da documentação | 2024 |
 | [`README_UPDATE_SUMMARY.md`](./README_UPDATE_SUMMARY.md) | Histórico de atualizações do README principal | 2024 |
+| [`MIGRATION_CARTEIRA_TO_DASHBOARD.md`](./MIGRATION_CARTEIRA_TO_DASHBOARD.md) | Documentação da migração `/carteira` → `/dashboard` | Jun 2025 |
 
 ### Versionamento de Diagramas
 

@@ -52,7 +52,7 @@ export default function HistoricoSimulacoes() {
   }
 
   const handleBack = () => {
-    router.push("/carteira")
+    router.push("/dashboard")
   }
 
   const handleViewSimulation = (simulationId: string) => {

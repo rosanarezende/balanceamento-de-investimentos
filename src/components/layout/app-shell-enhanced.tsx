@@ -35,7 +35,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: "Dashboard", href: "/carteira", icon: LayoutDashboard, implemented: true },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, implemented: true },
   { name: "Calculadora", href: "/calculadora-balanceamento", icon: Calculator, implemented: true },
   { name: "Histórico", href: "/historico", icon: Clock, implemented: true },
   { name: "Watchlist", href: "/watchlist", icon: Eye, implemented: false },
@@ -101,7 +101,7 @@ export function AppShellEnhanced({ children }: { children: React.ReactNode }) {
             <nav className="flex-1 p-4 space-y-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href ||
-                  (item.href === "/carteira" && pathname === "/");
+                  (item.href === "/dashboard" && pathname === "/");
 
                 return (
                   <TooltipProvider key={item.name}>

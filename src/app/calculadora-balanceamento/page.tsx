@@ -234,7 +234,7 @@ export default function CalculadoraBalanceamento() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => router.push('/carteira')}
+                              onClick={() => router.push('/dashboard')}
                             >
                               Ir para Carteira
                             </Button>
@@ -258,7 +258,7 @@ export default function CalculadoraBalanceamento() {
                             variant="outline"
                             size="sm"
                             className="mt-2"
-                            onClick={() => router.push('/carteira')}
+                            onClick={() => router.push('/dashboard')}
                           >
                             Gerenciar Ativos
                           </Button>

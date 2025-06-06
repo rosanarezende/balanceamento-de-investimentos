@@ -1,8 +1,10 @@
 # 📋 Resumo Final: Melhorias na Documentação EquilibreInvest
 
-## 🎯 Objetivo Concluído
+## 🎯 Objetivos Concluídos
 
-Reorganização completa da documentação markdown da aplicação EquilibreInvest com foco em **legibilidade**, **navegação** e **manutenibilidade**.
+1. **📁 Reorganização completa** da documentação markdown com foco em legibilidade e navegação
+2. **🔄 Atualização da arquitetura** para refletir a migração `/carteira` → `/dashboard`
+3. **📝 Documentação da migração** com recursos visuais atualizados
 
 ---
 
@@ -173,12 +175,37 @@ docs/
 
 ---
 
+## 🔄 Atualização: Migração `/carteira` → `/dashboard` (Jun 2025)
+
+### ✅ Documentação Atualizada
+- **🗂️ Arquitetura Mermaid**: Diagrama atualizado para refletir nova estrutura
+- **📝 Documentação Geral**: Compilado do projeto com informações da migração
+- **📊 Recursos Visuais**: Novos diagramas PNG e SVG gerados
+- **📚 Histórico**: Versões anteriores arquivadas com timestamp
+
+### 🎯 Componentes Documentados
+```
+src/app/dashboard/components/:
+├── MetricasCards.tsx       # Cards de métricas do portfólio
+├── GraficosCarteira.tsx    # Gráficos (pizza e barras)
+├── ResumoCarteira.tsx      # Componente de resumo expansível
+├── ListaAtivos.tsx         # Lista de ativos com CRUD
+└── ModaisAtivos.tsx        # Modais para gestão de ativos
+```
+
+### 📋 Novos Documentos
+- [`MIGRATION_CARTEIRA_TO_DASHBOARD.md`](./MIGRATION_CARTEIRA_TO_DASHBOARD.md): Detalhes técnicos da migração
+- Diagramas atualizados: `arquitetura.png` e `arquitetura.svg`
+- Histórico arquivado: Versões pré-migração preservadas
+
+---
+
 <div align="center">
 
-**📋 Documentação Totalmente Reorganizada**
+**📋 Documentação Totalmente Reorganizada + Arquitetura Atualizada**
 
-*Estrutura hierárquica • Navegação intuitiva • Accordions organizacionais*
+*Estrutura hierárquica • Navegação intuitiva • Accordions organizacionais • Migração documentada*
 
-**Versão 2.0** | Atualizado em junho de 2025
+**Versão 2.1** | Atualizado em 6 de junho de 2025
 
 </div>
