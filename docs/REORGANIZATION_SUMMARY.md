@@ -110,5 +110,13 @@ docs/technical/DEVELOPMENT_MODE.md
 
 **Status**: ✅ **COMPLETO** - Documentação reorganizada e funcionando perfeitamente.
 
-**Data**: 4 de junho de 2025  
+## 📝 Atualizações Recentes
+
+### 🔄 Migração `/carteira` → `/dashboard` (Junho 2025)
+- **Concluída**: Migração completa da funcionalidade de portfólio de `/carteira` para `/dashboard`
+- **Componentes migrados**: Todos os componentes foram movidos para `/src/app/dashboard/components/`
+- **Documentação atualizada**: Arquitetura Mermaid e documentação geral refletem a nova estrutura
+- **Limpeza**: Diretório `/carteira` removido após migração bem-sucedida
+
+**Data**: 6 de junho de 2025  
 **Responsável**: Reorganização automatizada via GitHub Copilot

@@ -14,7 +14,7 @@ import { StockWithDetails } from "@/core/types"
 import DashboardLayout from "./layout"
 import { ResumoCarteira, ListaAtivos, ModaisAtivos } from "./components"
 
-export default function CarteiraPage() {
+export default function DashboardPage() {
   const { toast } = useToast()
   const {
     loading,
