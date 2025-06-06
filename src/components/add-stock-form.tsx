@@ -18,7 +18,7 @@ export function AddStockForm({ isOpen, onClose }: { isOpen: boolean; onClose: ()
   const [recommendation, setRecommendation] = useState<"Comprar" | "Vender" | "Aguardar">("Comprar")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
-  console.log({ formError })
+  // console.log({ formError }) // Debugging purposes only; remove for production
 
   // Validação para submissão com mensagens de erro
   const validateForSubmission = () => {
