@@ -7,7 +7,19 @@ Este documento descreve em detalhes como o modo de desenvolvimento funciona no E
 ### Estrutura de Arquivos
 
 ```
-src/core/utils/development.ts  # Configurações e dados mock centralizados
+src/__mocks__/               # 🆕 Dados mock centralizados
+├── index.ts                # Export centralizado
+├── data/                   # Dados mock organizados
+│   ├── user.ts            # Dados de usuário
+│   ├── portfolio.ts       # Dados de portfólio
+│   ├── stocks.ts          # Preços de ações
+│   └── simulations.ts     # Simulações
+├── services/               # Mocks de serviços
+│   └── firebase.ts        # Firebase mock
+└── utils/                 # Utilitários mock
+    └── helpers.ts         # Funções auxiliares
+
+src/core/utils/development.ts  # Configurações (usa @/__mocks__)
 src/components/auth-guard.tsx  # Bypass de autenticação
 src/core/state/auth-context.tsx  # Contexto de autenticação mock
 src/services/firebase/firestore.ts  # Serviços de dados mock
@@ -24,14 +36,19 @@ src/services/api/stock-price.ts  # Preços de ações simulados
 
 ## Componentes Principais
 
-### 1. Utilitários de Desenvolvimento (`development.ts`)
+### 1. Sistema de Mocks Centralizado (`src/__mocks__/`)
 
-**Funções de Verificação:**
+**Estrutura Organizada:**
+- `@/__mocks__/data/`: Dados mock organizados por categoria
+- `@/__mocks__/services/`: Mocks de serviços externos
+- `@/__mocks__/utils/`: Funções utilitárias para desenvolvimento
+
+**Funções de Verificação (via `development.ts`):**
 - `isDevelopmentMode()`: Verifica se está em modo de desenvolvimento
 - `shouldMockAuth()`: Verifica se deve usar autenticação mock
 - `shouldUseMockData()`: Verifica se deve usar dados mock
 
-**Dados Mock:**
+**Dados Mock Disponíveis:**
 - `mockUser`: Usuário fictício para desenvolvimento
 - `mockPortfolioData`: Portfolio com 5 ações pré-configuradas
 - `mockWatchlistData`: Lista de acompanhamento com NVDA e META
@@ -40,7 +57,7 @@ src/services/api/stock-price.ts  # Preços de ações simulados
 
 **Funções de Simulação:**
 - `simulateStockPrices()`: Gera preços aleatórios para ações
-- `simulateStockPrice()`:  Gera preço aleatório para uma ação específica (que não esteja previsto em `mockStockPrices`)
+- `simulateStockPrice()`: Gera preço aleatório para uma ação específica
 
 ### 2. Bypass de Autenticação
 
@@ -153,23 +170,24 @@ Para tornar a experiência mais realista, delays são simulados:
 
 ### Adicionando Dados Mock
 
-1. **Adicione os dados** em `development.ts`:
+1. **Adicione os dados** em `src/__mocks__/data/`:
 ```typescript
+// src/__mocks__/data/new-feature.ts
 export const mockNewFeatureData = {
   // seus dados mock aqui
 };
 ```
 
-2. **Exporte no objeto default**:
+2. **Exporte no index centralizado**:
 ```typescript
-export default {
-  // ...existing exports
-  mockNewFeatureData,
-};
+// src/__mocks__/index.ts
+export { mockNewFeatureData } from './data/new-feature';
 ```
 
 3. **Use nos serviços**:
 ```typescript
+import { mockNewFeatureData } from '@/__mocks__';
+
 if (shouldUseMockData()) {
   devLog("Usando dados mock para nova feature");
   await mockDelay(400);
@@ -180,6 +198,7 @@ if (shouldUseMockData()) {
 ### Adicionando Funções de Simulação
 
 ```typescript
+// src/__mocks__/utils/helpers.ts
 export const simulateNewFeature = (params: any): any => {
   devLog("Simulando nova feature", params);
   // lógica de simulação

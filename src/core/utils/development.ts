@@ -1,15 +1,66 @@
 /**
- * Configurações e utilitários para desenvolvimento local
+ * Utilitários para modo de desenvolvimento
  * 
- * Este arquivo permite executar a aplicação localmente sem dependências externas
- * quando as variáveis de desenvolvimento estão habilitadas.
+ * Este arquivo contém funções utilitárias que podem ser usadas tanto
+ * em produção quanto em desenvolvimento, sem referências ao Jest.
  */
-import { UserData, WatchlistItem } from "@/core/types";
-import { Portfolio, Simulation } from "@/core/schemas/stock";
 
-// Verificar se estamos em modo de desenvolvimento
+import type { User } from "firebase/auth";
+import type { UserData, Portfolio, WatchlistItem } from "@/core/types";
+import type { Simulation } from "@/core/schemas/stock";
+
+// Estado interno para override em testes
+let mockAuthOverride: boolean | null = null;
+let developmentModeOverride: boolean | null = null;
+
+// Delay para simular operações assíncronas
+export const mockDelay = (ms = 1000): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+// Logger para desenvolvimento
+export const devLog = (message: string, data?: any): void => {
+  if (isDevelopmentMode()) {
+    console.log(`[DEV MODE] ${message}`, data || '');
+  }
+};
+
+// Helper para verificar se devemos usar dados mock
+export const shouldUseMockData = (): boolean => {
+  return isDevelopmentMode() && 
+         process.env.NEXT_PUBLIC_MOCK_DATA === 'true';
+};
+
+// Helper para verificar se devemos usar auth mock (com override para testes)
+export const shouldMockAuth = (): boolean => {
+  if (mockAuthOverride !== null) {
+    return mockAuthOverride;
+  }
+  return isDevelopmentMode() && 
+         process.env.NEXT_PUBLIC_MOCK_AUTH === 'true';
+};
+
+// Verificar se estamos em modo de desenvolvimento (com override para testes)
 export const isDevelopmentMode = (): boolean => {
+  if (developmentModeOverride !== null) {
+    return developmentModeOverride;
+  }
   return process.env.NEXT_PUBLIC_DEVELOPMENT_MODE === 'true';
+};
+
+// Funções para override em testes
+export const setMockAuthOverride = (value: boolean | null): void => {
+  mockAuthOverride = value;
+};
+
+export const setDevelopmentModeOverride = (value: boolean | null): void => {
+  developmentModeOverride = value;
+};
+
+// Resetar overrides
+export const resetOverrides = (): void => {
+  mockAuthOverride = null;
+  developmentModeOverride = null;
 };
 
 export const isMockAuth = (): boolean => {
@@ -20,30 +71,24 @@ export const isMockData = (): boolean => {
   return process.env.NEXT_PUBLIC_MOCK_DATA === 'true';
 };
 
-// Usuário mock para desenvolvimento
-export const mockUser = {
+// Dados mock para desenvolvimento
+export const mockUser: Partial<User> = {
   uid: 'dev-user-123',
   email: 'dev@example.com',
-  displayName: 'Usuário Desenvolvimento',
+  displayName: 'Usuário de Desenvolvimento',
   photoURL: null,
-  emailVerified: true,
-  isAnonymous: false,
-  metadata: {
-    createdAt: new Date().toISOString(),
-    lastLoginAt: new Date().toISOString(),
-  },
-  providerData: [{
-    providerId: 'google.com',
-    uid: 'dev-user-123',
-    displayName: 'Usuário Desenvolvimento',
-    email: 'dev@example.com',
-    photoURL: null,
-  }],
-  refreshToken: 'mock-refresh-token',
-  tenantId: null,
-} as any;
+};
 
-// Dados mock de carteira para desenvolvimento
+export const getMockUserData = (): UserData => ({
+  email: mockUser.email || null,
+  displayName: mockUser.displayName || null,
+  portfolio: mockPortfolioData,
+  watchlist: {},
+  preferences: {
+    theme: "dark",
+  },
+});
+
 export const mockPortfolioData: Portfolio = {
   'AAPL': {
     quantity: 10,
@@ -70,23 +115,8 @@ export const mockPortfolioData: Portfolio = {
     targetPercentage: 10,
     userRecommendation: 'Vender' as const,
   },
-};
+}
 
-// Watchlist mock para desenvolvimento (deve ser array para compatibilidade com getMockUserData)
-export const mockWatchlistData: WatchlistItem[] = [
-  {
-    ticker: 'NVDA',
-    targetPrice: 500.00,
-    notes: 'Esperando queda para comprar',
-  },
-  {
-    ticker: 'META',
-    targetPrice: 250.00,
-    notes: 'Monitorando para entrada',
-  },
-];
-
-// Preços mock para APIs de ações
 export const mockStockPrices: Record<string, number> = {
   'AAPL': 15.00,
   'GOOGL': 25.00,
@@ -98,9 +128,34 @@ export const mockStockPrices: Record<string, number> = {
   'NFLX': 4.20,
   'AMD': 0.85,
   'INTC': 0.45,
-};
+}
 
-// Simulações mock para histórico
+export const simulateStockPrices = (tickers: string[]): Record<string, number> => {
+  return tickers.reduce((acc, ticker) => {
+    acc[ticker] = simulateStockPrice(ticker);
+    return acc;
+  }, {} as Record<string, number>);
+}
+
+export const simulateStockPrice = (ticker: string): number => {
+  // Usar preço mock se disponível, senão gerar preço entre R$10 e R$100
+  return mockStockPrices[ticker] || (Math.random() * 90 + 10)
+}
+
+// Dados mock adicionais para desenvolvimento
+export const mockWatchlistData: WatchlistItem[] = [
+  {
+    ticker: 'NVDA',
+    targetPrice: 500.00,
+    notes: 'Esperando queda para comprar',
+  },
+  {
+    ticker: 'META',
+    targetPrice: 250.00,
+    notes: 'Monitorando para entrada',
+  },
+]
+
 export const mockSimulations: Simulation[] = [
   {
     id: 'sim-1',
@@ -160,87 +215,3 @@ export const mockSimulations: Simulation[] = [
     ]
   },
 ];
-
-// Helper para verificar se devemos usar dados mock
-export const shouldUseMockData = (): boolean => {
-  return isDevelopmentMode() && isMockData();
-};
-
-// Helper para verificar se devemos usar auth mock
-export const shouldMockAuth = (): boolean => {
-  return isDevelopmentMode() && isMockAuth();
-};
-
-// Funções para obter dados mock
-export const getMockUser = () => {
-  return mockUser;
-};
-
-export const getMockUserData = () => {
-  // Convert watchlist array to Record<string, WatchlistItem>
-  const watchlistRecord: Record<string, WatchlistItem> = mockWatchlistData.reduce((acc, item) => {
-    acc[item.ticker] = item;
-    return acc;
-  }, {} as Record<string, WatchlistItem>);
-
-  const mockUserData = {
-    email: mockUser.email,
-    displayName: mockUser.displayName,
-    portfolio: mockPortfolioData,
-    watchlist: watchlistRecord,
-    preferences: {
-      theme: "dark" as const,
-    },
-  };
-  return mockUserData as UserData;
-};
-
-// Delay para simular operações assíncronas
-export const mockDelay = (ms = 1000): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
-
-// Logger para desenvolvimento
-export const devLog = (message: string, data?: any): void => {
-  if (isDevelopmentMode()) {
-    console.log(`[DEV MODE] ${message}`, data || '');
-  }
-};
-
-// ===== FUNÇÕES DE SIMULAÇÃO PARA DESENVOLVIMENTO =====
-
-/**
- * Simula preços de ações (apenas para desenvolvimento)
- * @param tickers Lista de códigos de ações
- * @returns Objeto com preços simulados por ticker
- */
-export const simulateStockPrices = (tickers: string[]): Record<string, number> => {
-  return tickers.reduce((acc, ticker) => {
-    acc[ticker] = simulateStockPrice(ticker);
-    return acc;
-  }, {} as Record<string, number>);
-};
-
-export const simulateStockPrice = (ticker: string): number => {
-  // Usar preço mock se disponível, senão gerar preço entre R$10 e R$100
-  return mockStockPrices[ticker] || (Math.random() * 90 + 10);
-};
-
-export default {
-  isDevelopmentMode,
-  isMockAuth,
-  isMockData,
-  mockUser,
-  mockPortfolioData,
-  mockWatchlistData,
-  mockStockPrices,
-  mockSimulations,
-  shouldUseMockData,
-  shouldMockAuth,
-  getMockUser,
-  getMockUserData,
-  mockDelay,
-  devLog,
-  simulateStockPrices,
-  simulateStockPrice,
-};
