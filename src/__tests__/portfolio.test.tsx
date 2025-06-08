@@ -14,7 +14,7 @@ import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { ListaAtivos } from '@/app/carteira/components'
+import { ListaAtivos } from '@/app/dashboard/components'
 import { AddStockForm } from '@/components/add-stock-form'
 import { TestWrapper } from './helpers/test-wrapper'
 import {
@@ -54,7 +54,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
     it('deve exibir lista de ativos do portfólio', async () => {
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -69,7 +69,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -86,7 +86,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -107,7 +107,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -269,7 +269,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
     it('deve remover ativo do portfólio', async () => {
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -304,7 +304,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -328,7 +328,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -349,7 +349,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
     it('deve permitir editar quantidade de ativo existente', async () => {
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -391,7 +391,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
     it('deve permitir editar alocação alvo', async () => {
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -432,7 +432,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
     it('deve permitir buscar ativo por ticker', async () => {
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -454,7 +454,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
     it('deve permitir buscar ativo por nome', async () => {
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -475,7 +475,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
     it('deve exibir mensagem quando busca não retornar resultados', async () => {
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -500,7 +500,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -512,7 +512,7 @@ describe.skip('Testes de Gestão de Portfólio', () => {
     it('deve mostrar total de alocações atual', async () => {
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 

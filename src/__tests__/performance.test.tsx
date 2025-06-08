@@ -14,7 +14,7 @@ import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
-import { ListaAtivos } from '@/app/carteira/components'
+import { ListaAtivos } from '@/app/dashboard/components'
 import { TestWrapper } from './helpers/test-wrapper'
 import {
   mockAuth,
@@ -60,7 +60,7 @@ describe.skip('Testes de Performance', () => {
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
-    jest.requireMock('next/navigation').usePathname.mockReturnValue('/carteira')
+    jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
 
     // Performance.now mock para medições
     const mockPerformance = {
@@ -86,7 +86,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -110,7 +110,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -134,7 +134,7 @@ describe.skip('Testes de Performance', () => {
       // Primeira renderização
       const { unmount } = render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -147,7 +147,7 @@ describe.skip('Testes de Performance', () => {
       // Segunda renderização - deve usar cache
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -169,7 +169,7 @@ describe.skip('Testes de Performance', () => {
       let renderCount = 0
       const TestComponent = () => {
         renderCount++
-        return <ListaAtivos />
+        return <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
       }
 
       render(
@@ -204,7 +204,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -226,7 +226,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -260,7 +260,7 @@ describe.skip('Testes de Performance', () => {
 
       const { unmount } = render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -310,7 +310,7 @@ describe.skip('Testes de Performance', () => {
 
       const { unmount } = render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -494,7 +494,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
