@@ -56,7 +56,8 @@ O projeto passou por uma refatoração arquitetural completa com foco em:
 *   **Migração de Hooks e Contextos:** `use-portfolio`, `auth-context`, `theme-context` foram migrados para a nova estrutura (`core/state/`).
 *   **Atualização de Componentes:** Todos os componentes foram atualizados para usar os novos caminhos e serviços.
 *   **Remoção de Código Obsoleto:** Diretórios e arquivos antigos (`/lib/`, `/contexts/` legados, `/hooks/` legados) foram removidos para garantir consistência.
-*   **Validação:** Funcionalidades foram validadas após a integração.
+*   **Migração de Rotas Completa:** A funcionalidade de portfólio foi migrada de `/carteira` para `/dashboard`, consolidando a gestão de investimentos em uma única interface moderna.
+*   **Validação:** Funcionalidades foram validadas após a integração e migração.
 
 ## Arquitetura Atual do Projeto
 

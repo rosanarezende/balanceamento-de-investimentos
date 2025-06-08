@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event'
 
 import LoginPage from '@/app/login/page'
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
-import { ListaAtivos } from '@/app/carteira/components'
+import { ListaAtivos } from '@/app/dashboard/components'
 import { AddStockForm } from '@/components/add-stock-form'
 import { TestWrapper } from './helpers/test-wrapper'
 import {
@@ -45,7 +45,7 @@ describe('Testes de Tratamento de Erros', () => {
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
-    jest.requireMock('next/navigation').usePathname.mockReturnValue('/carteira')
+    jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
 
     // Setup Firebase Auth
     Object.assign(jest.requireMock('firebase/auth'), mockAuth)
@@ -194,7 +194,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -234,7 +234,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -249,7 +249,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -341,7 +341,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -524,7 +524,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <ListaAtivos />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 

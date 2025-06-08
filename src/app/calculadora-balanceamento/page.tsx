@@ -162,11 +162,11 @@ export default function CalculadoraBalanceamento() {
   const minPercentage = 1;  // Limite mínimo de percentual sugerido
   const calculatedPercentage = totalPortfolioValue > 0 ? (totalPortfolioValue * 0.05 / 100) : 0; // Percentual calculado com base no valor total do portfólio
   const roundedPercentage = Math.round(calculatedPercentage * 100); // Arredondar o percentual calculado
-  const suggestedPercentage = totalPortfolioValue > 0 
-    ? Math.min(maxPercentage, Math.max(minPercentage, roundedPercentage)) 
+  const suggestedPercentage = totalPortfolioValue > 0
+    ? Math.min(maxPercentage, Math.max(minPercentage, roundedPercentage))
     : 1000; // Garantir que o percentual esteja dentro dos limites
-  const suggestedValue = totalPortfolioValue > 0 
-    ? (totalPortfolioValue * (suggestedPercentage / 100)) 
+  const suggestedValue = totalPortfolioValue > 0
+    ? (totalPortfolioValue * (suggestedPercentage / 100))
     : 1000; // Valor sugerido com base no percentual calculado
   const formattedSuggestedValue = formatCurrency(suggestedValue); // Formatar o valor sugerido como moeda
 
@@ -203,7 +203,7 @@ export default function CalculadoraBalanceamento() {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -220,7 +220,7 @@ export default function CalculadoraBalanceamento() {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -415,7 +415,7 @@ export default function CalculadoraBalanceamento() {
               )}
             </div>
           </CardContent>
-          
+
           <CardFooter className="px-6 pb-6 pt-0">
             <p className="text-xs text-muted-foreground w-full text-center">
               Os cálculos são baseados nos ativos da sua carteira e nas recomendações definidas para cada ativo.
