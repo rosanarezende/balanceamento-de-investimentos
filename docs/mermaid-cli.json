@@ -1,0 +1,63 @@
+{
+  "theme": "default",
+  "width": 1920,
+  "height": 1080,
+  "backgroundColor": "#FFFFFF",
+  "scale": 3,
+  "outputFormat": "png",
+  "quiet": false,
+  "puppeteerConfig": {
+    "headless": "new",
+    "args": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ]
+  },
+  "flowchart": {
+    "useMaxWidth": true,
+    "htmlLabels": true,
+    "curve": "basis",
+    "padding": 25,
+    "nodeSpacing": 75,
+    "rankSpacing": 100
+  },
+  "themeVariables": {
+    "fontFamily": "Inter, Segoe UI, Tahoma, Geneva, Verdana, sans-serif",
+    "fontSize": "16px",
+    "textColor": "#1A202C",
+    "primaryTextColor": "#000000",
+    "lineColor": "#4A5568",
+    "arrowheadColor": "#4A5568",
+    "nodeBorder": "#333333",
+    "clusterBkg": "#E8F4FD",
+    "clusterBorder": "#1976D2",
+    "cluster0Bkg": "#E8F4FD",
+    "cluster0Border": "#1976D2",
+    "cluster1Bkg": "#FFF8E1",
+    "cluster1Border": "#F57C00",
+    "cluster2Bkg": "#FFEBEE", 
+    "cluster2Border": "#D32F2F",
+    "cluster3Bkg": "#F3E5F5",
+    "cluster3Border": "#7B1FA2",
+    "cluster4Bkg": "#E8F5E8",
+    "cluster4Border": "#388E3C",
+    "cluster5Bkg": "#F0F8FF",
+    "cluster5Border": "#0066CC",
+    "cluster6Bkg": "#F0FFF0",
+    "cluster6Border": "#228B22",
+    "titleColor": "#2D3748",
+    "uiFill": "#E3F2FD",
+    "uiStroke": "#0D47A1",
+    "serviceFill": "#E8F5E8", 
+    "serviceStroke": "#1B5E20",
+    "apiFill": "#FFF3E0",
+    "apiStroke": "#FF6F00", 
+    "dataFill": "#FFEBEE",
+    "dataStroke": "#C62828",
+    "externalFill": "#F3E5F5",
+    "externalStroke": "#4A148C",
+    "infraFill": "#E0F2F1",
+    "infraStroke": "#004D40",
+    "edgeLabelBackground": "#FFFFFF"
+  }
+}

@@ -14,13 +14,13 @@ import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
-import { StockList } from '@/components/stocks/stock-list'
+import { ListaAtivos } from '@/app/dashboard/components'
 import { TestWrapper } from './helpers/test-wrapper'
 import {
   mockAuth,
   mockAuthenticatedUser,
-  resetAllMocks
-} from './mocks/firebase'
+  resetAuthMocks
+} from '@/__mocks__'
 
 // Mocks dos serviços
 jest.mock('@/services/firebase/firestore')
@@ -51,7 +51,7 @@ describe.skip('Testes de Performance', () => {
   }
 
   beforeEach(() => {
-    resetAllMocks()
+    resetAuthMocks()
 
     // Setup usuário autenticado
     mockAuthenticatedUser()
@@ -60,7 +60,7 @@ describe.skip('Testes de Performance', () => {
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
-    jest.requireMock('next/navigation').usePathname.mockReturnValue('/carteira')
+    jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
 
     // Performance.now mock para medições
     const mockPerformance = {
@@ -86,7 +86,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -110,7 +110,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -134,7 +134,7 @@ describe.skip('Testes de Performance', () => {
       // Primeira renderização
       const { unmount } = render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -147,7 +147,7 @@ describe.skip('Testes de Performance', () => {
       // Segunda renderização - deve usar cache
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -169,7 +169,7 @@ describe.skip('Testes de Performance', () => {
       let renderCount = 0
       const TestComponent = () => {
         renderCount++
-        return <StockList />
+        return <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
       }
 
       render(
@@ -204,7 +204,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -226,7 +226,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -260,7 +260,7 @@ describe.skip('Testes de Performance', () => {
 
       const { unmount } = render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -310,7 +310,7 @@ describe.skip('Testes de Performance', () => {
 
       const { unmount } = render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -494,7 +494,7 @@ describe.skip('Testes de Performance', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 

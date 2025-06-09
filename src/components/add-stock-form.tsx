@@ -18,11 +18,14 @@ export function AddStockForm({ isOpen, onClose }: { isOpen: boolean; onClose: ()
   const [recommendation, setRecommendation] = useState<"Comprar" | "Vender" | "Aguardar">("Comprar")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  // console.log({ formError }) // Debugging purposes only; remove for production
 
-  // Validação de formulário
-  const isFormValid = () => {
+  // Validação para submissão com mensagens de erro
+  const validateForSubmission = () => {
     setFormError(null)
-    
+
+    console.log({ ticker, quantity, targetPercentage, recommendation })
+
     if (!ticker.trim()) {
       setFormError("Código do ativo é obrigatório");
       return false;
@@ -45,8 +48,9 @@ export function AddStockForm({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log("entrou no submit")
 
-    if (!isFormValid()) return
+    if (!validateForSubmission()) return
 
     try {
       setIsSubmitting(true)
@@ -167,7 +171,7 @@ export function AddStockForm({ isOpen, onClose }: { isOpen: boolean; onClose: ()
               <Button variant="outline" type="button" onClick={handleClose} disabled={isSubmitting}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || !ticker.trim()}>
                 {isSubmitting ? "Salvando..." : "Salvar"}
               </Button>
             </DialogFooter>

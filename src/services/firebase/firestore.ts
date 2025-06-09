@@ -19,6 +19,14 @@ import type {
   WatchlistItem,
   UserPreferences
 } from "@/types";
+import {
+  shouldUseMockData,
+  mockDelay,
+  mockPortfolioData,
+  mockWatchlistData,
+  mockSimulations,
+  devLog
+} from "@/core/utils/development";
 
 /**
  * Serviço para interação com o Firestore
@@ -33,6 +41,13 @@ import type {
  * Obtém a carteira do usuário
  */
 export async function getUserPortfolio(userId: string): Promise<Portfolio> {
+  // Em modo de desenvolvimento, retornar dados mock
+  if (shouldUseMockData()) {
+    devLog("Usando dados mock para portfólio");
+    await mockDelay(500);
+    return mockPortfolioData;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -64,8 +79,11 @@ export async function updateStock(
     userRecommendation: string;
   }
 ): Promise<void> {
-  if (!db) {
-    throw new Error("Database not initialized");
+  // Em modo de desenvolvimento, simular operação
+  if (shouldUseMockData()) {
+    devLog(`Simulando atualização de ação: ${ticker}`, data);
+    await mockDelay(300);
+    return;
   }
 
   if (!db) {
@@ -90,6 +108,13 @@ export async function updateStock(
  * Remove uma ação da carteira
  */
 export async function removeStock(userId: string, ticker: string): Promise<void> {
+  // Em modo de desenvolvimento, simular operação
+  if (shouldUseMockData()) {
+    devLog(`Simulando remoção de ação: ${ticker}`);
+    await mockDelay(300);
+    return;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -113,6 +138,13 @@ export async function updateUserRecommendation(
   ticker: string,
   recommendation: string
 ): Promise<void> {
+  // Em modo de desenvolvimento, simular operação
+  if (shouldUseMockData()) {
+    devLog(`Simulando atualização de recomendação para ${ticker}: ${recommendation}`);
+    await mockDelay(300);
+    return;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -157,6 +189,13 @@ export async function saveManualRecommendation(
  * Salva uma simulação no histórico
  */
 export async function saveSimulation(userId: string, simulation: Simulation): Promise<string> {
+  // Em modo de desenvolvimento, simular operação
+  if (shouldUseMockData()) {
+    devLog("Simulando salvamento de simulação", simulation);
+    await mockDelay(400);
+    return `mock-simulation-${Date.now()}`;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -182,6 +221,13 @@ export async function saveSimulation(userId: string, simulation: Simulation): Pr
  * Obtém o histórico de simulações
  */
 export async function getSimulations(userId: string): Promise<Simulation[]> {
+  // Em modo de desenvolvimento, retornar dados mock
+  if (shouldUseMockData()) {
+    devLog("Usando dados mock para simulações");
+    await mockDelay(500);
+    return mockSimulations;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -215,6 +261,14 @@ export async function getSimulations(userId: string): Promise<Simulation[]> {
  * Obtém uma simulação específica
  */
 export async function getSimulation(userId: string, simulationId: string): Promise<Simulation | null> {
+  // Em modo de desenvolvimento, retornar dados mock
+  if (shouldUseMockData()) {
+    devLog(`Buscando simulação mock: ${simulationId}`);
+    await mockDelay(300);
+    const simulation = mockSimulations.find(s => s.id === simulationId);
+    return simulation || null;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -248,6 +302,17 @@ export async function getSimulation(userId: string, simulationId: string): Promi
  * Obtém a watchlist do usuário
  */
 export async function getUserWatchlist(userId: string): Promise<WatchlistItem[]> {
+  // Em modo de desenvolvimento, retornar dados mock
+  if (shouldUseMockData()) {
+    devLog("Usando dados mock para watchlist");
+    await mockDelay(400);
+    return Object.entries(mockWatchlistData).map(([ticker, data]) => ({
+      ticker,
+      targetPrice: data.targetPrice,
+      notes: data.notes,
+    }));
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -281,6 +346,13 @@ export async function addToWatchlist(
     notes: string;
   }
 ): Promise<void> {
+  // Em modo de desenvolvimento, simular operação
+  if (shouldUseMockData()) {
+    devLog(`Simulando adição à watchlist: ${item.ticker}`, item);
+    await mockDelay(300);
+    return;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -310,6 +382,13 @@ export async function updateWatchlistItem(
     notes: string;
   }
 ): Promise<void> {
+  // Em modo de desenvolvimento, simular operação
+  if (shouldUseMockData()) {
+    devLog(`Simulando atualização na watchlist: ${ticker}`, data);
+    await mockDelay(300);
+    return;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }
@@ -332,6 +411,13 @@ export async function updateWatchlistItem(
  * Remove item da watchlist
  */
 export async function removeFromWatchlist(userId: string, ticker: string): Promise<void> {
+  // Em modo de desenvolvimento, simular operação
+  if (shouldUseMockData()) {
+    devLog(`Simulando remoção da watchlist: ${ticker}`);
+    await mockDelay(300);
+    return;
+  }
+
   if (!db) {
     throw new Error("Database not initialized");
   }

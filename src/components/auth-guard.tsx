@@ -5,27 +5,37 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/core/state/auth-context"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorDisplay } from "@/core/state/error-handling"
+import { isDevelopmentMode, shouldMockAuth } from "@/core/utils/development"
 
 // Componente para proteger rotas que exigem autenticação
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading, error } = useAuth()
   const router = useRouter()
 
+  // Em modo de desenvolvimento com mock auth, permitir acesso sem autenticação
+  const isDevMode = isDevelopmentMode()
+  const mockAuth = shouldMockAuth()
+
   useEffect(() => {
+    // Se estivermos em modo de desenvolvimento com mock auth, não redirecionar
+    if (isDevMode && mockAuth) {
+      return
+    }
+
     // Se não estiver carregando e não houver usuário, redirecionar para login
     if (!loading && !user) {
       router.push("/login")
     }
-  }, [user, loading, router])
+  }, [user, loading, router, isDevMode, mockAuth])
 
   // Mostrar mensagem de erro se houver algum problema de autenticação
   if (error) {
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <ErrorDisplay 
-            message={error} 
-            onRetry={() => router.push("/login")} 
+          <ErrorDisplay
+            message={error}
+            onRetry={() => router.push("/login")}
           />
         </div>
       </div>
@@ -47,5 +57,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   // Se não estiver carregando e houver usuário, renderizar o conteúdo protegido
-  return user ? <>{children}</> : null
+  // OU se estivermos em modo de desenvolvimento com mock auth
+  return (user || (isDevMode && mockAuth)) ? <>{children}</> : null
 }

@@ -1,0 +1,213 @@
+%% ===============================================
+%% DIAGRAMA DE ARQUITETURA - EQUILIBREINVEST
+%% ===============================================
+%% Orientação: Vertical (Top-Bottom) para melhor legibilidade
+%% Estilos de cor devem ser controlados via arquivo de configuração externo (mermaid.config.js / mermaid-cli.json)
+%% 
+%% MIGRAÇÃO COMPLETA: /carteira → /dashboard 
+%% A funcionalidade de portfólio foi migrada do caminho /carteira para /dashboard
+%% Todos os componentes foram movidos para /src/app/dashboard/components/
+%% O diretório /carteira foi removido após a migração bem-sucedida
+
+flowchart TB
+    %% ===============================================
+    %% CAMADA FRONTEND
+    %% ===============================================
+    subgraph frontend ["🎨 Frontend Layer (Next.js + React)"]
+        direction TB
+        
+        %% Core App Components
+        AppShell["🏠 App Shell<br/><small>Layout Principal</small>"]:::ui
+        ThemeProvider["🌓 Theme Provider<br/><small>Gerenciamento de Tema</small>"]:::ui
+        UIComponents["🧩 UI Components<br/><small>Biblioteca de Componentes</small>"]:::ui
+
+        %% Pages Subgraph
+        subgraph pages ["📄 Application Pages"]
+            direction TB
+            LoginPage["🔐 Login Page<br/><small>Autenticação Google</small>"]:::ui
+            DashboardPage["💼 Dashboard Page<br/><small>Gestão de Portfólio</small>"]:::ui
+            CalculadoraPage["🧮 Calculadora Page<br/><small>Balanceamento Principal</small>"]:::ui
+            RecomendacoesPage["💡 Recomendações Page<br/><small>Sugestões IA</small>"]:::ui
+            ResultadoPage["📊 Resultado Page<br/><small>Resultados & Salvamento</small>"]:::ui
+            HistoricoList["📈 Histórico List<br/><small>Lista de Simulações</small>"]:::ui
+            HistoricoDetail["🔍 Histórico Detail<br/><small>Detalhes da Simulação</small>"]:::ui
+        end
+
+        %% State Management Subgraph  
+        subgraph state ["🧠 Global State Management"]
+            direction TB
+            AuthContext["👤 Auth Context<br/><small>Estado de Autenticação</small>"]:::service
+            PortfolioContext["💰 Portfolio Context<br/><small>Estado da Carteira</small>"]:::service
+            ThemeContext["🎨 Theme Context<br/><small>Estado do Tema</small>"]:::service
+        end
+    end
+
+    %% ===============================================
+    %% CAMADA BACKEND/API
+    %% ===============================================
+    subgraph backend ["⚙️ Backend Layer (API Routes)"]
+        direction TB
+        StockPriceAPI["📈 Stock Price API<br/><small>/api/stock-price</small>"]:::api
+        AIRecAPI["🤖 AI Recommendation API<br/><small>/api/ai-recommendation</small>"]:::api
+    end
+
+    %% ===============================================
+    %% CAMADA DE DADOS
+    %% ===============================================
+    subgraph data ["🗄️ Data Layer (Firebase Cloud)"]
+        direction TB
+        FirebaseAuth["🔒 Firebase Auth<br/><small>Autenticação OAuth</small>"]:::data
+        FirestoreDB["📚 Firestore DB<br/><small>Banco NoSQL</small>"]:::data
+    end
+
+    %% ===============================================
+    %% SERVIÇOS EXTERNOS
+    %% ===============================================
+    subgraph external ["🌐 External Services"]
+        direction TB
+        MarketDataAPI["📊 Market Data APIs<br/><small>Alpha Vantage / Yahoo</small>"]:::external
+        AIService["🧠 AI Services<br/><small>Hugging Face / OpenAI</small>"]:::external
+    end
+
+    %% ===============================================
+    %% INFRAESTRUTURA
+    %% ===============================================
+    subgraph infra ["🏗️ Infrastructure & CI/CD"]
+        direction TB
+        Vercel["🚀 Vercel Deploy<br/><small>Hospedagem & CDN</small>"]:::infra
+        GitHubActions["⚡ GitHub Actions<br/><small>CI/CD Pipeline</small>"]:::infra
+    end
+
+    %% ===============================================
+    %% FLUXOS DE DADOS PRINCIPAIS
+    %% ===============================================
+    
+    %% Autenticação e Estado Global
+    LoginPage -.->|"🔐 autenticação"| AuthContext
+    AuthContext -.->|"📡 OAuth login"| FirebaseAuth
+    ThemeProvider -.->|"🎨 fornece tema"| ThemeContext
+    
+    %% Gestão de Dashboard
+    DashboardPage -.->|"💾 CRUD ações"| FirestoreDB
+    DashboardPage -.->|"📈 busca preços"| StockPriceAPI
+    DashboardPage -.->|"🔄 gerencia portfólio"| PortfolioContext
+    
+    %% Calculadora e Recomendações
+    CalculadoraPage -.->|"🤖 solicita IA"| AIRecAPI
+    CalculadoraPage -.->|"📊 preços atuais"| StockPriceAPI
+    CalculadoraPage -.->|"➡️ navega para"| RecomendacoesPage
+    RecomendacoesPage -.->|"🧠 processamento"| AIRecAPI
+    RecomendacoesPage -.->|"➡️ navega para"| ResultadoPage
+    ResultadoPage -.->|"💾 salva simulação"| FirestoreDB
+    
+    %% Histórico e Consultas
+    HistoricoList -.->|"📚 lista simulações"| FirestoreDB
+    HistoricoList -.->|"➡️ navega para"| HistoricoDetail
+    HistoricoDetail -.->|"🔍 detalhes"| FirestoreDB
+    
+    %% APIs e Serviços Externos
+    StockPriceAPI -.->|"📡 proxy request"| MarketDataAPI
+    AIRecAPI -.->|"🤖 gera recomendações"| AIService
+    
+    %% Estrutura da Aplicação
+    AppShell -.->|"🏗️ envolve"| ThemeProvider
+    AppShell -.->|"🧩 usa"| UIComponents
+    UIComponents -.->|"🎨 componentes"| LoginPage
+    UIComponents -.->|"🎨 componentes"| DashboardPage
+    UIComponents -.->|"🎨 componentes"| CalculadoraPage
+    
+    %% CI/CD e Infraestrutura
+    GitHubActions -.->|"🚀 deploy para"| Vercel
+
+    %% Click Events
+    click AppShell "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/layout.tsx"
+    click ThemeProvider "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/components/theme-provider.tsx"
+    click UIComponents "https://github.com/rosanarezende/balanceamento-de-investimentos/tree/main/src/components/ui/"
+    click LoginPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/login/page.tsx"
+    click CalculadoraPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/page.tsx"
+    click RecomendacoesPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/recomendacoes/page.tsx"
+    click ResultadoPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/calculadora-balanceamento/resultado/page.tsx"
+    click HistoricoList "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/historico/page.tsx"
+    click HistoricoDetail "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/historico/[id]/page.tsx"
+    click DashboardPage "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/dashboard/page.tsx"
+    click AuthContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/auth-context.tsx"
+    click PortfolioContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/portfolio-context.tsx"
+    click ThemeContext "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/core/state/theme-context.tsx"
+    click StockPriceAPI "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/api/stock-price/route.ts"
+    click AIRecAPI "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/app/api/ai-recommendation/route.ts"
+    click FirebaseAuth "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/services/firebase/config.ts"
+    click FirestoreDB "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/src/services/firebase/firestore.ts"
+    click GitHubActions "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/.github/workflows/ci.yml"
+    click Vercel "https://github.com/rosanarezende/balanceamento-de-investimentos/blob/main/next.config.mjs"
+
+    %% ===============================================
+    %% ESTILOS COM MÁXIMO CONTRASTE E SEPARAÇÃO VISUAL POR RESPONSABILIDADE
+    %% ===============================================
+    %% UI Components (Frontend) - Azul Royal intenso com borda sólida
+    classDef ui fill:#E3F2FD,stroke:#0D47A1,stroke-width:6px,color:#000051,font-weight:bold,stroke-dasharray: 0
+    
+    %% State Management (Services) - Verde Esmeralda com borda tracejada
+    classDef service fill:#E8F5E8,stroke:#1B5E20,stroke-width:5px,color:#0D4F0D,font-weight:bold,stroke-dasharray: 8 4
+    
+    %% API Layer - Laranja Vibrante com borda pontilhada
+    classDef api fill:#FFF3E0,stroke:#FF6F00,stroke-width:5px,color:#E65100,font-weight:bold,stroke-dasharray: 12 2
+    
+    %% Data Layer - Vermelho Profundo com borda dupla
+    classDef data fill:#FFEBEE,stroke:#C62828,stroke-width:7px,color:#B71C1C,font-weight:bold,stroke-dasharray: 0
+    
+    %% External Services - Roxo Intenso com borda alternada
+    classDef external fill:#F3E5F5,stroke:#4A148C,stroke-width:5px,color:#38006B,font-weight:bold,stroke-dasharray: 4 8
+    
+    %% Infrastructure - Teal Escuro com borda mista
+    classDef infra fill:#E0F2F1,stroke:#004D40,stroke-width:5px,color:#00251A,font-weight:bold,stroke-dasharray: 6 3
+
+    %% ===============================================
+    %% ESTILOS PARA SUBGRÁFICOS INTERNOS (SUB-CAMADAS)
+    %% ===============================================
+    %% Definindo cores específicas para subgráficos internos no Frontend
+    classDef pagesCluster fill:#F0F8FF,stroke:#0066CC,stroke-width:2px,stroke-dasharray: 4 2
+    classDef stateCluster fill:#F0FFF0,stroke:#228B22,stroke-width:2px,stroke-dasharray: 4 2
+    
+    %% Aplicando estilos aos subgráficos internos
+    class pages pagesCluster
+    class state stateCluster
+
+    %% ===============================================
+    %% ESTILOS ESPECÍFICOS PARA SUBGRÁFICOS (CAMADAS)
+    %% ===============================================
+    %% Aplicação de cores específicas para cada camada/subgráfico
+    classDef frontendCluster fill:#E8F4FD,stroke:#1976D2,stroke-width:3px
+    classDef backendCluster fill:#FFF8E1,stroke:#F57C00,stroke-width:3px
+    classDef dataCluster fill:#FFEBEE,stroke:#D32F2F,stroke-width:3px
+    classDef externalCluster fill:#F3E5F5,stroke:#7B1FA2,stroke-width:3px
+    classDef infraCluster fill:#E8F5E8,stroke:#388E3C,stroke-width:3px
+    
+    %% Aplicação dos estilos aos subgráficos
+    class frontend frontendCluster
+    class backend backendCluster
+    class data dataCluster
+    class external externalCluster
+    class infra infraCluster
+
+    %% ===============================================
+    %% NOTA: DIFERENCIAÇÃO VISUAL DAS CAMADAS
+    %% ===============================================
+    %% Os subgráficos já possuem diferenciação visual através de:
+    %% 1. Emojis distintivos nos títulos das camadas
+    %% 2. Cores específicas dos componentes internos (ui, service, api, data, external, infra)
+    %% 3. Bordas tracejadas diferentes para cada tipo de componente
+    %% 4. Agrupamento lógico por responsabilidade
+    %% 
+    %% Esta abordagem mantém o diagrama limpo e legível
+    %% enquanto preserva a separação visual clara entre as responsabilidades
+
+    %% ===============================================
+    %% COMPONENTES DO DASHBOARD (pós-migração)
+    %% ===============================================
+    %% Estrutura de componentes em /src/app/dashboard/components/:
+    %% - MetricasCards.tsx: Cards de métricas do portfólio
+    %% - GraficosCarteira.tsx: Gráficos (pizza e barras) da carteira
+    %% - ResumoCarteira.tsx: Componente de resumo expansível
+    %% - ListaAtivos.tsx: Lista de ativos com funcionalidades CRUD
+    %% - ModaisAtivos.tsx: Modais para adicionar/editar/excluir ativos
+    %% - index.ts: Arquivo de exportação dos componentes

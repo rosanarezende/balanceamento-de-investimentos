@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
+import { shouldUseMockData, mockDelay, devLog, simulateStockPrice, simulateStockPrices } from "@/core/utils/development";
 
 /**
  * Serviço para obtenção de preços de ações
@@ -23,15 +24,22 @@ const FETCH_TIMEOUT = 5000; // Timeout para requisições (5 segundos)
  * @returns Preço da ação ou valor de fallback em caso de erro
  */
 export async function getStockPrice(ticker: string): Promise<number> {
+  // Em modo de desenvolvimento, retornar preços mock
+  if (shouldUseMockData()) {
+    devLog(`Usando preço mock para ${ticker}`);
+    await mockDelay(200);
+    return simulateStockPrice(ticker);
+  }
+
   try {
     // Verificar cache primeiro
     const now = Date.now();
     const cachedData = priceCache[ticker];
-    
+
     if (cachedData && now - cachedData.timestamp < CACHE_DURATION) {
       return cachedData.price;
     }
-    
+
     // Adicionar sufixo .SA para ações brasileiras se não tiver
     const formattedTicker = ticker.includes('.') ? ticker : `${ticker}.SA`;
 
@@ -60,7 +68,7 @@ export async function getStockPrice(ticker: string): Promise<number> {
           price: data.price,
           timestamp: now
         };
-        
+
         return data.price;
       }
 
@@ -71,16 +79,16 @@ export async function getStockPrice(ticker: string): Promise<number> {
     }
   } catch (error) {
     console.error(`Erro ao obter cotação para ${ticker}:`, error);
-    
+
     // Usar valor de cache expirado se disponível como primeira opção de fallback
     const cachedData = priceCache[ticker];
     if (cachedData) {
       console.log(`Usando valor de cache expirado para ${ticker}: ${cachedData.price}`);
       return cachedData.price;
     }
-    
+
     // Usar valor padrão como última opção de fallback
-    console.log(`Usando valor padrão para ${ticker}: ${DEFAULT_STOCK_PRICE}`);
+    console.log(`Usando valor rand para ${ticker}: ${DEFAULT_STOCK_PRICE}`);
     return DEFAULT_STOCK_PRICE;
   }
 }
@@ -91,6 +99,13 @@ export async function getStockPrice(ticker: string): Promise<number> {
  * @returns Objeto com preços por ticker
  */
 export async function getMultipleStockPrices(tickers: string[]): Promise<Record<string, number>> {
+  // Em modo de desenvolvimento, retornar preços mock
+  if (shouldUseMockData()) {
+    devLog(`Usando preços mock para múltiplas ações: ${tickers.join(', ')}`);
+    await mockDelay(300);
+    return simulateStockPrices(tickers);
+  }
+
   const results: Record<string, number> = {};
   let failedCount = 0;
 
@@ -133,30 +148,6 @@ export async function getMultipleStockPrices(tickers: string[]): Promise<Record<
 }
 
 /**
- * Simula preços de ações (apenas para desenvolvimento)
- * @param tickers Lista de códigos de ações
- * @returns Objeto com preços simulados por ticker
- */
-export function simulateStockPrices(tickers: string[]): Record<string, number> {
-  const results: Record<string, number> = {};
-
-  tickers.forEach(ticker => {
-    // Gerar preço entre R$10 e R$100
-    results[ticker] = Math.random() * 90 + 10;
-  });
-
-  return results;
-}
-
-/**
- * Verifica se estamos em ambiente de desenvolvimento
- * @returns true se estiver em ambiente de desenvolvimento
- */
-export function isDevelopment(): boolean {
-  return process.env.NODE_ENV === 'development';
-}
-
-/**
  * Obtém o preço atual de uma ação
  * @param ticker Código da ação
  * @returns Preço da ação ou valor de fallback em caso de erro
@@ -165,17 +156,17 @@ export async function fetchStockPrice(ticker: string): Promise<number> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-    
+
     const response = await fetch(`/api/stock-price?ticker=${ticker}`, {
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       throw new Error(`Erro ao obter cotação: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
     return data.price || DEFAULT_STOCK_PRICE;
   } catch (error) {
@@ -193,7 +184,7 @@ export async function saveManualRecommendation(ticker: string, recommendation: s
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-    
+
     const response = await fetch(`/api/save-recommendation`, {
       method: 'POST',
       headers: {
@@ -202,9 +193,9 @@ export async function saveManualRecommendation(ticker: string, recommendation: s
       body: JSON.stringify({ ticker, recommendation }),
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       throw new Error(`Erro ao salvar recomendação: ${response.statusText}`);
     }
@@ -236,6 +227,12 @@ export const RECOMMENDATION_DESCRIPTIONS = {
  * @returns Percentual de variação diária
  */
 export async function fetchDailyChange(ticker: string): Promise<number> {
+  // Em modo de desenvolvimento, usar função de simulação centralizada
+  if (shouldUseMockData()) {
+    devLog(`Usando variação diária mock para ${ticker}`);
+    return (Math.random() - 0.5) * 10; // Variação entre -5% e +5%
+  }
+
   // Simular uma variação entre -5% e +5%
   console.log(`Simulando variação diária para ${ticker}`);
   return (Math.random() - 0.5) * 10;

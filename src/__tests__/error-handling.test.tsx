@@ -15,15 +15,15 @@ import userEvent from '@testing-library/user-event'
 
 import LoginPage from '@/app/login/page'
 import CalculadoraBalanceamento from '@/app/calculadora-balanceamento/page'
-import { StockList } from '@/components/stocks/stock-list'
+import { ListaAtivos } from '@/app/dashboard/components'
 import { AddStockForm } from '@/components/add-stock-form'
 import { TestWrapper } from './helpers/test-wrapper'
 import {
   mockAuth,
   mockAuthenticatedUser,
   mockUnauthenticatedUser,
-  resetAllMocks
-} from './mocks/firebase'
+  resetAuthMocks
+} from '@/__mocks__'
 import {
   expectErrorToast,
 } from './helpers/test-utils'
@@ -40,12 +40,12 @@ describe('Testes de Tratamento de Erros', () => {
   const mockStockPriceService = jest.requireMock('@/services/api/stock-price')
 
   beforeEach(() => {
-    resetAllMocks()
+    resetAuthMocks()
 
     // Setup navigation
     const mockRouter = { push: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }
     jest.requireMock('next/navigation').useRouter.mockReturnValue(mockRouter)
-    jest.requireMock('next/navigation').usePathname.mockReturnValue('/carteira')
+    jest.requireMock('next/navigation').usePathname.mockReturnValue('/dashboard')
 
     // Setup Firebase Auth
     Object.assign(jest.requireMock('firebase/auth'), mockAuth)
@@ -194,7 +194,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -234,7 +234,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -249,7 +249,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -341,7 +341,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 
@@ -524,7 +524,7 @@ describe('Testes de Tratamento de Erros', () => {
 
       render(
         <TestWrapper>
-          <StockList />
+          <ListaAtivos onAddStock={() => {}} onEditStock={() => {}} onDeleteStock={() => {}} />
         </TestWrapper>
       )
 

@@ -11,10 +11,9 @@ import {
 } from "@/services/firebase/firestore";
 import {
   getStockPrice,
-  getMultipleStockPrices,
-  simulateStockPrices,
-  isDevelopment
+  getMultipleStockPrices
 } from "@/services/api/stock-price";
+import { isDevelopmentMode, simulateStockPrices } from "@/core/utils/development";
 import {
   Stock,
   StockWithDetails,
@@ -129,7 +128,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
       let prices: Record<string, number> = {};
 
       // Em desenvolvimento, usar preços simulados
-      if (isDevelopment()) {
+      if (isDevelopmentMode()) {
         console.log("Ambiente de desenvolvimento: usando preços simulados");
         prices = simulateStockPrices(tickers);
       } else {
