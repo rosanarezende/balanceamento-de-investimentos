@@ -1,3 +1,7 @@
+Este projeto representa uma fase anterior da minha jornada com IA: mais centrada em experimentar ferramentas no ciclo de desenvolvimento do que em sistematizar decisão e governança. 
+
+---
+
 # EquilibreInvest 
 
 ![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel)
